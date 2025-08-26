@@ -122,7 +122,7 @@ Na aba **Configurações**, cole a chave no campo do Shodan.
 - **URLHaus** identifica URLs associadas à distribuição de malware.  
 - **MalwareBazaar** mapeia hashes de arquivos para nomes de ameaças conhecidas.  
 
-**Nível:** Chave de API gratuita. Embora seja possível fazer consultas anônimas, uma chave é recomendada para evitar limites de requisição.  
+**Nível:** Chave de API gratuita. 
 
 ### Como Obter as Chaves
 **URLHaus:**  

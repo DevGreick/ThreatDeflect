@@ -126,7 +126,7 @@ Na aba **Configurações**, cole a chave no campo do Shodan.
 
 ### Como Obter as Chaves
 **URLHaus:**  
-1. Acesse o site [urlhaus.chabuse](https://urlhaus.abuse.ch/) e [bazzar.abuse](https://bazaar.abuse.ch/) .  
+1. Acesse o site [urlhaus.chabuse](https://urlhaus.abuse.ch/) 
 2. Faça login usando uma conta.  
 3. Navegue até a sua página de perfil para encontrar sua chave de API.  
 

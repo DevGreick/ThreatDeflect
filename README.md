@@ -84,7 +84,8 @@ chmod +x ThreatSpy
 ./ThreatSpy
 ```
 
-> **Notas sobre Keyring no Linux:**  
+> **Notas sobre Keyring no Linux:**
+> 
 > Se o seu sistema operacional não tiver o Keyring, o programa não vai funcionar. Instale conforme a sua distribuição:
 >
 > **Debian / Ubuntu:**  

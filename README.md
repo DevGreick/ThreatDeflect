@@ -120,9 +120,9 @@ Abra **Análise de IOCs** e cole indicadores (um por linha), ou clique em **Impo
 https://some-random-domain.net/path
 8.8.8.8
 ```
-
 Clique em **Analisar Alvos**. O app consulta APIs em paralelo e gera um Excel com os resultados.
 
+<img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/ioc.gif" alt="Demonstração da Análise de IOCs no ThreatSpy" width="800">
 ---
 
 **Exemplo 2: Analisando um repositório suspeito**
@@ -132,9 +132,9 @@ Abra **Análise de Repositórios** e cole repositórios (um por linha), ou cliqu
 ```
 https://github.com/DevGreick/threatspy-test-env
 ```
-
 Clique em **Analisar Repositórios**. A ferramenta detecta segredos e IOCs, gerando um relatório sem precisar clonar o repositório inteiro.
 
+<img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/rep.gif" alt="Demonstração da Análise de Repositorio no ThreatSpy" width="800">
 ---
 
 **Exemplo 3: Analisando Arquivos Locais**

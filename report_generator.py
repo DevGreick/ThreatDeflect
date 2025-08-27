@@ -19,7 +19,6 @@ import hashlib
 import logging
 import re
 from typing import Dict, Any, List, Tuple
-
 import xlsxwriter
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT

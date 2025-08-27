@@ -303,4 +303,4 @@ Use por sua conta e risco. O desenvolvedor não se responsabiliza por vazamentos
 
 ## 📜 Licença
 
-Distribuído sob a licença MIT. Veja o arquivo [LICENSE](https://github.com/DevGreick/ThreatSpy/blob/master/LICENSE) para mais informações.
+Distribuído sob a licença GNU GPLv3. Veja o arquivo [LICENSE](https://github.com/DevGreick/ThreatSpy/blob/master/LICENSE) para mais informações.

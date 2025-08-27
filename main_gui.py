@@ -427,7 +427,7 @@ class VtotalscanGUI(QMainWindow):
         self.last_file_results: Optional[Dict[str, Any]] = None
         self.last_repo_results: Optional[Dict[str, Any]] = None
         self.setWindowTitle("ThreatSpy by SecZeroR")
-        self.setFixedSize(700, 950)
+        #self.setFixedSize(700, 950)
         try:
             self.setWindowIcon(QIcon(resource_path("spy2.ico")))
         except Exception as e:

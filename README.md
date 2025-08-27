@@ -84,24 +84,25 @@ chmod +x ThreatSpy
 ./ThreatSpy
 ```
 
-> **Keyring no Linux:**
-> 
-> Se o seu sistema operacional não tiver o Keyring, o programa não vai funcionar. Então, instale conforme sua distribuição:
->  
+> **Notas sobre Keyring no Linux:**  
+> Se o seu sistema operacional não tiver o Keyring, o programa não vai funcionar. Instale conforme a sua distribuição:
+>
 > **Debian / Ubuntu:**  
 > ```bash
 > sudo apt update && sudo apt install gnome-keyring
 > ```
->  
+>
 > **Fedora / CentOS:**  
 > ```bash
 > sudo dnf install gnome-keyring
 > ```
->  
-> **Arch Linux e derivados (como Manjaro):**  
+>
+> **Arch / Manjaro:**  
 > ```bash
 > sudo pacman -S gnome-keyring libsecret
 > ```
+ Consulte também a [documentação oficial do Arch Linux](https://wiki.archlinux.org/title/GNOME/Keyring) se precisar de ajuda.
+
 
 ---
 

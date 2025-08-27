@@ -152,13 +152,14 @@ Clique em **Analisar Repositórios**. A ferramenta detecta segredos e IOCs, gera
 
 ## ✨ Funcionalidades Principais
 
-- **Análise de IOCs (IPs e URLs):** reputação em fontes como VirusTotal, AbuseIPDB, URLHaus e Shodan.  
-- **Análise de Repositórios (GitHub/GitLab):** busca por segredos expostos, links suspeitos e comandos perigosos.  
-- **Análise de Arquivos:** verificação de reputação por hash SHA256.  
+- **Análise de IOCs (IPs e URLs):** reputação em múltiplas fontes como VirusTotal, AbuseIPDB, URLHaus e Shodan.  
+- **Análise de Repositórios (GitHub/GitLab):** busca por segredos expostos, dependências vulneráveis, links suspeitos e comandos perigosos (inclusive URLs ofuscadas em Base64, com decodificação automática).  
+- **Análise de Arquivos:** reputação de arquivos locais por hash SHA256 (consultas no VirusTotal e MalwareBazaar).  
 - **GUI Moderna:** interface em PySide6 com tema escuro.  
-- **Relatórios Detalhados:** exportação para Excel e PDF.  
-- **IA Local (Ollama):** resumos automáticos com total privacidade.  
-- **Gestão Segura de Chaves:** usa keyring e cofres nativos do sistema.  
+- **Relatórios Detalhados:** exportação em Excel e PDF com sumário executivo gerado pela IA.  
+- **IA Local (Ollama):** resumos automáticos e planos de ação com total privacidade.  
+- **Gestão Segura de Chaves:** uso de keyring e cofres nativos do sistema operacional.  
+
 
 ---
 

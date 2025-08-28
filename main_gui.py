@@ -198,7 +198,6 @@ class RepoAnalysisWorker(QThread):
             processed_count = 0
             all_repo_results = []
             
-            # A LINHA QUE ENVIAVA O SINAL INICIAL FOI REMOVIDA DAQUI
             # self.progress_update.emit(0, total_repos) 
 
             def status_callback(message: str) -> None:

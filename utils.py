@@ -53,7 +53,6 @@ def is_file_writable(filepath: str) -> bool:
     try:
         f = open(filepath, 'a')
         f.close()
-        # Se o arquivo não existia, a abertura em modo 'a' o cria. Removemos para não deixar lixo.
         if not os.path.exists(filepath):
              os.remove(filepath)
         return True

@@ -230,7 +230,7 @@ python main_gui.py
 | AbuseIPDB     | Opcional    | Score de abuso de IPs |
 | Shodan        | Opcional    | Portas e serviços para IPs |
 | URLHaus       | Opcional    | Verificar se as urls são ativamente usadas para distribuir malware |
-| MalwareBazaar | Opcional    | Nome da ameaça (se disponivel na base de dados)  |
+| MalwareBazaar | Opcional    | Nome da ameaça |
 | Ollama (IA)   | Opcional    | Resumos automáticos locais |
 
 As chaves são salvas de forma segura com **keyring** no cofre do seu sistema operacional.  

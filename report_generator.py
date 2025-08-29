@@ -1,5 +1,5 @@
 # ThreatSpy
-# Copyright (C) 2025  seczeror <seczeror.ocelot245@passmail.net>
+# Copyright (C) 2025  SecZeror <seczeror.ocelot245@passmail.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

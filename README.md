@@ -229,7 +229,7 @@ python main_gui.py
 | GitHub/GitLab | Recomendada | Análise de repositórios com mais limites da API |
 | AbuseIPDB     | Opcional    | Score de abuso de IPs |
 | Shodan        | Opcional    | Portas e serviços para IPs |
-| URLHaus       | Opcional    | Verificar se as urls são ativamente usadas para distribuir malware |
+| URLHaus       | Opcional    | Verificar se as URLs são ativamente usadas para distribuir malware |
 | MalwareBazaar | Opcional    | Nome da ameaça |
 | Ollama (IA)   | Opcional    | Resumos automáticos locais |
 

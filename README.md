@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center">🔎 ThreatSp</h1>
+  <h1 align="center">🔎 ThreatSpy</h1>
   <img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/spy2-1.png" alt="Logo do ThreatSpy" width="150"/>
 </div>
 

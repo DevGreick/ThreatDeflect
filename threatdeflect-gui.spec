@@ -15,16 +15,15 @@ else:
 
 a = Analysis(
     ['threatdeflect/ui/main_gui.py'],
-    # --- CORREÇÃO APLICADA ---
-    # Adiciona o diretório atual ('.') ao pathex para ajudar a encontrar o módulo 'threatdeflect'.
+  .
     pathex=['.'],
     binaries=[],
-    # Adiciona TODOS os dados necessários com caminhos relativos.
+   
     datas=[
         ('threatdeflect/assets', 'threatdeflect/assets'),
         ('threatdeflect/core/rules.yaml', 'threatdeflect/core')
     ],
-    # --- FIM DA CORREÇÃO ---
+    
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

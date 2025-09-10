@@ -1,0 +1,41 @@
+# Arquivos de Bytecode e Cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cache do Pytest
+.pytest_cache/
+
+# Ambiente Virtual
+# Substitua 'venv' pelo nome da sua pasta de ambiente virtual se for diferente
+venv/
+.venv/
+env/
+.env
+
+# Arquivos de Log e Banco de Dados de Cache
+*.log
+.threatdeflect_cache/
+
+# Relatórios Gerados
+*.xlsx
+*.pdf
+*.html
+*.xml
+*.json
+
+# Arquivos de distribuição e instalação
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Arquivos de IDEs e Editores
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db

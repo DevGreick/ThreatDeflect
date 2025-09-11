@@ -13,7 +13,7 @@
 
 <div align="center">
 <!-- Badges -->
-<a href="https://www.python.org/downloads/release/python-380/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version"></a>
+<a href="https://www.python.org/downloads/release/python-380/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python Version"></a>
 <a href="https://github.com/DevGreick/ThreatDeflect/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg?logo=gnu" alt="License"></a>
 <img src="https://img.shields.io/badge/status-active-success.svg" alt="Project Status">
 <a href="https://doc.qt.io/qtforpython/"><img src="https://img.shields.io/badge/GUI-PySide6-purple.svg" alt="GUI Framework"></a>
@@ -180,7 +180,7 @@ As chaves de API e outras configurações podem ser gerenciadas via CLI (`threat
 ## ✅ Requisitos
 
 - **Executável:** não precisa de Python.  
-- **Código-fonte:** Python 3.8+ e Git.  
+- **Código-fonte:** Python 3.11+ e Git.  
 - **Chave do VirusTotal:** obrigatória para análises de IPs, URLs e arquivos.  
 
 **Para usar a IA local (opcional):**  Ollama instalado e em execução.  

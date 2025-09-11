@@ -50,8 +50,6 @@
 ## ⚡ Instale em 30 segundos
 Baixe o executável para o seu sistema operacional na página de [Releases](https://github.com/DevGreick/ThreatDeflect/releases).
 
-<a id="uso"></a>
-
 <a id="uso2"></a>
 
 ## 🛠️ Como Usar (GUI)
@@ -91,6 +89,8 @@ Clique em **Analisar Repositórios**. A ferramenta detecta segredos e IOCs, gera
 - O ThreatSpy **não envia seus arquivos**: ele calcula o hash SHA256 localmente e consulta no VirusTotal e no MalwareBazaar.  
 
 ---
+
+<a id="uso"></a>
 
 ## 🛠️ Como Usar  (CLI)
 

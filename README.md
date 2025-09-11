@@ -32,9 +32,9 @@
 ## 📑 Sumário
 
 - [⚡ Instale em 30 segundos](#instalacao-rapida)
-- [🚀 Funcionalidades Principais](#features)
 - [🛠️ Como Usar (GUI)](#uso2)
 - [🛠️ Como Usar (CLI)](#uso)
+- [🚀 Funcionalidades Principais](#features)
 - [⚙️ Configuração](#configuracao)
 - [✅ Requisitos](#requisitos)
 - [📦 Instalação pelo Código-Fonte](#instalacao-fonte)

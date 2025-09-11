@@ -21,7 +21,7 @@ Automatiza a análise de IOCs, varredura de repositórios e geração de relató
 ## 📑 Sumário
 - [✨ Novidades da Versão 2.0](#novidades)
 - [🚀 Funcionalidades Principais](#features)
-- [⚡ Instalação Rápida (Releases)](#instalacao-rapida)
+- [⚡ Instale em 30 segundos](#instalacao-rapida)
 - [🛠️ Exemplos de Uso (CLI)](#uso)
 - [⚙️ Configuração](#configuracao)
 - [✅ Requisitos](#requisitos)
@@ -82,7 +82,7 @@ A transição para ThreatDeflect traz melhorias massivas de arquitetura e novas 
 
 <a id="instalacao-rapida"></a>
 
-## ⚡ Instalação Rápida (Releases)
+## ⚡ Instale em 30 segundos
 Baixe o executável para o seu sistema operacional na página de [Releases](https://github.com/DevGreick/ThreatDeflect/releases).
 
 <a id="uso"></a>

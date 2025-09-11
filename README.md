@@ -106,6 +106,8 @@ threatdeflect ioc 8.8.8.8 https://malware.com/payload.php --ai llama3
 threatdeflect ioc --file C:\Users\SeuUsuario\Desktop\targets.txt -o C:\Users\SeuUsuario\Desktop\report_iocs.xlsx
 ```
 
+<img src="https://github.com/DevGreick/ThreatDeflect/blob/main/CLI.png" alt="Demonstração da Análise de IOCs no ThreatSpy" width="800">
+
 ---
 
 ### macOS (Terminal)

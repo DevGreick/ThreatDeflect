@@ -210,7 +210,7 @@ threatdeflect --help
 
 ## 🎛️ Calibrando a Precisão da Análise
 
-- Como toda ferramenta de Análise Estática de Segurança (SAST), o **ThreatDeflect** trabalha encontrando padrões que podem representar riscos. No entanto, por não executar o código, a ferramenta não consegue entender o contexto de um achado. Isso significa que ela pode gerar falsos positivos.  
+- Como toda ferramenta de Análise Estática de Segurança, o **ThreatDeflect** trabalha encontrando padrões que podem representar riscos. No entanto, por não executar o código, a ferramenta não consegue entender o contexto de um achado. Isso significa que ela pode gerar falsos positivos.  
 - A precisão do ThreatDeflect é diretamente controlada pelo arquivo **rules.yaml**. Se você é um desenvolvedor ou analista de segurança, é fortemente encorajado a calibrar este arquivo para reduzir o ruído e focar em riscos reais, ajustando as regras de detecção (`rules`) e principalmente a lista de exclusão (`ignore_patterns`) para remover pastas de teste, documentação ou outros diretórios que não são relevantes.  
 - Pense no ThreatDeflect como uma ferramenta de detecção poderosa ajustável para o seu ambiente. O refinamento contínuo do **rules.yaml** é essencial para uso eficaz. Novas versões vão focar na melhoria de calibragem e na redução de falsos positivos.
 

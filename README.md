@@ -4,7 +4,7 @@
 </div>
 
 <div align="center">
-<strong>Ferramenta integrada de Análise de Ameaças, Análise de Código e Threat Intelligence com IA Local.</strong>
+<strong>Uma ferramenta de análise de ameaças que automatiza a consulta de IOCs e repositórios em múltiplas fontes, gera relatórios e cria resumos com IA local.</strong>
 <br><br>
 ⭐ Dê uma estrela se o projeto te ajudou! | <a href="https://github.com/DevGreick/ThreatDeflect/releases"><strong>Baixar a Última Versão »</strong></a>
 </div>

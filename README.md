@@ -7,8 +7,7 @@
 <div align="center">
 <strong>Plataforma integrada de Análise de Ameaças, Análise de Código e Threat Intelligence com IA Local.</strong>
 <br>
-Automatiza a análise de IOCs, varredura de repositórios e geração de relatórios com IA local para priorização de riscos.
-</div>
+
 
 <br>
 

@@ -30,7 +30,8 @@
 
 - [⚡ Instale em 30 segundos](#instalacao-rapida)
 - [🚀 Funcionalidades Principais](#features)
-- [🛠️ Exemplos de Uso (CLI)](#uso)
+- [🛠️ Como Usar (GUI)](#uso2)
+- [🛠️ Como Usar (CLI)](#uso)
 - [⚙️ Configuração](#configuracao)
 - [✅ Requisitos](#requisitos)
 - [📦 Instalação pelo Código-Fonte](#instalacao-fonte)
@@ -48,7 +49,47 @@ Baixe o executável para o seu sistema operacional na página de [Releases](http
 
 <a id="uso"></a>
 
-## 🛠️ Exemplos de Uso (CLI)
+<a id="uso2"></a>
+
+## 🛠️ Como Usar (GUI)
+
+**Exemplo 1: Analisando IOCs**
+
+Abra **Análise de IOCs** e cole indicadores (um por linha), ou clique em **Importar Alvos de Arquivo** para enviar IPs/domínios em lote:
+
+```
+185.172.128.150
+https://some-random-domain.net/path
+8.8.8.8
+```
+Clique em **Analisar Alvos**. O app consulta APIs em paralelo e gera um Excel com os resultados.
+
+<img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/ioc.gif" alt="Demonstração da Análise de IOCs no ThreatSpy" width="800">
+
+---
+
+**Exemplo 2: Analisando um repositório suspeito**
+
+Abra **Análise de Repositórios** e cole repositórios (um por linha), ou clique em **Importar Alvos de Arquivo** para enviar repositórios em lote (*não recomendado sem token de API; para volumes corporativos, pode ser necessário GitHub Enterprise*).  
+
+```
+https://github.com/DevGreick/threatspy-test-env
+```
+Clique em **Analisar Repositórios**. A ferramenta detecta segredos e IOCs, gerando um relatório sem precisar clonar o repositório inteiro.
+
+<img src="https://raw.githubusercontent.com/DevGreick/ThreatSpy/master/rep.gif" alt="Demonstração da Análise de Repositorio no ThreatSpy" width="800">
+
+---
+
+**Exemplo 3: Analisando Arquivos Locais**
+
+- Na aba **Análise de IOCs**, clique em **Verificar Reputação de Arquivos**.  
+- Selecione um ou mais arquivos (PDFs, executáveis, etc.).  
+- O ThreatSpy **não envia seus arquivos**: ele calcula o hash SHA256 localmente e consulta no VirusTotal e no MalwareBazaar.  
+
+---
+
+## 🛠️ Como Usar  (CLI)
 
 ### Windows (PowerShell ou CMD)
 ```powershell

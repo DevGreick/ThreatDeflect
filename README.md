@@ -19,9 +19,10 @@ Automatiza a análise de IOCs, varredura de repositórios e geração de relató
 
 
 ## 📑 Sumário
-- [✨ Novidades da Versão 2.0](#novidades)
-- [🚀 Funcionalidades Principais](#features)
+
+
 - [⚡ Instale em 30 segundos](#instalacao-rapida)
+- [🚀 Funcionalidades Principais](#features)
 - [🛠️ Exemplos de Uso (CLI)](#uso)
 - [⚙️ Configuração](#configuracao)
 - [✅ Requisitos](#requisitos)
@@ -32,31 +33,62 @@ Automatiza a análise de IOCs, varredura de repositórios e geração de relató
 - [☕ Apoie o Projeto](#apoie)
 - [📜 Licença](#licenca)
 
-<a id="novidades"></a>
+## ⚡ Instale em 30 segundos
+Baixe o executável para o seu sistema operacional na página de [Releases](https://github.com/DevGreick/ThreatDeflect/releases).
 
-## ✨ Novidades da Versão 2.0
-A transição para ThreatDeflect traz melhorias massivas de arquitetura e novas capacidades de detecção:
+<a id="uso"></a>
 
-### 🧠 Análise de Repositórios Aprimorada por IA:
-- **Validação de Segredos**: Usa um modelo de IA local (Ollama) para analisar achados genéricos (ex: chaves de API) e reduzir drasticamente falsos positivos, distinguindo segredos reais de placeholders.
-- **Priorização de Riscos**: Gera um Resumo Executivo para relatórios, utilizando a IA para triar todas as vulnerabilidades encontradas e destacar os 3 riscos mais críticos em linguagem de negócio.
+# 🛠️ Exemplos de Uso (CLI)
 
-### ⚡ Sistema de Cache Inteligente:
-- Implementado um cache local em SQLite para a análise de repositórios. Arquivos inalterados não são reanalisados, resultando em uma performance significativamente mais rápida em varreduras subsequentes.
+## Windows (PowerShell ou CMD)
+```powershell
+# Ver ajuda geral
+threatdeflect --help
 
-### 🕵️ Detecção Avançada de Ameaças:
-- **IOCs Ocultos**: Extrai e decodifica ativamente strings em Base64 para encontrar URLs e indicadores de comprometimento ofuscados no código-fonte.
-- **Detecção de Spoofing Visual**: Alerta sobre URLs que utilizam ataques de Punycode/Homograph e ofuscação com RTLO (Right-to-Left Override), técnicas comuns em phishing.
+# Analisa múltiplos alvos e gera relatório com resumo por IA
+threatdeflect ioc 8.8.8.8 https://malware.com/payload.php --ai llama3
 
-### 📦 Análise de Dependências:
-- Integração com a API do OSV.dev para verificar vulnerabilidades conhecidas nos pacotes listados em package.json e requirements.txt.
+# Analisa alvos de um arquivo e salva em Excel
+threatdeflect ioc --file C:\Users\SeuUsuario\Desktop\targets.txt -o C:\Users\SeuUsuario\Desktop\report_iocs.xlsx
+```
 
-### 📊 Relatórios Mais Completos:
-- **Relatórios em PDF**: Além do Excel, agora gera relatórios técnicos em PDF, formatando a resposta da IA (incluindo tabelas em Markdown) em um documento profissional.
-- **Planilhas Dedicadas**: O relatório Excel foi reestruturado com abas específicas para "Resumo Executivo", "Avisos de Segurança", "Achados", "Dependências" e "IOCs Extraídos".
+---
 
-### 🔧 Motor de Análise Configurável:
-- Todas as regras de detecção de segredos, palavras-chave suspeitas, arquivos e diretórios a serem ignorados são definidas externamente no arquivo `rules.yaml`, permitindo fácil customização.
+## macOS (Terminal)
+```bash
+# Ver ajuda
+threatdeflect --help
+
+# Analisa múltiplos alvos
+threatdeflect ioc 8.8.8.8 https://malware.com/payload.php --ai llama3
+
+# Analisa via arquivo e exporta
+threatdeflect ioc --file ~/targets.txt -o ~/report_iocs.xlsx
+```
+
+---
+
+## Linux (Terminal)
+
+Após descompactar o release, torne o binário executável com:
+```bash
+chmod +x ThreatDeflect
+```
+
+```bash
+# Ver ajuda
+./ThreatDeflect --help
+
+# Analisa múltiplos alvos com resumo por IA local
+./ThreatDeflect ioc 8.8.8.8 https://malware.com/payload.php --ai llama3
+
+# Analisa via arquivo e salva Excel
+./ThreatDeflect ioc --file ~/targets.txt -o ~/report_iocs.xlsx
+```
+
+
+
+
 
 <a id="features"></a>
 
@@ -85,42 +117,6 @@ A transição para ThreatDeflect traz melhorias massivas de arquitetura e novas 
 
 <a id="instalacao-rapida"></a>
 
-## ⚡ Instale em 30 segundos
-Baixe o executável para o seu sistema operacional na página de [Releases](https://github.com/DevGreick/ThreatDeflect/releases).
-
-<a id="uso"></a>
-
-## 🛠️ Exemplos de Uso (CLI)
-
-### Analisar IOCs (IPs/URLs)
-```bash
-# Analisa múltiplos alvos e gera um relatório com resumo da IA
-threatdeflect ioc 8.8.8.8 https://malware.com/payload.php --ai llama3
-
-# Analisa alvos a partir de um arquivo de texto
-threatdeflect ioc --file targets.txt -o report_iocs.xlsx
-```
-
-### Analisar Repositórios
-```bash
-# Analisa um repositório, salva o relatório e gera um resumo com a IA
-threatdeflect repo https://github.com/some/repo --ai mistral
-```
-
-### Configurações
-```bash
-# Configurar a chave da API do VirusTotal
-threatdeflect config set virustotal YOUR_KEY_HERE
-
-# Configurar o endpoint do Ollama
-threatdeflect config set-ollama http://localhost:11434/api/generate
-
-# Alterar o idioma
-threatdeflect config set-lang en_us
-
-# Mostrar a configuração atual
-threatdeflect config show
-```
 
 <a id="configuracao"></a>
 

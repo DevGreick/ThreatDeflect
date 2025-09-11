@@ -1,18 +1,12 @@
-
 <div align="center">
   <h1 align="center">🔐 ThreatDeflect</h1>
-  <img src="https://github.com/DevGreick/ThreatSpy/blob/main/spy2-1.png" alt="Logo do ThreatDeflect" width="150"/>
+  <img src="https://github.com/DevGreick/ThreatDeflect/blob/main/spy2-1.png" alt="Logo do ThreatDeflect" width="150"/>
 </div>
 
 <div align="center">
 <strong>Ferramenta integrada de Análise de Ameaças, Análise de Código e Threat Intelligence com IA Local.</strong>
-<br>
-
-
-<br>
-
-<div align="center">
-⭐ Dê uma estrela se o projeto te ajudou! | <a href="https://github.com/DevGreick/ThreatSpy/releases"><strong>Baixar a Última Versão »</strong></a>
+<br><br>
+⭐ Dê uma estrela se o projeto te ajudou! | <a href="https://github.com/DevGreick/ThreatDeflect/releases"><strong>Baixar a Última Versão »</strong></a>
 </div>
 
 <br>
@@ -20,7 +14,7 @@
 <div align="center">
 <!-- Badges -->
 <a href="https://www.python.org/downloads/release/python-380/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version"></a>
-<a href="https://github.com/DevGreick/ThreatSpy/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg?logo=gnu" alt="License"></a>
+<a href="https://github.com/DevGreick/ThreatDeflect/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg?logo=gnu" alt="License"></a>
 <img src="https://img.shields.io/badge/status-active-success.svg" alt="Project Status">
 <a href="https://doc.qt.io/qtforpython/"><img src="https://img.shields.io/badge/GUI-PySide6-purple.svg" alt="GUI Framework"></a>
 <a href="#contribuicao"><img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg" alt="Contributions"></a>
@@ -28,9 +22,11 @@
 
 <br>
 
+---
+
+<a id="sumario"></a>
 
 ## 📑 Sumário
-
 
 - [⚡ Instale em 30 segundos](#instalacao-rapida)
 - [🚀 Funcionalidades Principais](#features)
@@ -38,21 +34,23 @@
 - [⚙️ Configuração](#configuracao)
 - [✅ Requisitos](#requisitos)
 - [📦 Instalação pelo Código-Fonte](#instalacao-fonte)
-- [🎛️  Calibrando a Precisão da Análise](#importante)
+- [🎛️ Calibrando a Precisão da Análise](#calibragem)
 - [⚖️ Aviso de Segurança e Privacidade](#aviso)
 - [🛠️ Tecnologias](#tech)
 - [🤝 Contribuição](#contribuicao)
 - [☕ Apoie o Projeto](#apoie)
 - [📜 Licença](#licenca)
 
+<a id="instalacao-rapida"></a>
+
 ## ⚡ Instale em 30 segundos
 Baixe o executável para o seu sistema operacional na página de [Releases](https://github.com/DevGreick/ThreatDeflect/releases).
 
 <a id="uso"></a>
 
-# 🛠️ Exemplos de Uso (CLI)
+## 🛠️ Exemplos de Uso (CLI)
 
-## Windows (PowerShell ou CMD)
+### Windows (PowerShell ou CMD)
 ```powershell
 # Ver ajuda geral
 threatdeflect --help
@@ -66,7 +64,7 @@ threatdeflect ioc --file C:\Users\SeuUsuario\Desktop\targets.txt -o C:\Users\Seu
 
 ---
 
-## macOS (Terminal)
+### macOS (Terminal)
 ```bash
 # Ver ajuda
 threatdeflect --help
@@ -80,7 +78,7 @@ threatdeflect ioc --file ~/targets.txt -o ~/report_iocs.xlsx
 
 ---
 
-## Linux (Terminal)
+### Linux (Terminal)
 
 Após descompactar o release, torne o binário executável com:
 ```bash
@@ -97,10 +95,6 @@ chmod +x ThreatDeflect
 # Analisa via arquivo e salva Excel
 ./ThreatDeflect ioc --file ~/targets.txt -o ~/report_iocs.xlsx
 ```
-
-
-
-
 
 <a id="features"></a>
 
@@ -126,9 +120,6 @@ chmod +x ThreatDeflect
 
 **Modularidade:**
 - Dois idiomas disponíveis: inglês e português, pra facilitar o uso em diferentes cenários.
-
-<a id="instalacao-rapida"></a>
-
 
 <a id="configuracao"></a>
 
@@ -171,15 +162,13 @@ threatdeflect-gui  # Ou acesse o arquivo main_gui.py na pasta \ThreatDeflect\thr
 threatdeflect --help
 ```
 
-<a id="importante"></a>
+<a id="calibragem"></a>
 
-## 🎛️  Calibrando a Precisão da Análise
+## 🎛️ Calibrando a Precisão da Análise
 
-- Como toda ferramenta de Análise Estática de Segurança (SAST), o **ThreatDeflect** trabalha encontrando padrões que podem representar riscos, no entanto por não executar o código, a ferramenta não consegue entender o contexto de um achado, isso significa que ela pode gerar falsos positivos, por exemplo ela pode encontrar uma chave de API em um arquivo de teste que foi colocada lá de propósito, ou um padrão de senha em URL em um arquivo de documentação.
-
-- A precisão do ThreatDeflect é diretamente controlada pelo arquivo **rules.yaml**. se você é um desenvolvedor ou analista de segurança, é fortemente encorajado a calibrar este arquivo para reduzir o ruído e focar em novos riscos, ajustando as regras de detecção (`rules`) e principalmente a lista de exclusão (`ignore_patterns`) para remover pastas de teste, documentação ou outros diretórios que podem não ser relevantes para a sua análise de segurança.
-
-- Pense no ThreatDeflect como uma ferramenta de detecção poderosa ajustavel para o seu ambiente, o refinamento contínuo do **rules.yaml** é uma parte essencial do uso eficaz da ferramenta, por isso novas versões serão focadas em aprimoramento e a redução de falsos positivos.
+- Como toda ferramenta de Análise Estática de Segurança (SAST), o **ThreatDeflect** trabalha encontrando padrões que podem representar riscos. No entanto, por não executar o código, a ferramenta não consegue entender o contexto de um achado. Isso significa que ela pode gerar falsos positivos.  
+- A precisão do ThreatDeflect é diretamente controlada pelo arquivo **rules.yaml**. Se você é um desenvolvedor ou analista de segurança, é fortemente encorajado a calibrar este arquivo para reduzir o ruído e focar em riscos reais, ajustando as regras de detecção (`rules`) e principalmente a lista de exclusão (`ignore_patterns`) para remover pastas de teste, documentação ou outros diretórios que não são relevantes.  
+- Pense no ThreatDeflect como uma ferramenta de detecção poderosa ajustável para o seu ambiente. O refinamento contínuo do **rules.yaml** é essencial para uso eficaz. Novas versões vão focar na melhoria de calibragem e na redução de falsos positivos.
 
 <a id="aviso"></a>
 
@@ -213,12 +202,7 @@ threatdeflect --help
 
 ---
 
-
 > *Ao submeter um Pull Request, você concorda que suas contribuições serão licenciadas sob a mesma licença GPLv3 do projeto, concedendo ao mantenedor o direito de usar, modificar e distribuir seu código como parte do ThreatDeflect.*
-> <br>
-
-<a id="licenca"></a>
-
 
 <a id="apoie"></a>
 
@@ -229,6 +213,8 @@ threatdeflect --help
 <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" width="200">
 </a>
 </div>
+
+<a id="licenca"></a>
 
 ## 📜 Licença
 Distribuído sob a licença GPLv3. Consulte o arquivo LICENSE para mais informações.

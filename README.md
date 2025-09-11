@@ -39,8 +39,8 @@ Automatiza a análise de IOCs, varredura de repositórios e geração de relató
 - [⚙️ Configuração](#configuracao)
 - [✅ Requisitos](#requisitos)
 - [📦 Instalação pelo Código-Fonte](#instalacao-fonte)
-- [⚖️ Aviso de Segurança e Privacidade](#aviso)
 - [🎛️  Calibrando a Precisão da Análise](#importante)
+- [⚖️ Aviso de Segurança e Privacidade](#aviso)
 - [🛠️ Tecnologias](#tech)
 - [🤝 Contribuição](#contribuicao)
 - [☕ Apoie o Projeto](#apoie)
@@ -172,14 +172,6 @@ threatdeflect-gui  # Ou acesse o arquivo main_gui.py na pasta \ThreatDeflect\thr
 threatdeflect --help
 ```
 
-<a id="aviso"></a>
-
-## ⚖️ Aviso de Segurança e Privacidade
-- Os IPs e URLs fornecidos são enviados para as APIs de terceiros configuradas.
-- O ThreatDeflect não envia seus arquivos, apenas o **hash SHA256** é calculado localmente e enviado para as APIs.
-- Não submeta dados sensíveis ou internos. A responsabilidade pela segurança dos dados analisados é **sua**.
-
-
 <a id="importante"></a>
 
 ## 🎛️  Calibrando a Precisão da Análise
@@ -190,9 +182,12 @@ threatdeflect --help
 
 - Pense no ThreatDeflect como uma ferramenta de detecção poderosa ajustavel para o seu ambiente, o refinamento contínuo do **rules.yaml** é uma parte essencial do uso eficaz da ferramenta, por isso novas versões serão focadas em aprimoramento e a redução de falsos positivos.
 
+<a id="aviso"></a>
 
-
-
+## ⚖️ Aviso de Segurança e Privacidade
+- Os IPs e URLs fornecidos são enviados para as APIs de terceiros configuradas.
+- O ThreatDeflect não envia seus arquivos, apenas o **hash SHA256** é calculado localmente e enviado para as APIs.
+- Não submeta dados sensíveis ou internos. A responsabilidade pela segurança dos dados analisados é **sua**.
 
 <a id="tech"></a>
 

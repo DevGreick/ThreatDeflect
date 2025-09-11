@@ -124,10 +124,6 @@ threatdeflect config show
 ## ⚙️ Configuração
 As chaves de API e outras configurações podem ser gerenciadas via CLI (`threatdeflect config ...`) ou pela janela de "Configurações" na GUI.
 
-**Arquivo de Configuração (`settings.ini`):**
-- Linux: `~/.config/ThreatDeflect/settings.ini`
-- Windows: `%APPDATA%\ThreatDeflect\settings.ini`
-
 **Cache de Análise:**
 - O cache do SQLite é armazenado no mesmo diretório, dentro da subpasta `.threatdeflect_cache`.
 

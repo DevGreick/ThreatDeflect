@@ -176,10 +176,34 @@ As chaves de API e outras configurações podem ser gerenciadas via CLI (`threat
 <a id="requisitos"></a>
 
 ## ✅ Requisitos
-- Python 3.8+
-- Ollama para as funcionalidades de IA local (opcional).
-- Chaves de API para os serviços desejados (VirusTotal é altamente recomendado).
-- Um backend de Keyring instalado no sistema (para Linux, ex: `keyrings.alt`).
+
+- **Executável:** não precisa de Python.  
+- **Código-fonte:** Python 3.8+ e Git.  
+- **Chave do VirusTotal:** obrigatória para análises de IPs, URLs e arquivos.  
+
+**Para usar a IA local (opcional):**  Ollama instalado e em execução.  
+
+Windows: <https://ollama.com>  
+
+macOS:
+```bash
+brew install --cask ollama
+```
+
+Linux:
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+**Teste rápido:**
+```bash
+ollama --version
+ollama pull llama3
+```
+
+Sem Ollama, os botões de resumo por IA ficam indisponíveis. As demais funções seguem ativas.
+
+---
 
 <a id="instalacao-fonte"></a>
 

@@ -21,6 +21,9 @@
 </div>
 
 <br>
+<div align="center">
+<img src="https://github.com/DevGreick/ThreatDeflect/blob/main/Abertura.png" alt="Screenshot da interface do ThreatDeflect" width="700"/>
+</div>
 
 ---
 

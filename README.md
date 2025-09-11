@@ -5,7 +5,7 @@
 </div>
 
 <div align="center">
-<strong>Plataforma integrada de Análise de Ameaças, Análise de Código e Threat Intelligence com IA Local.</strong>
+<strong>Ferramenta integrada de Análise de Ameaças, Análise de Código e Threat Intelligence com IA Local.</strong>
 <br>
 
 

@@ -80,6 +80,9 @@ A transição para ThreatDeflect traz melhorias massivas de arquitetura e novas 
 - Armazena chaves de API de forma segura usando o keyring do sistema operacional.
 - Não envia o conteúdo de arquivos locais, apenas seus hashes.
 
+**Modularidade:**
+- Dois idiomas disponíveis: inglês e português, pra facilitar o uso em diferentes cenários.
+
 <a id="instalacao-rapida"></a>
 
 ## ⚡ Instale em 30 segundos

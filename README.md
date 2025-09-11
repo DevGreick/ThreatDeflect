@@ -153,7 +153,7 @@ pip install -r requirements.txt
 pip install -e .
 
 # Execute a versão GUI
-threatdeflect-gui  # Ou acesse o arquivo main_gui.py na pasta \ThreatDeflect\threatdeflect\ui\main_gui.py
+threatdeflect-gui  # Ou acesse o arquivo main_gui.py na pasta \ThreatDeflect\threatdeflect\ui
 
 # Execute a versão CLI
 threatdeflect --help

@@ -40,6 +40,7 @@ Automatiza a análise de IOCs, varredura de repositórios e geração de relató
 - [✅ Requisitos](#requisitos)
 - [📦 Instalação pelo Código-Fonte](#instalacao-fonte)
 - [⚖️ Aviso de Segurança e Privacidade](#aviso)
+- [🎛️  Calibrando a Precisão da Análise](#importante)
 - [🛠️ Tecnologias](#tech)
 - [🤝 Contribuição](#contribuicao)
 - [☕ Apoie o Projeto](#apoie)
@@ -177,6 +178,20 @@ threatdeflect --help
 - Os IPs e URLs fornecidos são enviados para as APIs de terceiros configuradas.
 - O ThreatDeflect não envia seus arquivos, apenas o **hash SHA256** é calculado localmente e enviado para as APIs.
 - Não submeta dados sensíveis ou internos. A responsabilidade pela segurança dos dados analisados é **sua**.
+
+
+<a id="importante"></a>
+
+## 🎛️  Calibrando a Precisão da Análise
+
+- Como toda ferramenta de Análise Estática de Segurança (SAST), o **ThreatDeflect** trabalha encontrando padrões que podem representar riscos, no entanto por não executar o código, a ferramenta não consegue entender o contexto de um achado, isso significa que ela pode gerar falsos positivos, por exemplo ela pode encontrar uma chave de API em um arquivo de teste que foi colocada lá de propósito, ou um padrão de senha em URL em um arquivo de documentação.
+
+- A precisão do ThreatDeflect é diretamente controlada pelo arquivo **rules.yaml**. se você é um desenvolvedor ou analista de segurança, é fortemente encorajado a calibrar este arquivo para reduzir o ruído e focar em novos riscos, ajustando as regras de detecção (`rules`) e principalmente a lista de exclusão (`ignore_patterns`) para remover pastas de teste, documentação ou outros diretórios que podem não ser relevantes para a sua análise de segurança.
+
+- Pense no ThreatDeflect como uma ferramenta de detecção poderosa ajustavel para o seu ambiente, o refinamento contínuo do **rules.yaml** é uma parte essencial do uso eficaz da ferramenta, por isso novas versões serão focadas em aprimoramento e a redução de falsos positivos.
+
+
+
 
 
 <a id="tech"></a>

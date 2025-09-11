@@ -162,10 +162,10 @@ threatdeflect --help
 <a id="aviso"></a>
 
 ## ⚖️ Aviso de Segurança e Privacidade
-- **Análise de IOCs**: Os IPs e URLs fornecidos são enviados para as APIs de terceiros configuradas.
-- **Análise de Arquivos**: O ThreatDeflect não envia seus arquivos. Apenas o hash SHA256 é calculado localmente e enviado para as APIs.
-- **Análise de Repositórios**: O conteúdo dos arquivos de repositórios públicos é baixado para análise local.
-- **Uso Responsável**: Não submeta dados sensíveis ou internos. A responsabilidade pela segurança dos dados analisados é sua.
+- Os IPs e URLs fornecidos são enviados para as APIs de terceiros configuradas.
+- O ThreatDeflect não envia seus arquivos, apenas o **hash SHA256** é calculado localmente e enviado para as APIs.
+- Não submeta dados sensíveis ou internos. A responsabilidade pela segurança dos dados analisados é **sua**.
+- O conteúdo dos arquivos é baixado para análise local de forma superficial, onde é inspecionado como texto e **nunca executado**, sendo processado em **memória** e descartado automaticamente após a conclusão da análise.
 
 <a id="tech"></a>
 

@@ -152,7 +152,9 @@ severity_map:
   "High Entropy String": "MEDIUM"
   "Generic API Key": "MEDIUM"
   "Suspicious Command": "MEDIUM"
-  "Suspicious JS Keyword": "MEDIUM"  # CORRIGIDO: de LOW para MEDIUM
+  "Suspicious JS Keyword": "MEDIUM"
+  "Invisible Whitespace": "MEDIUM"
+  "Trailing Whitespace": "LOW"
 
 # ===================================================================
 # Definição das Regras de Detecção por Padrão de Conteúdo
@@ -190,5 +192,9 @@ rules:
     pattern: '[aA][pP][iI]_?[kK][eE][yY].*[\''|"][0-9a-zA-Z]{32,}[\''|"]'
   - id: "Remote Script Execution"
     pattern: 'curl\s+[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)\s*\|\s*(bash|sh)'
-  - id: "Suspicious Command" # Exemplo de comando
+  - id: "Suspicious Command" 
     pattern: 'wget\s+.*\s+-O\s+/tmp/.*'
+  - id: "Trailing Whitespace"
+    pattern: "[ \\t]+$"
+  - id: "Invisible Whitespace"
+    pattern: "[\u00A0\u200B\u202F]"

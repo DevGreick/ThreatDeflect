@@ -183,9 +183,18 @@ threatdeflect --help
 <a id="contribuicao"></a>
 
 ## 🤝 Contribuição
-Pull requests são bem-vindos. Para grandes mudanças, por favor, abra uma issue primeiro para discutirmos o que você gostaria de mudar.
 
-Ao submeter um Pull Request, você concorda que suas contribuições serão licenciadas sob a mesma licença GPLv3 do projeto, concedendo ao mantenedor o direito de usar, modificar e distribuir seu código como parte do ThreatDeflect.
+1. Faça um fork.  
+2. Crie a branch `feature/nova-feature`.  
+3. Commit: `git commit -m "Adiciona nova feature"`.  
+4. Push: `git push origin feature/nova-feature`.  
+5. Abra um Pull Request.  
+
+---
+
+
+> *Ao submeter um Pull Request, você concorda que suas contribuições serão licenciadas sob a mesma licença GPLv3 do projeto, concedendo ao mantenedor o direito de usar, modificar e distribuir seu código como parte do ThreatDeflect.*
+> <br>
 
 <a id="licenca"></a>
 

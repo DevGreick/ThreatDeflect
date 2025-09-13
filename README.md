@@ -262,15 +262,19 @@ threatdeflect --help
 <a id="tech"></a>
 
 ## 🛠️ Tecnologias
-- **Core**: Python
-- **GUI**: PySide6
-- **CLI**: Typer, Rich
-- **APIs**: Requests
-- **Cache**: SQLite
-- **Relatórios**: XlsxWriter, ReportLab
-- **IA Local**: Integração com Ollama
-- **Testes**: Pytest
-- **Empacotamento**: PyInstaller
+
+| Tecnologia | Propósito |
+|------------|-----------|
+| Python     | Linguagem principal |
+| PySide6    | Interface gráfica |
+| Typer / Rich | CLI |
+| SQLite     | SQlite |
+| Requests   | Comunicação com APIs |
+| Keyring    | Cofre de credenciais |
+| XlsxWriter / ReportLab | Relatórios Excel e PDF |
+| Ollama     | IA local |
+| PyInstaller| Executáveis multiplataforma |
+
 
 <a id="contribuicao"></a>
 

@@ -35,7 +35,7 @@
 - [🛠️ Como Usar (GUI)](#uso2)
 - [🛠️ Como Usar (CLI)](#uso)
 - [🚀 Funcionalidades Principais](#features)
-- [⚙️ Configuração](#configuracao)
+- [⚙️ Configuração Essencial](#configuracao)
 - [✅ Requisitos](#requisitos)
 - [📦 Instalação pelo Código-Fonte](#instalacao-fonte)
 - [🎛️ Calibrando a Precisão da Análise](#calibragem)
@@ -169,8 +169,20 @@ chmod +x ThreatDeflect
 
 <a id="configuracao"></a>
 
-## ⚙️ Configuração
-As chaves de API e outras configurações podem ser gerenciadas via CLI (`threatdeflect config ...`) ou pela janela de "Configurações" na GUI.
+## ⚙️ Configuração Essencial
+
+| Serviço       | Necessidade | O que habilita? |
+|---------------|-------------|-----------------|
+| VirusTotal    | Obrigatória | Reputação de IPs, URLs e arquivos |
+| GitHub/GitLab | Recomendada | Análise de repositórios com mais limites da API |
+| AbuseIPDB     | Opcional    | Score de abuso de IPs |
+| Shodan        | Opcional    | Portas e serviços para IPs |
+| URLHaus       | Opcional    | Verificar se as URLs são ativamente usadas para distribuir malware |
+| MalwareBazaar | Opcional    | Nome da ameaça |
+| Ollama (IA)   | Opcional    | Resumos automáticos locais |
+
+As chaves são salvas de forma segura com **keyring** no cofre do seu sistema operacional.  
+Para um guia detalhado sobre como obter e configurar cada chave, consulte o nosso [Guia de Configuração de APIs ](./config.md).
 
 **Cache de Análise:**
 - O cache do SQLite é armazenado no mesmo diretório, dentro da subpasta `.threatdeflect_cache`.

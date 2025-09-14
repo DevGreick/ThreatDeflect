@@ -27,7 +27,6 @@ def mock_api_responses():
         }
     }
 
-# --- Testes para run_ioc_analysis ---
 
 def test_run_ioc_analysis_success(monkeypatch, tmp_path, mock_api_responses):
     """Testa o fluxo completo de análise de IOCs com sucesso, usando mocks."""
@@ -60,7 +59,6 @@ def test_run_ioc_analysis_no_targets_raises_error(monkeypatch, tmp_path):
     with pytest.raises(NoValidTargetsError, match="Nenhum alvo válido"):
         engine.run_ioc_analysis(targets, output_file)
 
-# --- Testes para run_file_analysis ---
 
 def test_run_file_analysis_success(monkeypatch, tmp_path, mock_api_responses):
     """Testa o fluxo de sucesso da análise de arquivos."""
@@ -81,7 +79,6 @@ def test_run_file_analysis_success(monkeypatch, tmp_path, mock_api_responses):
     assert results["files"]["dummy_hash"]["malwarebazaar"]["data"][0]["signature"] == "Cerber"
     mock_api_client.check_file_multi.assert_called_once_with("dummy_hash")
 
-# CORREÇÃO: O teste agora espera a exceção correta (NoValidTargetsError)
 def test_run_file_analysis_no_valid_files_raises_error(monkeypatch, tmp_path):
     """Testa se a exceção correta é levantada quando nenhum hash pode ser gerado."""
     monkeypatch.setattr('threatdeflect.core.engine.calculate_sha256', lambda path: None)
@@ -89,7 +86,6 @@ def test_run_file_analysis_no_valid_files_raises_error(monkeypatch, tmp_path):
     with pytest.raises(NoValidTargetsError):
         engine.run_file_analysis(["nonexistent_file.txt"], tmp_path / "report.xlsx")
 
-# --- Testes para run_repo_analysis ---
 
 @pytest.fixture
 def mock_cache_manager(monkeypatch):

@@ -156,5 +156,5 @@ ollama pull llama3
 ```
 
 ### Configuração no ThreatDeflect
-No ThreatSpy, vá para a aba **Configurações**. O endpoint padrão (`http://localhost:11434`) já estará configurado.  
+No ThreatDeflect, vá para a aba **Configurações**. O endpoint padrão (`http://localhost:11434`) já estará configurado.  
 Se você estiver rodando o Ollama em outra máquina ou porta, ajuste o endereço.  

@@ -1,6 +1,6 @@
-# ⚙️ Guia de Configuração de APIs para o ThreatSpy
+# ⚙️ Guia de Configuração de APIs para o ThreatDeflect
 
-Este guia detalha como obter e configurar as chaves de API necessárias para habilitar todas as funcionalidades do **ThreatSpy**.  
+Este guia detalha como obter e configurar as chaves de API necessárias para habilitar todas as funcionalidades do **ThreatDeflect**.  
 As chaves são armazenadas de forma segura no cofre de credenciais do seu sistema operacional usando a biblioteca **keyring**.
 
 ---
@@ -27,8 +27,8 @@ As chaves são armazenadas de forma segura no cofre de credenciais do seu sistem
 2. Navegue até o seu perfil no canto superior direito e clique em **API Key**.  
 3. Copie a chave exibida.  
 
-### Configuração no ThreatSpy
-Na primeira vez que você executar, o ThreatSpy solicitará a chave do VirusTotal. Cole-a no campo correspondente.  
+### Configuração no ThreatDeflect
+Na primeira vez que você executar, o ThreatDeflect solicitará a chave do VirusTotal. Cole-a no campo correspondente.  
 
 ---
 
@@ -52,11 +52,11 @@ Na primeira vez que você executar, o ThreatSpy solicitará a chave do VirusTota
 1. Acesse sua conta do [GitHub](https://github.com).  
 2. Vá para **Settings > Developer settings > Personal access tokens > Tokens (classic)**.  
 3. Clique em **Generate new token (classic)**.  
-4. Dê um nome ao token (ex: `threatspy-token`).  
+4. Dê um nome ao token (ex: `ThreatDeflect-token`).  
 5. Selecione o escopo `public_repo` (para repositórios públicos) e `repo` (se precisar analisar repositórios privados).  
 6. Clique em **Generate token** e copie a chave gerada.  
 
-### Configuração no ThreatSpy
+### Configuração no ThreatDeflect
 Na aba **Configurações**, cole o token nos campos correspondentes do GitHub ou GitLab.  
 
 > **Notas sobre Limites de API:**  
@@ -67,7 +67,7 @@ Na aba **Configurações**, cole o token nos campos correspondentes do GitHub ou
 > Com token, esse limite sobe para **5.000 requisições por hora** por usuário.  
 >  
 >  
-> Para evitar falhas, o ThreatSpy alerta se você tentar analisar mais de **2 repositórios** ao mesmo tempo.  
+> Para evitar falhas, o ThreatDeflect alerta se você tentar analisar mais de **2 repositórios** ao mesmo tempo.  
 >  
 > Em repositórios muito grandes, use um **token**, divida a análise em **lotes menores** e, se necessário, considere **planos pagos corporativos**.
 
@@ -94,7 +94,7 @@ isso retorna os limites e o saldo restante de requisições, incluindo a quota e
 3. Clique em **Create API Key**.  
 4. Copie a chave gerada.  
 
-### Configuração no ThreatSpy
+### Configuração no ThreatDeflect
 Na aba **Configurações**, cole a chave no campo do AbuseIPDB.  
 
 ---
@@ -110,7 +110,7 @@ Na aba **Configurações**, cole a chave no campo do AbuseIPDB.
 2. Após o login, sua chave de API estará visível no topo da página da sua conta.  
 3. Copie a chave.  
 
-### Configuração no ThreatSpy
+### Configuração no ThreatDeflect
 Na aba **Configurações**, cole a chave no campo do Shodan.  
 
 ---
@@ -134,7 +134,7 @@ Na aba **Configurações**, cole a chave no campo do Shodan.
 1. Crie uma conta no site do [MalwareBazaar](https://bazaar.abuse.ch).  
 2. Após o login, sua chave de API estará disponível na sua página de conta.  
 
-### Configuração no ThreatSpy
+### Configuração no ThreatDeflect
 Na aba **Configurações**, cole as chaves nos campos correspondentes do URLHaus e MalwareBazaar.  
 
 ---
@@ -155,6 +155,6 @@ Na aba **Configurações**, cole as chaves nos campos correspondentes do URLHaus
 ollama pull llama3
 ```
 
-### Configuração no ThreatSpy
+### Configuração no ThreatDeflect
 No ThreatSpy, vá para a aba **Configurações**. O endpoint padrão (`http://localhost:11434`) já estará configurado.  
 Se você estiver rodando o Ollama em outra máquina ou porta, ajuste o endereço.  

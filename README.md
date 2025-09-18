@@ -100,7 +100,7 @@ Clique em **Analisar Repositórios**. A ferramenta detecta segredos e IOCs, gera
 threatdeflect --help
 
 # Analisa múltiplos alvos e gera relatório com resumo por IA
-threatdeflect ioc 8.8.8.8 https://malware.com/payload.php --ai llama3
+threatdeflect ioc 8.8.8.8 https://malware.com/payload.php --ai gpt-oss:20b
 
 # Analisa alvos de um arquivo e salva em Excel
 threatdeflect ioc --file C:\Users\SeuUsuario\Desktop\targets.txt -o C:\Users\SeuUsuario\Desktop\report_iocs.xlsx
@@ -116,7 +116,7 @@ threatdeflect ioc --file C:\Users\SeuUsuario\Desktop\targets.txt -o C:\Users\Seu
 threatdeflect --help
 
 # Analisa múltiplos alvos
-threatdeflect ioc 8.8.8.8 https://malware.com/payload.php --ai llama3
+threatdeflect ioc 8.8.8.8 https://malware.com/payload.php --ai gpt-oss:20b
 
 # Analisa via arquivo e exporta
 threatdeflect ioc --file ~/targets.txt -o ~/report_iocs.xlsx
@@ -128,18 +128,18 @@ threatdeflect ioc --file ~/targets.txt -o ~/report_iocs.xlsx
 
 Após descompactar o release, torne o binário executável com:
 ```bash
-chmod +x ThreatDeflect
+chmod +x ThreatDeflect-CLI-Linux
 ```
 
 ```bash
 # Ver ajuda
-./ThreatDeflect --help
+./ThreatDeflect-CLI-Linux --help
 
 # Analisa múltiplos alvos com resumo por IA local
-./ThreatDeflect ioc 8.8.8.8 https://malware.com/payload.php --ai llama3
+./ThreatDeflect-CLI-Linux ioc 8.8.8.8 https://malware.com/payload.php --ai gpt-oss:20b
 
 # Analisa via arquivo e salva Excel
-./ThreatDeflect ioc --file ~/targets.txt -o ~/report_iocs.xlsx
+./ThreatDeflect-CLI-Linux ioc --file ~/targets.txt -o ~/report_iocs.xlsx
 ```
 
 <a id="features"></a>
@@ -214,6 +214,8 @@ curl -fsSL https://ollama.com/install.sh | sh
 ollama --version
 ollama pull llama3
 ```
+> *Para melhores resultados use o gpt-oss:20b*
+
 
 Sem Ollama, os botões de resumo por IA ficam indisponíveis. As demais funções seguem ativas.
 

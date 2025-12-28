@@ -1,22 +1,3 @@
-# ===================================================================
-# Módulo de Utilitários (utils.py)
-# ===================================================================
-# ThreatDeflect
-# Copyright (C) 2025  Jackson Greick <seczeror.ocelot245@passmail.net>
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 import hashlib
 import ipaddress
 import logging
@@ -30,9 +11,7 @@ from pathlib import Path
 from typing import List, Set, Tuple, Any, Dict, Optional
 from urllib.parse import urlparse
 
-
 def get_config_path() -> Path:
-    """Retorna o caminho absoluto para o arquivo de configuração, compatível com múltiplos SO."""
     app_name = "ThreatDeflect"
     config_dir: Path
 
@@ -42,19 +21,14 @@ def get_config_path() -> Path:
     elif sys.platform == "darwin":
         home = Path.home()
         config_dir = home.joinpath("Library", "Application Support", app_name)
-    else:  # Linux e outros
+    else:
         home = Path.home()
         config_dir = home.joinpath(".config", app_name)
     
     config_dir.mkdir(parents=True, exist_ok=True)
     return config_dir.joinpath("settings.ini")
 
-
 def get_log_path() -> Path:
-    """
-    Retorna o caminho do arquivo de log.
-    Primeiro, tenta ler do arquivo de configuração. Se não encontrar, usa um padrão.
-    """
     config_path = get_config_path()
     default_log_path = Path.home() / 'threatdeflect.log'
 
@@ -68,20 +42,30 @@ def get_log_path() -> Path:
 
     return default_log_path
 
+import sys
+from pathlib import Path
 
 def resource_path(relative_path: str) -> str:
-    """ Obtém o caminho absoluto para o recurso, para dev e PyInstaller """
+    """
+    Localiza recursos (imagens, configs) tanto em DEV quanto no EXE (PyInstaller).
+    Busca automaticamente nas pastas 'assets' e 'core'.
+    """
     try:
         base_path = Path(sys._MEIPASS)
-    except Exception:
+    except AttributeError:
         base_path = Path(__file__).resolve().parent.parent
-    
-    asset_path = base_path.joinpath("assets", relative_path)
-    return str(asset_path)
 
+    target_path = base_path.joinpath("assets", relative_path)
+    if target_path.exists():
+        return str(target_path)
+
+    fallback_path = base_path.joinpath("core", relative_path)
+    if fallback_path.exists():
+        return str(fallback_path)
+    
+    return str(target_path)
 
 def is_file_writable(filepath: str) -> bool:
-    """ Verifica se um arquivo pode ser escrito. """
     path = Path(filepath)
     try:
         if not path.parent.exists():
@@ -100,9 +84,7 @@ def is_file_writable(filepath: str) -> bool:
                 return False
         return False
 
-
 def create_updater_script(new_asset_path: str, current_executable_path: str, app_pid: int) -> Optional[str]:
-    """Cria um script de atualização externo e autodestrutivo."""
     script_content = ""
     script_extension = ""
     temp_dir = tempfile.gettempdir()
@@ -125,7 +107,7 @@ start "" "{current_executable_path}"
 echo Limpando...
 (goto) 2>nul & del "%~f0"
 """
-    else:  # Linux e macOS
+    else:
         script_extension = ".sh"
         script_content = f"""
 #!/bin/sh
@@ -154,9 +136,7 @@ rm -- "$0"
         logging.error(f"Falha ao criar script de atualizacao: {e}")
         return None
 
-
 def parse_repo_urls(text: str) -> Tuple[List[str], List[str], List[str]]:
-    """Analisa um texto e extrai URLs de repositório GitHub/GitLab válidas."""
     seen_urls: Set[str] = set()
     valid_urls: List[str] = []
     invalid_lines: List[str] = []
@@ -189,17 +169,10 @@ def parse_repo_urls(text: str) -> Tuple[List[str], List[str], List[str]]:
             
     return sorted(valid_urls), invalid_lines, sorted(list(set(duplicate_lines)))
 
-
 def parse_targets(text: str) -> Tuple[List[str], List[str]]:
-    """
-    Analisa um texto e extrai IPs e URLs válidos de forma robusta.
-    """
     valid_ips: Set[str] = set()
     valid_urls: Set[str] = set()
     
-    # ===================================================================
-    # ALTERAÇÃO: Regex para validar a sintaxe de um hostname
-    # ===================================================================
     hostname_pattern = re.compile(r'^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$')
 
     for line in text.splitlines():
@@ -220,9 +193,6 @@ def parse_targets(text: str) -> Tuple[List[str], List[str]]:
 
         try:
             parsed = urlparse(url_to_parse)
-            # ===================================================================
-            # ALTERAÇÃO: Adicionada validação de sintaxe do hostname
-            # ===================================================================
             if parsed.scheme and parsed.hostname and hostname_pattern.fullmatch(parsed.hostname):
                 valid_urls.add(url_to_parse)
             else:
@@ -232,9 +202,7 @@ def parse_targets(text: str) -> Tuple[List[str], List[str]]:
 
     return sorted(list(valid_ips)), sorted(list(valid_urls))
 
-
 def calculate_sha256(filepath: str) -> Optional[str]:
-    """Calcula o hash SHA256 de um arquivo."""
     sha256_hash = hashlib.sha256()
     try:
         with open(filepath, "rb") as f:
@@ -245,18 +213,14 @@ def calculate_sha256(filepath: str) -> Optional[str]:
         logging.error(f"Erro ao ler o arquivo {filepath}: {e}")
         return None
 
-
 def defang_ioc(ioc_string: str) -> str:
-    """Converte um IOC para um formato "defanged" para exibição segura."""
     if not ioc_string:
         return ""
     if "xn--" in ioc_string or '\u202e' in ioc_string:
         return ioc_string.replace('http://', 'hxxp://').replace('https://', 'hxxps://')
     return ioc_string.replace('http://', 'hxxp://').replace('https://', 'hxxps://').replace('.', '[.]')
 
-
 def safe_get(data: Dict[str, Any], path: str, default: Any = None) -> Any:
-    """Extrai um valor de um dicionário aninhado usando uma string de caminho."""
     if not isinstance(data, dict):
         return default
     keys = path.split('.')
@@ -275,12 +239,7 @@ def safe_get(data: Dict[str, Any], path: str, default: Any = None) -> Any:
             return default
     return current
 
-
 def detect_visual_spoofing(text: str) -> Optional[str]:
-    """
-    Verifica se a string contém indicadores de ataques de spoofing visual.
-    Retorna o tipo de ataque detectado ('Punycode/Cyrillic' ou 'RTLO') ou None.
-    """
     if not isinstance(text, str):
         return None
         

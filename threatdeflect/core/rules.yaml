@@ -1,0 +1,335 @@
+ignore_patterns:
+  directories:
+    - /node_modules/
+    - /bower_components/
+    - /jspm_packages/
+    - /web_modules/
+    - /dist/
+    - /build/
+    - /out/
+    - /target/
+    - /vendor/
+    - /lib/site-packages/
+    - /lib64/site-packages/
+    - /site-packages/
+    - /dist-packages/
+    - /__pycache__/
+    - /.pytest_cache/
+    - /.mypy_cache/
+    - /.tox/
+    - /.eggs/
+    - /htmlcov/
+    - /.coverage/
+    - /__snapshots__/
+    - /docs/
+    - /doc/
+    - /man/
+    - /help/
+    - /samples/
+    - /examples/
+    - /demo/
+    - /tutorials/
+    - /.git/
+    - /.svn/
+    - /.hg/
+    - /.bzr/
+    - /.venv/
+    - /venv/
+    - /env/
+    - /.history/
+    - /.settings/
+    - /.project/
+    - /.classpath/
+    - /bin/
+    - /obj/
+    - /tmp/
+    - /temp/
+    - /log/
+    - /logs/
+    - /coverage/
+    - /assets/
+    - /static/
+    - /media/
+    - /public/
+    - /resources/
+    - /res/
+    - /locales/
+    - /i18n/
+    - /translations/
+    - /.next/
+    - /.nuxt/
+    - /.cache/
+    - /.parcel-cache/
+    - /.serverless/
+    - /.terraform/
+    - /.vagrant/
+    - /android/app/build/
+    - /ios/Pods/
+  files:
+    - package-lock.json
+    - yarn.lock
+    - pnpm-lock.yaml
+    - Cargo.lock
+    - Gemfile.lock
+    - composer.lock
+    - poetry.lock
+    - Pipfile.lock
+    - mix.lock
+    - go.sum
+    - podfile.lock
+    - packages.config
+    - nuget.config
+    - tsconfig.json
+    - jsconfig.json
+    - .eslintrc
+    - .prettierrc
+    - .babelrc
+    - .editorconfig
+    - .gitignore
+    - .gitattributes
+    - .dockerignore
+    - .npmignore
+    - LICENSE
+    - LICENSE.txt
+    - LICENSE.md
+    - README
+    - README.txt
+    - README.md
+    - README.rst
+    - CHANGELOG
+    - CHANGELOG.md
+    - CONTRIBUTING.md
+    - AUTHORS
+    - NOTICE
+    - cacert.pem
+    - cert.pem
+    - .min.js
+    - .min.css
+    - .map
+    - .d.ts
+    - .pem
+    - .crt
+    - .cer
+    - .der
+    - .p12
+    - .pfx
+    - .pub
+    - .asc
+    - .gpg
+    - .jks
+    - .keystore
+    - .truststore
+    - .png
+    - .jpg
+    - .jpeg
+    - .gif
+    - .bmp
+    - .ico
+    - .svg
+    - .webp
+    - .tif
+    - .tiff
+    - .mp3
+    - .mp4
+    - .mov
+    - .avi
+    - .wav
+    - .flac
+    - .mkv
+    - .webm
+    - .woff
+    - .woff2
+    - .eot
+    - .ttf
+    - .otf
+    - .pyc
+    - .pyo
+    - .log
+    - .sqlite
+    - .sqlite3
+    - .db
+    - .mdb
+    - .db3
+    - .iso
+    - .img
+    - .qcow2
+    - .vdi
+    - .DS_Store
+    - Thumbs.db
+    - jquery.js
+    - jquery.min.js
+    - bootstrap.js
+    - bootstrap.min.js
+    - react.production.min.js
+    - vue.min.js
+    - angular.min.js
+
+file_scan_targets:
+  interesting_extensions:
+    - .js
+    - .jsx
+    - .ts
+    - .tsx
+    - .py
+    - .pyw
+    - .go
+    - .rs
+    - .java
+    - .kt
+    - .rb
+    - .php
+    - .c
+    - .cpp
+    - .h
+    - .hpp
+    - .cs
+    - .sh
+    - .bash
+    - .zsh
+    - .ps1
+    - .bat
+    - .cmd
+    - .pl
+    - .swift
+    - .r
+    - .lua
+    - .yml
+    - .yaml
+    - .json
+    - .xml
+    - .toml
+    - .ini
+    - .config
+    - .conf
+    - .properties
+    - .env
+    - Dockerfile
+    - Makefile
+    - Jenkinsfile
+    - Vagrantfile
+    - Rakefile
+    - Procfile
+  
+  dependency_files:
+    - package.json
+    - requirements.txt
+    - Pipfile
+    - pyproject.toml
+    - go.mod
+    - Cargo.toml
+  
+  sensitive_filenames:
+    - .env
+    - .env.local
+    - .env.development
+    - .env.production
+    - .env.test
+    - .env.example
+    - .envrc
+    - credentials
+    - credentials.json
+    - credentials.yml
+    - credentials.xml
+    - secrets.json
+    - secrets.yml
+    - secrets.yaml
+    - config.json
+    - config.yml
+    - config.yaml
+    - settings.py
+    - settings.json
+    - database.yml
+    - id_rsa
+    - id_dsa
+    - id_ed25519
+    - private.key
+    - server.key
+    - client.key
+    - .npmrc
+    - .pypirc
+    - .git-credentials
+    - .boto
+    - .s3cfg
+    - .aws/credentials
+    - terraform.tfstate
+    - .bash_history
+    - .zsh_history
+    - .mysql_history
+    - .psql_history
+    - .netrc
+    - kubeconfig
+    - gcloud.json
+    - key.pem
+    - setup.py
+    - build.rs
+    - tasks.json
+    - .gitlab-ci.yml
+    - .travis.yml
+    - circle.yml
+
+severity_map:
+  Private Key: CRITICAL
+  AWS Key: CRITICAL
+  GitHub Token: CRITICAL
+  GitLab PAT: CRITICAL
+  Slack Token: CRITICAL
+  Stripe API Key: CRITICAL
+  Heroku API Key: HIGH
+  Google Cloud API Key: CRITICAL
+  Twilio Auth Token: HIGH
+  Malicious Dependency: CRITICAL
+  NPM Dangerous Hook: HIGH
+  Remote Script Execution: HIGH
+  Hidden IOC (Base64): HIGH
+  PowerShell Encoded: HIGH
+  Password in URL: MEDIUM
+  Twilio SID: MEDIUM
+  JSON Web Token (JWT): MEDIUM
+  Sensitive File: LOW
+  High Entropy String: LOW
+  Generic API Key: LOW
+  Validated Generic API Key: HIGH
+  Suspicious Command: LOW
+  Validated Suspicious Command: MEDIUM
+  Suspicious JS Keyword: LOW
+  Invisible Whitespace: LOW
+  Trailing Whitespace: LOW
+  Google OAuth Client ID: MEDIUM
+
+rules:
+  - id: Private Key
+    pattern: "-----BEGIN ((EC|RSA|OPENSSH|DSA|PGP) )?PRIVATE KEY-----"
+  - id: AWS Key
+    pattern: "(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}"
+  - id: GitHub Token
+    pattern: "(ghp|gho|ghu|ghs|ghr)_[0-9a-zA-Z]{36}"
+  - id: GitLab PAT
+    pattern: "glpat-[0-9a-zA-Z\\-\\_]{20}"
+  - id: Slack Token
+    pattern: "xox[baprs]-[0-9a-zA-Z]{10,48}"
+  - id: Stripe API Key
+    pattern: "sk_live_[0-9a-zA-Z]{24}"
+  - id: Heroku API Key
+    pattern: "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+  - id: Google Cloud API Key
+    pattern: "AIza[0-9A-Za-z\\-_]{35}"
+  - id: Google OAuth Client ID
+    pattern: "[0-9]+-[0-9a-zA-Z_]{32}\\.apps\\.googleusercontent\\.com"
+  - id: Twilio SID
+    pattern: "AC[a-f0-9]{32}"
+  - id: Twilio Auth Token
+    pattern: "SK[a-f0-9]{32}"
+  - id: JSON Web Token (JWT)
+    pattern: "ey[a-zA-Z0-9_=-]+\\.[a-zA-Z0-9_=-]+\\.[a-zA-Z0-9_=-]+"
+  - id: PowerShell Encoded
+    pattern: "powershell.*-e(n|nc|nco|ncod|ncode|encoded)?[\\s]+[a-zA-Z0-9+/=]{20,}"
+  - id: Password in URL
+    pattern: "[a-zA-Z0-9]+://[^/\\s:]+:[^/\\s@]+@[^/\\s]+"
+  - id: Generic API Key
+    pattern: '(?i)(api_key|apikey|secret|token|auth_token)\s*[:=]\s*[\''|"][0-9a-zA-Z\\-_]{32,}[\''|"]'
+  - id: Remote Script Execution
+    pattern: 'curl\\s+.*\\|\\s*(bash|sh|zsh|python|perl|ruby)'
+  - id: Suspicious Command
+    pattern: '(wget|curl|nc|ncat|netcat)\s+.*'
+  - id: Invisible Whitespace
+    pattern: "[\u00A0\u200B\u202F]"

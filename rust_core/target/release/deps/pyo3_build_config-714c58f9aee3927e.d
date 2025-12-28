@@ -1,0 +1,14 @@
+/home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/deps/pyo3_build_config-714c58f9aee3927e.d: /home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/lib.rs /home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/errors.rs /home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/impl_.rs /home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/build/pyo3-build-config-c182551637304dcf/out/pyo3-build-config-file.txt /home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/build/pyo3-build-config-c182551637304dcf/out/pyo3-build-config.txt
+
+/home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/deps/libpyo3_build_config-714c58f9aee3927e.rlib: /home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/lib.rs /home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/errors.rs /home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/impl_.rs /home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/build/pyo3-build-config-c182551637304dcf/out/pyo3-build-config-file.txt /home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/build/pyo3-build-config-c182551637304dcf/out/pyo3-build-config.txt
+
+/home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/deps/libpyo3_build_config-714c58f9aee3927e.rmeta: /home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/lib.rs /home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/errors.rs /home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/impl_.rs /home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/build/pyo3-build-config-c182551637304dcf/out/pyo3-build-config-file.txt /home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/build/pyo3-build-config-c182551637304dcf/out/pyo3-build-config.txt
+
+/home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/lib.rs:
+/home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/errors.rs:
+/home/jack/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/pyo3-build-config-0.23.5/src/impl_.rs:
+/home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/build/pyo3-build-config-c182551637304dcf/out/pyo3-build-config-file.txt:
+/home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/build/pyo3-build-config-c182551637304dcf/out/pyo3-build-config.txt:
+
+# env-dep:CARGO_PKG_VERSION=0.23.5
+# env-dep:OUT_DIR=/home/jack/Documents/Codigos/ThreatDeflect/rust_core/target/release/build/pyo3-build-config-c182551637304dcf/out

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["maturin>=1.4,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "threatdeflect"
+version = "2.0.0"
+description = "Ferramenta de análise de ameaças com interfaces GUI e CLI e motor híbrido Rust."
+authors = [{name = "DevGreick", email = "seczeror.ocelot245@passmail.net"}]
+requires-python = ">=3.11"
+dependencies = [
+    "typer[standard]", 
+    "rich",
+    "PySide6",
+    "keyring",
+    "requests",
+    "xlsxwriter",
+    "reportlab",
+    "PyYAML",
+    "urllib3"
+]
+
+[tool.maturin]
+python-source = "."
+module-name = "threatdeflect_rs"
+manifest-path = "rust_core/Cargo.toml"
+features = ["pyo3/extension-module"]
+
+[project.scripts]
+threatdeflect-gui = "threatdeflect.ui.main_gui:main"
+threatdeflect = "threatdeflect.cli.main:app"

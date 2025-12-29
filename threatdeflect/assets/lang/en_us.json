@@ -1,6 +1,13 @@
 {
-    "window_title": "ThreatDeflect",
+    "window_title": "ThreatDeflect v3.0 (Hybrid Engine)",
     "file_menu": "File",
+    "risk_unverified": "⚠️ UNVERIFIED RISK",
+    "manual_check_prefix": "[MANUAL CHECK]",
+    "ai_limit_reached": "AI limit reached. Prioritizing highest risk items.",
+    "ioc_limit_reached": "IOC limit reached. Analyzing statistical sample.",
+    "performance_limit_title": "Performance Limit",
+    "scan_repo_button": "Analyze Repository",
+    "scan_ioc_button": "Analyze Targets",
     "settings_title": "Settings",
     "general_tab": "General",
     "log_path_label": "Log File Path:",
@@ -99,4 +106,4 @@
     "cli_language": "Language",
     "cli_ollama_no_models": "None (check if Ollama is running)",
     "cli_ollama_available_models": "Available Ollama Models"
-  }
+}

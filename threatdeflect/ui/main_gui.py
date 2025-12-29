@@ -38,7 +38,7 @@ from threatdeflect.utils.utils import (
     get_log_path
 )
 
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 
 
 def setup_logging() -> None:

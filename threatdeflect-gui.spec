@@ -28,7 +28,6 @@ binaries = []
 
 if is_win:
     # No Windows, o Rust gera .dll, mas o Python espera .pyd ou .dll
-    # Procuramos por threatdeflect_rs.dll e renomeamos/colocamos como extensão
     rust_bin_source = RUST_TARGET_DIR / 'threatdeflect_rs.dll'
     if not rust_bin_source.exists():
         # Fallback: Tenta achar .pyd se foi renomeado pelo maturin
@@ -84,7 +83,6 @@ a = Analysis(
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=None)
 
-# --- GERAÇÃO DO EXECUTÁVEL (EXE/ELF) ---
 exe = EXE(
     pyz,
     a.scripts,

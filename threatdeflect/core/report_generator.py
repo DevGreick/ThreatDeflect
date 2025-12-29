@@ -22,7 +22,7 @@ import hashlib
 import logging
 import re
 from typing import Dict, Any, List, Tuple
-
+from urllib.parse import quote
 import xlsxwriter
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
@@ -273,9 +273,28 @@ class ReportGenerator:
         ws.set_column('A:A', 60); ws.set_column('B:B', 65); ws.set_column('C:E', 25)
 
         for row_num, (url, results) in enumerate(self.url_results.items(), 2):
-            final_url = safe_get(results, 'virustotal.meta.url_info.url', url)
-            url_hash = hashlib.sha256(final_url.encode('utf-8')).hexdigest()
-            vt_malicious = safe_get(results, 'virustotal.data.attributes.stats.malicious')
+            
+            vt_id = safe_get(results, 'virustotal.data.id')
+
+            if vt_id and isinstance(vt_id, str) and vt_id.startswith('u-'):
+                parts = vt_id.split('-')
+                if len(parts) > 1:
+                    vt_id = parts[1] 
+
+            if vt_id:
+                vt_link = f"https://www.virustotal.com/gui/url/{vt_id}"
+            else:
+                try:
+                    encoded_url = quote(url, safe='')
+                    vt_link = f"https://www.virustotal.com/gui/search/{encoded_url}"
+                except Exception:
+                    vt_link = f"https://www.virustotal.com/gui/domain/{url}"
+
+            vt_malicious = safe_get(results, 'virustotal.data.attributes.last_analysis_stats.malicious')
+            
+            if vt_malicious is None:
+                vt_malicious = safe_get(results, 'virustotal.data.attributes.stats.malicious')
+
             
             if warning_type := self.spoofing_warnings.get(url):
                 text_to_write = f"⚠️ ALERTA ({warning_type}): {defang_ioc(url)}"
@@ -283,16 +302,23 @@ class ReportGenerator:
             else:
                 ws.write(f'A{row_num}', defang_ioc(url), formats['wrap'])
             
-            ws.write(f'B{row_num}', f"https://www.virustotal.com/gui/url/{url_hash}", formats['cell'])
-            ws.write(f'C{row_num}', vt_malicious if vt_malicious is not None else "Falha", formats['score_high'] if vt_malicious and vt_malicious > 0 else formats['cell'])
+            ws.write(f'B{row_num}', vt_link, formats['cell'])
+            
+            if vt_malicious is not None:
+                style = formats['score_high'] if vt_malicious > 0 else formats['cell']
+                ws.write(f'C{row_num}', vt_malicious, style)
+            else:
+                ws.write(f'C{row_num}', "Falha", formats['cell'])
             
             if uh := results.get('urlhaus'):
                 status = uh.get('url_status', 'N/A')
                 if uh.get('query_status') == 'ok':
                     ws.write(f'D{row_num}', status, formats['score_high'] if status == 'online' else formats['cell'])
                     ws.write(f'E{row_num}', ", ".join(uh.get('tags', [])) or "N/A", formats['cell'])
-                elif uh.get('query_status') == 'no_results': ws.write_row(f'D{row_num}', ['Não encontrado', 'N/A'], formats['cell'])
-                else: ws.write_row(f'D{row_num}', ['Falha', 'N/A'], formats['cell'])
+                elif uh.get('query_status') == 'no_results': 
+                    ws.write_row(f'D{row_num}', ['Não encontrado', 'N/A'], formats['cell'])
+                else: 
+                    ws.write_row(f'D{row_num}', ['Falha', 'N/A'], formats['cell'])
 
     def _write_file_sheet(self, workbook: Workbook, formats: Dict[str, Format]) -> None:
         """Escreve os resultados da análise de arquivo em uma nova planilha."""
@@ -480,11 +506,8 @@ class ReportGenerator:
             story.extend([table, Spacer(1, 0.2*inch)])
         
         return story
-    
-    # ===================================================================
-    # ALTERAÇÃO: Método _build_security_warnings_story ADICIONADO AQUI
-    # ===================================================================
     def _build_security_warnings_story(self, styles: Dict) -> List:
+    
         """Constrói uma seção de aviso de segurança para o PDF se URLs suspeitas forem encontradas."""
         if not self.spoofing_warnings:
             return []

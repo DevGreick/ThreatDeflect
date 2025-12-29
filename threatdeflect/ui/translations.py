@@ -13,7 +13,7 @@ from threatdeflect.utils.utils import get_config_path, resource_path
 
 FALLBACK_TRANSLATIONS = {
     "pt_br": {
-        "window_title": "ThreatDeflect v3.0 (Hybrid Engine)",
+        "window_title": "ThreatDeflect v3.0",
         "file_menu": "Arquivo",
         "risk_unverified": "⚠️ RISCO NÃO VERIFICADO",
         "manual_check_prefix": "[CHECAGEM MANUAL]",

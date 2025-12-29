@@ -12,8 +12,36 @@ from threatdeflect.utils.utils import get_config_path, resource_path
 
 
 FALLBACK_TRANSLATIONS = {
-    "pt_br": {"window_title": "ThreatDeflect", "file_menu": "Arquivo"},
-    "en_us": {"window_title": "ThreatDeflect", "file_menu": "File"}
+    "pt_br": {
+        "window_title": "ThreatDeflect v3.0 (Hybrid Engine)",
+        "file_menu": "Arquivo",
+        "risk_unverified": "⚠️ RISCO NÃO VERIFICADO",
+        "manual_check_prefix": "[CHECAGEM MANUAL]",
+        "ai_limit_reached": "Limite de IA atingido. Priorizamos os itens de maior risco.",
+        "ioc_limit_reached": "Limite de IOCs atingido. Analisando amostra estatística.",
+        "performance_limit_title": "Limite de Performance",
+        "scan_repo_button": "Analisar Repositório",
+        "scan_ioc_button": "Analisar Alvos",
+        "settings_title": "Configurações",
+        "general_tab": "Geral",
+        "api_keys_tab": "Chaves de API",
+        "about_tab": "Sobre"
+    },
+    "en_us": {
+        "window_title": "ThreatDeflect v3.0 (Hybrid Engine)",
+        "file_menu": "File",
+        "risk_unverified": "⚠️ UNVERIFIED RISK",
+        "manual_check_prefix": "[MANUAL CHECK]",
+        "ai_limit_reached": "AI limit reached. Prioritizing highest risk items.",
+        "ioc_limit_reached": "IOC limit reached. Analyzing statistical sample.",
+        "performance_limit_title": "Performance Limit",
+        "scan_repo_button": "Analyze Repository",
+        "scan_ioc_button": "Analyze Targets",
+        "settings_title": "Settings",
+        "general_tab": "General",
+        "api_keys_tab": "API Keys",
+        "about_tab": "About"
+    }
 }
 
 class Translator:
@@ -47,7 +75,6 @@ class Translator:
             
             logging.info(f"Nenhuma configuração de idioma encontrada. Detectado idioma do sistema: {detected_lang}")
             
-            # 3. Salva o idioma detectado para as próximas execuções
             if not config.has_section('General'):
                 config.add_section('General')
             config.set('General', 'language', detected_lang)
@@ -58,7 +85,6 @@ class Translator:
 
         except Exception as e:
             logging.warning(f"Não foi possível detectar o idioma do sistema: {e}. Usando 'en_us' como padrão.")
-            
             return 'en_us'
    
 
@@ -67,14 +93,21 @@ class Translator:
         try:
             json_path_str = resource_path(os.path.join('lang', f'{self.language}.json'))
             with open(json_path_str, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                loaded = json.load(f)
+                fallback = FALLBACK_TRANSLATIONS.get(self.language, FALLBACK_TRANSLATIONS['en_us'])
+                return {**fallback, **loaded}
         except (FileNotFoundError, json.JSONDecodeError):
-            logging.error(f"Arquivo de tradução para '{self.language}' não encontrado ou inválido. Usando fallback.")
+            logging.error(f"Arquivo de tradução para '{self.language}' não encontrado ou inválido. Usando fallback interno.")
             return FALLBACK_TRANSLATIONS.get(self.language, FALLBACK_TRANSLATIONS['en_us'])
 
     def get(self, key: str) -> str:
         """Retorna o texto traduzido para uma chave específica."""
-        return self.translations.get(key, f"_{key}_")
+        val = self.translations.get(key)
+        if val:
+            return val
+            
+        fallback_dict = FALLBACK_TRANSLATIONS.get(self.language, FALLBACK_TRANSLATIONS['en_us'])
+        return fallback_dict.get(key, f"_{key}_")
 
 translator = Translator()
 

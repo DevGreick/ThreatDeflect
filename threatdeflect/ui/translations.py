@@ -28,7 +28,7 @@ FALLBACK_TRANSLATIONS = {
         "about_tab": "Sobre"
     },
     "en_us": {
-        "window_title": "ThreatDeflect v3.0 (Hybrid Engine)",
+        "window_title": "ThreatDeflect v3.0",
         "file_menu": "File",
         "risk_unverified": "⚠️ UNVERIFIED RISK",
         "manual_check_prefix": "[MANUAL CHECK]",

@@ -21,6 +21,10 @@ elif is_mac:
 else:
     icon_file = None
 
+if icon_file and not icon_file.exists():
+    print(f"AVISO: Ícone {icon_file} não encontrado. Build continuará sem ícone.")
+    icon_file = None
+
 # 2. Motor Rust Compilado
 binaries = []
 

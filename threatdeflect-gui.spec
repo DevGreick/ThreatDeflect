@@ -14,13 +14,18 @@ is_win = sys.platform.startswith('win')
 is_mac = sys.platform.startswith('darwin')
 is_linux = sys.platform.startswith('linux')
 
-# 1. Definição do Ícone
+# 1. Definição do Ícone (usa .ico no Windows, .icns no Mac, .png no Linux)
+# Faz fallback para None se o arquivo não existir (ex: sem .icns no macOS)
 if is_win:
     icon_file = ASSETS_DIR / 'spy2.ico'
 elif is_mac:
     icon_file = ASSETS_DIR / 'spy2.icns'
 else:
     icon_file = ASSETS_DIR / 'spy2.png'
+
+if icon_file and not icon_file.exists():
+    print(f"AVISO: Ícone {icon_file} não encontrado. Build continuará sem ícone.")
+    icon_file = None
 
 # 2. Localização do Motor Rust Compilado (A "Mágica")
 # O PyInstaller precisa pegar o binário nativo e colocar na pasta raiz interna
@@ -103,7 +108,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=str(icon_file)
+    icon=str(icon_file) if icon_file else None,
 )
 
 # --- PACOTE DE APLICATIVO (APENAS MAC) ---
@@ -111,7 +116,7 @@ if is_mac:
     app = BUNDLE(
         exe,
         name='ThreatDeflect.app',
-        icon=str(icon_file),
+        icon=str(icon_file) if icon_file else None,
         bundle_identifier='com.devgreick.threatdeflect',
         info_plist={
             'NSHighResolutionCapable': 'True'

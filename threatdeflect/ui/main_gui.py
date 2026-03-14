@@ -38,7 +38,11 @@ from threatdeflect.utils.utils import (
     get_log_path
 )
 
-__version__ = "3.0.0"
+try:
+    from importlib.metadata import version as _pkg_version
+    __version__ = _pkg_version("threatdeflect")
+except Exception:
+    __version__ = "0.0.0"
 
 APP_STYLESHEET = """
     QWidget {
@@ -887,8 +891,12 @@ class VtotalscanGUI(QMainWindow):
             latest_version, current_version = (0,), (0,)
 
         if latest_version > current_version:
-            platform_identifier = ".exe" if sys.platform == "win32" else ".dmg" if sys.platform == "darwin" else ".appimage"
-            asset = next((a for a in release_info.get("assets", []) if a.get("name", "").lower().endswith(platform_identifier)), None)
+            if sys.platform == "win32":
+                asset = next((a for a in release_info.get("assets", []) if "GUI" in a.get("name", "") and a.get("name", "").endswith(".exe")), None)
+            elif sys.platform == "darwin":
+                asset = next((a for a in release_info.get("assets", []) if "GUI" in a.get("name", "") and "macOS" in a.get("name", "")), None)
+            else:
+                asset = next((a for a in release_info.get("assets", []) if "GUI" in a.get("name", "") and "Linux" in a.get("name", "")), None)
             self.update_info = {"url": asset.get("browser_download_url") if asset else None, "asset_name": asset.get("name") if asset else None}
             
             self.update_notification_widget = QWidget()
@@ -900,7 +908,8 @@ class VtotalscanGUI(QMainWindow):
             self.btn_update_now = QPushButton("Atualizar Agora")
             self.btn_update_now.setStyleSheet("background-color: #2ea87a; color: white; padding: 10px; font-weight: bold; border: 1px solid #2ea87a; border-radius: 6px;")
             if not self.update_info["url"]:
-                self.btn_update_now.setText(f"Executável para {sys.platform} não encontrado")
+                platform_name = "Windows" if sys.platform == "win32" else "macOS" if sys.platform == "darwin" else "Linux"
+                self.btn_update_now.setText(f"Executável para {platform_name} não encontrado")
                 self.btn_update_now.setEnabled(False)
             else:
                 self.btn_update_now.clicked.connect(self.start_update_process)
@@ -917,9 +926,21 @@ class VtotalscanGUI(QMainWindow):
         line = QWidget(); line.setFixedHeight(1); line.setStyleSheet("background-color: #3a3f47;")
         self.update_tab_layout.insertWidget(1, line)
         
-        body = release_info.get('body', 'Conteúdo não disponível.').replace('\r\n', '<br>')
-        body = re.sub(r'###\s*(.*)', r'<h3>\1</h3>', body)
-        release_html = f"<h2>Notas da Versão: {release_info.get('name')}</h2>{body}"
+        body = release_info.get('body', 'Conteúdo não disponível.')
+        body = re.sub(r'### (.+)', r'<h3>\1</h3>', body)
+        body = re.sub(r'## (.+)', r'<h2>\1</h2>', body)
+        body = re.sub(r'# (.+)', r'<h1>\1</h1>', body)
+        body = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', body)
+        body = re.sub(r'`(.+?)`', r'<code>\1</code>', body)
+        body = re.sub(r'^\* (.+)$', r'<li>\1</li>', body, flags=re.MULTILINE)
+        body = re.sub(r'^- (.+)$', r'<li>\1</li>', body, flags=re.MULTILINE)
+        body = re.sub(r'(<li>.*?</li>(?:\n<li>.*?</li>)*)', r'<ul>\1</ul>', body, flags=re.DOTALL)
+        body = re.sub(r'---', r'<hr>', body)
+        body = body.replace('\r\n', '<br>').replace('\n', '<br>')
+        body = body.replace('<br><h', '<h').replace('</h1><br>', '</h1>').replace('</h2><br>', '</h2>').replace('</h3><br>', '</h3>')
+        body = body.replace('<br><ul>', '<ul>').replace('</ul><br>', '</ul>').replace('<br><li>', '<li>').replace('</li><br>', '</li>')
+        body = body.replace('<br><hr>', '<hr>').replace('<hr><br>', '<hr>')
+        release_html = f"<h2>Notas da Versao: {release_info.get('name')}</h2>{body}"
         self.release_notes_box.setHtml(release_html)
     
     def start_update_process(self) -> None:

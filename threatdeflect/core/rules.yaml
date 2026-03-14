@@ -1,61 +1,116 @@
+# ============================================================================
+# ThreatDeflect - Rules Configuration
+# ============================================================================
+# Este arquivo controla a precisao da analise de repositorios.
+# Ajuste as regras e exclusoes para reduzir falsos positivos no seu contexto.
+# ============================================================================
+
+# --- PADROES IGNORADOS (nao analisados) ---
 ignore_patterns:
   directories:
+    # Package managers & vendored deps
     - /node_modules/
     - /bower_components/
     - /jspm_packages/
     - /web_modules/
-    - /dist/
-    - /build/
-    - /out/
-    - /target/
     - /vendor/
+    - /third_party/
+    - /third-party/
+    - /external/
     - /lib/site-packages/
     - /lib64/site-packages/
     - /site-packages/
     - /dist-packages/
+
+    # Build output
+    - /dist/
+    - /build/
+    - /out/
+    - /target/
+    - /bin/
+    - /obj/
+    - /release/
+    - /debug/
+    - /_build/
+
+    # Python caches
     - /__pycache__/
     - /.pytest_cache/
     - /.mypy_cache/
+    - /.ruff_cache/
     - /.tox/
     - /.eggs/
+    - /.egg-info/
+
+    # Coverage & test output
     - /htmlcov/
     - /.coverage/
+    - /coverage/
     - /__snapshots__/
+
+    # Documentation
     - /docs/
     - /doc/
     - /man/
     - /help/
+
+    # Examples & demos (alto volume de falsos positivos)
     - /samples/
     - /examples/
+    - /example/
     - /demo/
+    - /demos/
     - /tutorials/
+    - /fixtures/
+    - /testdata/
+    - /test_data/
+    - /mock/
+    - /mocks/
+    - /stub/
+    - /stubs/
+
+    # VCS
     - /.git/
     - /.svn/
     - /.hg/
     - /.bzr/
+
+    # Virtual environments
     - /.venv/
     - /venv/
     - /env/
+    - /virtualenv/
+
+    # IDE & editor
     - /.history/
     - /.settings/
     - /.project/
     - /.classpath/
-    - /bin/
-    - /obj/
+    - /.idea/
+    - /.vscode/
+
+    # Temp & logs
     - /tmp/
     - /temp/
     - /log/
     - /logs/
-    - /coverage/
+
+    # Static assets (nunca contem segredos)
     - /assets/
     - /static/
     - /media/
-    - /public/
-    - /resources/
-    - /res/
+    - /public/images/
+    - /public/fonts/
+    - /public/css/
+    - /resources/images/
+    - /res/drawable/
+    - /res/mipmap/
     - /locales/
     - /i18n/
     - /translations/
+    - /lang/
+
+    # Framework caches & generated
     - /.next/
     - /.nuxt/
     - /.cache/
@@ -65,7 +120,15 @@ ignore_patterns:
     - /.vagrant/
     - /android/app/build/
     - /ios/Pods/
+    - /.gradle/
+    - /.m2/
+
+    # Migrations (SQL gerado, nao segredos)
+    - /migrations/
+    - /alembic/versions/
+
   files:
+    # Lock files (gerados automaticamente)
     - package-lock.json
     - yarn.lock
     - pnpm-lock.yaml
@@ -77,48 +140,82 @@ ignore_patterns:
     - mix.lock
     - go.sum
     - podfile.lock
+    - uv.lock
+    - bun.lockb
+
+    # Config files (sem segredos)
     - packages.config
     - nuget.config
     - tsconfig.json
     - jsconfig.json
     - .eslintrc
+    - .eslintrc.json
+    - .eslintrc.js
     - .prettierrc
+    - .prettierrc.json
     - .babelrc
     - .editorconfig
+    - .stylelintrc
+    - .browserslistrc
+    - babel.config.js
+    - babel.config.json
+    - webpack.config.js
+    - rollup.config.js
+    - vite.config.js
+    - vite.config.ts
+    - next.config.js
+    - nuxt.config.js
+    - tailwind.config.js
+    - postcss.config.js
+    - jest.config.js
+    - jest.config.ts
+    - vitest.config.ts
+    - .swcrc
+
+    # Git metadata
     - .gitignore
     - .gitattributes
+    - .gitmodules
     - .dockerignore
     - .npmignore
+    - .slugignore
+
+    # Docs & legal (texto puro)
     - LICENSE
     - LICENSE.txt
     - LICENSE.md
+    - LICENSE-MIT
+    - LICENSE-APACHE
+    - LICENCE
     - README
     - README.txt
     - README.md
     - README.rst
     - CHANGELOG
     - CHANGELOG.md
+    - HISTORY.md
     - CONTRIBUTING.md
+    - CODE_OF_CONDUCT.md
+    - SECURITY.md
     - AUTHORS
     - NOTICE
+    - PATENTS
+
+    # Certificados publicos (nao sao segredos)
     - cacert.pem
     - cert.pem
+    - ca-bundle.crt
+    - ca-certificates.crt
+
+    # Minified / compiled / generated (barulho puro)
     - .min.js
     - .min.css
     - .map
     - .d.ts
-    - .pem
-    - .crt
-    - .cer
-    - .der
-    - .p12
-    - .pfx
-    - .pub
-    - .asc
-    - .gpg
-    - .jks
-    - .keystore
-    - .truststore
+    - .d.mts
+    - .chunk.js
+
+    # Binarios & media (nao analisaveis como texto)
     - .png
     - .jpg
     - .jpeg
@@ -137,6 +234,7 @@ ignore_patterns:
     - .flac
     - .mkv
     - .webm
+    - .ogg
     - .woff
     - .woff2
     - .eot
@@ -144,6 +242,17 @@ ignore_patterns:
     - .otf
     - .pyc
     - .pyo
+    - .class
+    - .o
+    - .obj
+    - .so
+    - .dll
+    - .dylib
+    - .exe
+    - .bin
+    - .wasm
+
+    # Databases & archives
     - .log
     - .sqlite
     - .sqlite3
@@ -154,28 +263,56 @@ ignore_patterns:
     - .img
     - .qcow2
     - .vdi
+    - .zip
+    - .tar
+    - .gz
+    - .bz2
+    - .xz
+    - .7z
+    - .rar
+
+    # OS junk
     - .DS_Store
     - Thumbs.db
+    - desktop.ini
+
+    # Libs conhecidas (falsos positivos garantidos)
     - jquery.js
     - jquery.min.js
     - bootstrap.js
     - bootstrap.min.js
     - react.production.min.js
+    - react-dom.production.min.js
     - vue.min.js
+    - vue.global.prod.js
     - angular.min.js
+    - lodash.js
+    - lodash.min.js
+    - moment.js
+    - moment.min.js
+    - d3.min.js
+    - three.min.js
+    - chart.min.js
+    - axios.min.js
+    - socket.io.min.js
 
+# --- ALVOS DE SCAN ---
 file_scan_targets:
   interesting_extensions:
+    # Linguagens de programacao
     - .js
     - .jsx
     - .ts
     - .tsx
+    - .mjs
+    - .cjs
     - .py
     - .pyw
     - .go
     - .rs
     - .java
     - .kt
+    - .kts
     - .rb
     - .php
     - .c
@@ -183,16 +320,28 @@ file_scan_targets:
     - .h
     - .hpp
     - .cs
+    - .swift
+    - .scala
+    - .groovy
+    - .r
+    - .lua
+    - .pl
+    - .ex
+    - .exs
+    - .erl
+    - .dart
+    - .zig
+
+    # Shell / scripts
     - .sh
     - .bash
     - .zsh
     - .ps1
+    - .psm1
     - .bat
     - .cmd
-    - .pl
-    - .swift
-    - .r
-    - .lua
+
+    # Config que PODE conter segredos
     - .yml
     - .yaml
     - .json
@@ -203,13 +352,22 @@ file_scan_targets:
     - .conf
     - .properties
     - .env
+    - .cfg
+    - .hcl
+    - .tf
+    - .tfvars
+
+    # CI/CD & Build (podem expor segredos)
     - Dockerfile
     - Makefile
     - Jenkinsfile
     - Vagrantfile
     - Rakefile
     - Procfile
-  
+    - Taskfile
+    - Justfile
+    - .github/workflows
+
   dependency_files:
     - package.json
     - requirements.txt
@@ -217,15 +375,23 @@ file_scan_targets:
     - pyproject.toml
     - go.mod
     - Cargo.toml
-  
+    - Gemfile
+    - composer.json
+    - pom.xml
+    - build.gradle
+    - build.gradle.kts
+
   sensitive_filenames:
+    # Environment files (alta probabilidade de segredos)
     - .env
     - .env.local
     - .env.development
     - .env.production
+    - .env.staging
     - .env.test
-    - .env.example
     - .envrc
+
+    # Credentials & secrets (quase certeza de segredos)
     - credentials
     - credentials.json
     - credentials.yml
@@ -233,103 +399,219 @@ file_scan_targets:
     - secrets.json
     - secrets.yml
     - secrets.yaml
-    - config.json
-    - config.yml
-    - config.yaml
-    - settings.py
-    - settings.json
+    - secret_key
+    - master.key
+    - encryption.key
+
+    # Config com segredos frequentes
     - database.yml
+    - database.json
+    - wp-config.php
+    - application.yml
+    - application.properties
+    - appsettings.json
+    - appsettings.Development.json
+    - appsettings.Production.json
+    - local_settings.py
+
+    # Chaves privadas
     - id_rsa
     - id_dsa
+    - id_ecdsa
     - id_ed25519
     - private.key
     - server.key
     - client.key
-    - .npmrc
-    - .pypirc
-    - .git-credentials
+    - key.pem
+    - privkey.pem
+
+    # Cloud & infra
+    - .aws/credentials
     - .boto
     - .s3cfg
-    - .aws/credentials
     - terraform.tfstate
+    - terraform.tfstate.backup
+    - kubeconfig
+    - kube/config
+    - gcloud.json
+    - service-account.json
+    - firebase-adminsdk.json
+    - google-credentials.json
+
+    # Package manager auth
+    - .npmrc
+    - .pypirc
+    - .gem/credentials
+    - .docker/config.json
+    - .git-credentials
+    - .netrc
+    - .htpasswd
+
+    # Shell history (podem conter tokens/senhas)
     - .bash_history
     - .zsh_history
     - .mysql_history
     - .psql_history
-    - .netrc
-    - kubeconfig
-    - gcloud.json
-    - key.pem
-    - setup.py
-    - build.rs
-    - tasks.json
-    - .gitlab-ci.yml
-    - .travis.yml
-    - circle.yml
+    - .node_repl_history
+    - .python_history
+    - .irb_history
 
+# --- MAPA DE SEVERIDADE ---
 severity_map:
+  # CRITICAL: Vazamento direto de credenciais com formato validavel
   Private Key: CRITICAL
   AWS Key: CRITICAL
+  AWS Secret Key: CRITICAL
   GitHub Token: CRITICAL
   GitLab PAT: CRITICAL
   Slack Token: CRITICAL
   Stripe API Key: CRITICAL
-  Heroku API Key: HIGH
+  Stripe Secret Key: CRITICAL
   Google Cloud API Key: CRITICAL
-  Twilio Auth Token: HIGH
+  Firebase Server Key: CRITICAL
+  Azure Storage Key: CRITICAL
+  DigitalOcean Token: CRITICAL
+  Telegram Bot Token: CRITICAL
+  Discord Bot Token: CRITICAL
+  NPM Auth Token: CRITICAL
+  PyPI Token: CRITICAL
   Malicious Dependency: CRITICAL
-  NPM Dangerous Hook: HIGH
+  Database Connection String: CRITICAL
+  Supabase Service Key: CRITICAL
+
+  # HIGH: Credenciais provaveis ou execucao remota
+  Heroku API Key: HIGH
+  Twilio Auth Token: HIGH
+  SendGrid API Key: HIGH
+  Mailgun API Key: HIGH
+  Datadog API Key: HIGH
   Remote Script Execution: HIGH
   Hidden IOC (Base64): HIGH
   PowerShell Encoded: HIGH
+  NPM Dangerous Hook: HIGH
+  Validated Generic API Key: HIGH
+  Validated Suspicious Command: MEDIUM
+
+  # MEDIUM: Requer contexto para confirmar
   Password in URL: MEDIUM
   Twilio SID: MEDIUM
   JSON Web Token (JWT): MEDIUM
+  Google OAuth Client ID: MEDIUM
+
+  # LOW: Indicadores fracos, dependem de validacao por IA
   Sensitive File: LOW
   High Entropy String: LOW
   Generic API Key: LOW
-  Validated Generic API Key: HIGH
   Suspicious Command: LOW
-  Validated Suspicious Command: MEDIUM
   Suspicious JS Keyword: LOW
-  Invisible Whitespace: LOW
-  Trailing Whitespace: LOW
-  Google OAuth Client ID: MEDIUM
 
+# --- REGRAS DE DETECCAO ---
+# Cada regra tem um id (referenciado no severity_map) e um pattern (regex).
+# O motor Rust separa regras por tipo:
+#   - IDs com "command" ou "execution" → so disparam fora de contextos seguros
+#   - Demais → tratados como deteccao de segredos/credenciais
 rules:
+  # ── Chaves privadas ──
   - id: Private Key
-    pattern: "-----BEGIN ((EC|RSA|OPENSSH|DSA|PGP) )?PRIVATE KEY-----"
+    pattern: "-----BEGIN ((EC|RSA|OPENSSH|DSA|PGP) )?PRIVATE KEY(----- |-{5})"
+
+  # ── AWS ──
+  # AKIA/ASIA prefixos sao unicos da AWS, word boundary previne substrings
   - id: AWS Key
-    pattern: "(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}"
+    pattern: '\b(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}\b'
+  - id: AWS Secret Key
+    pattern: '(?i)(aws_secret_access_key|aws_secret_key)\s*[:=]\s*["'']?[A-Za-z0-9/+=]{40}["'']?'
+
+  # ── GitHub / GitLab ──
+  # Prefixos ghp_/glpat- sao unicos, \b suficiente
   - id: GitHub Token
-    pattern: "(ghp|gho|ghu|ghs|ghr)_[0-9a-zA-Z]{36}"
+    pattern: '\b(ghp|gho|ghu|ghs|ghr)_[0-9a-zA-Z]{36}\b'
   - id: GitLab PAT
-    pattern: "glpat-[0-9a-zA-Z\\-\\_]{20}"
+    pattern: '\bglpat-[0-9a-zA-Z\-_]{20}\b'
+
+  # ── Messaging / Chat ──
   - id: Slack Token
-    pattern: "xox[baprs]-[0-9a-zA-Z]{10,48}"
+    pattern: '\bxox[baprs]-[0-9a-zA-Z\-]{10,48}\b'
+  - id: Telegram Bot Token
+    pattern: '\b[0-9]{8,10}:[A-Za-z0-9_-]{35}\b'
+  - id: Discord Bot Token
+    pattern: '\b[MN][A-Za-z0-9]{23,}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27,}\b'
+
+  # ── Payment ──
   - id: Stripe API Key
-    pattern: "sk_live_[0-9a-zA-Z]{24}"
-  - id: Heroku API Key
-    pattern: "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+    pattern: '\bsk_live_[0-9a-zA-Z]{24,}\b'
+  - id: Stripe Secret Key
+    pattern: '\brk_live_[0-9a-zA-Z]{24,}\b'
+
+  # ── Cloud providers ──
   - id: Google Cloud API Key
-    pattern: "AIza[0-9A-Za-z\\-_]{35}"
+    pattern: '\bAIza[0-9A-Za-z\-_]{35}\b'
   - id: Google OAuth Client ID
-    pattern: "[0-9]+-[0-9a-zA-Z_]{32}\\.apps\\.googleusercontent\\.com"
+    pattern: '[0-9]{6,}-[0-9a-zA-Z_]{32}\.apps\.googleusercontent\.com'
+  - id: Firebase Server Key
+    pattern: '\bAAAA[A-Za-z0-9_-]{7}:[A-Za-z0-9_-]{140,}\b'
+  - id: Azure Storage Key
+    pattern: '(?i)(AccountKey|azure[_-]?storage[_-]?key)\s*[:=]\s*["'']?[A-Za-z0-9+/=]{86,88}["'']?'
+  - id: DigitalOcean Token
+    pattern: '\bdop_v1_[a-f0-9]{64}\b'
+  - id: Supabase Service Key
+    pattern: '(?i)(supabase[_-]?service[_-]?role[_-]?key|SUPABASE_SERVICE_ROLE_KEY)\s*[:=]\s*["'']?eyJ[A-Za-z0-9_=-]+\.[A-Za-z0-9_=-]+\.[A-Za-z0-9_=-]+["'']?'
+
+  # ── Email services ──
+  - id: SendGrid API Key
+    pattern: '\bSG\.[a-zA-Z0-9_-]{22}\.[a-zA-Z0-9_-]{43}\b'
+  - id: Mailgun API Key
+    pattern: '(?i)(mailgun[_-]?api[_-]?key|MAILGUN_API_KEY)\s*[:=]\s*["'']?key-[a-zA-Z0-9]{32}["'']?'
+
+  # ── Monitoring ──
+  - id: Datadog API Key
+    pattern: '(?i)(datadog[_-]?api[_-]?key|DD_API_KEY)\s*[:=]\s*["'']?[a-f0-9]{32}["'']?'
+
+  # ── Heroku ──
+  # Requer contexto de atribuicao para evitar falsos positivos com UUIDs genericos
+  - id: Heroku API Key
+    pattern: '(?i)(heroku[_-]?api[_-]?key|HEROKU_API_KEY)\s*[:=]\s*["'']?[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}["'']?'
+
+  # ── Twilio ──
   - id: Twilio SID
-    pattern: "AC[a-f0-9]{32}"
+    pattern: '\bAC[a-f0-9]{32}\b'
   - id: Twilio Auth Token
-    pattern: "SK[a-f0-9]{32}"
+    pattern: '(?i)(twilio[_-]?auth[_-]?token|TWILIO_AUTH_TOKEN)\s*[:=]\s*["'']?[a-f0-9]{32}["'']?'
+
+  # ── Package managers ──
+  - id: NPM Auth Token
+    pattern: '(?i)(npm[_-]?token|NPM_TOKEN|_authToken)\s*[:=]\s*["'']?npm_[a-zA-Z0-9]{36}["'']?'
+  - id: PyPI Token
+    pattern: '\bpypi-[A-Za-z0-9_-]{16,}\b'
+
+  # ── Database connection strings ──
+  - id: Database Connection String
+    pattern: '(?i)(mongodb(\+srv)?|postgres(ql)?|mysql|mssql|redis|amqp|rabbitmq)://[^\s:]+:[^\s@]+@[^\s]+'
+
+  # ── JWT (requer contexto de atribuicao para nao disparar em qualquer base64) ──
   - id: JSON Web Token (JWT)
-    pattern: "ey[a-zA-Z0-9_=-]+\\.[a-zA-Z0-9_=-]+\\.[a-zA-Z0-9_=-]+"
-  - id: PowerShell Encoded
-    pattern: "powershell.*-e(n|nc|nco|ncod|ncode|encoded)?[\\s]+[a-zA-Z0-9+/=]{20,}"
+    pattern: '(?i)(jwt|bearer|token|authorization)\s*[:=]\s*["'']?eyJ[a-zA-Z0-9_=-]+\.[a-zA-Z0-9_=-]+\.[a-zA-Z0-9_=-]+["'']?'
+
+  # ── Credenciais em URLs (senha minimo 8 chars para filtrar ports) ──
   - id: Password in URL
-    pattern: "[a-zA-Z0-9]+://[^/\\s:]+:[^/\\s@]+@[^/\\s]+"
+    pattern: '[a-zA-Z][a-zA-Z0-9+.-]*://[^\s/:]+:[^\s/@]{8,}@[^\s]+'
+
+  # ── Generic API Key (requer contexto de atribuicao: key = "valor") ──
   - id: Generic API Key
-    pattern: '(?i)(api_key|apikey|secret|token|auth_token)\s*[:=]\s*[\''|"][0-9a-zA-Z\\-_]{32,}[\''|"]'
+    pattern: '(?i)(api[_-]?key|api[_-]?secret|secret[_-]?key|access[_-]?token|auth[_-]?token|private[_-]?key|client[_-]?secret)\s*[:=]\s*["''][0-9a-zA-Z\-_/+=]{20,}["'']'
+
+  # ── Execucao remota (pipe direto para shell) ──
   - id: Remote Script Execution
-    pattern: 'curl\\s+.*\\|\\s*(bash|sh|zsh|python|perl|ruby)'
+    pattern: '(curl|wget)\s+[^|;]+\|\s*(sudo\s+)?(bash|sh|zsh|python[23]?|perl|ruby|node)'
+
+  # ── Comandos suspeitos (reverse shells, backdoors — so fora de safe context) ──
   - id: Suspicious Command
-    pattern: '(wget|curl|nc|ncat|netcat)\s+.*'
+    pattern: '(mkfifo|/dev/tcp/|nc\s+-[elp]|ncat\s+(-e|--exec)|socat\s+exec|bash\s+-i\s+>&|python[23]?\s+-c\s+.*socket|perl\s+-e\s+.*socket|ruby\s+-rsocket|php\s+-r\s+.*fsockopen)'
+
+  # ── PowerShell ofuscado ──
+  - id: PowerShell Encoded
+    pattern: '(?i)powershell[^\n]*-e(n|nc|nco|ncod|ncode|ncoded|ncodedC|ncodedCo|ncodedCom|ncodedComm|ncodedComma|ncodedComman|ncodedCommand)?\s+[a-zA-Z0-9+/=]{40,}'
+
+  # ── Whitespace invisivel (tecnicas de ofuscacao) ──
   - id: Invisible Whitespace
-    pattern: "[\u00A0\u200B\u202F]"
+    pattern: "[\u200B\u200C\u200D\u2060\uFEFF]"

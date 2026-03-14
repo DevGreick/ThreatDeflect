@@ -62,19 +62,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      # ── Compile Rust module ──
-      - name: Build Rust engine (release)
-        working-directory: rust_core
-        run: cargo build --release
-
-      # ── Create virtualenv and install dependencies ──
-      - name: Create virtualenv and install dependencies
-        run: |
-          python -m venv .venv
-
-      - name: Activate venv and install (Linux/macOS)
+      # ── Create virtualenv and install all dependencies ──
+      - name: Setup venv and install deps (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
+          python -m venv .venv
           source .venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
@@ -82,10 +74,11 @@ jobs:
           echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
           echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
 
-      - name: Activate venv and install (Windows)
+      - name: Setup venv and install deps (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          python -m venv .venv
           .venv\Scripts\Activate.ps1
           pip install --upgrade pip
           pip install -r requirements.txt
@@ -93,8 +86,8 @@ jobs:
           echo "VIRTUAL_ENV=$env:VIRTUAL_ENV" >> $env:GITHUB_ENV
           echo "$env:VIRTUAL_ENV\Scripts" >> $env:GITHUB_PATH
 
-      # ── Install Rust module into virtualenv ──
-      - name: Install Rust module (maturin develop)
+      # ── Build and install Rust module via maturin ──
+      - name: Build and install Rust module
         run: maturin develop --release
 
       # ── Linux: install system deps for PySide6 ──
@@ -115,29 +108,30 @@ jobs:
       - name: Build CLI executable
         run: pyinstaller threatdeflect-cli.spec --noconfirm --clean
 
+      # ── List build output for debugging ──
+      - name: List dist contents
+        run: find dist/ -type f | head -20
+        shell: bash
+
       # ── Rename artifacts (Windows) ──
       - name: Rename artifacts (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Move-Item -Force dist/ThreatDeflect.exe "dist/${{ matrix.gui_artifact }}"
-          Move-Item -Force dist/ThreatDeflect-CLI.exe "dist/${{ matrix.cli_artifact }}"
+          $gui = Get-ChildItem -Path dist -Recurse -Filter "ThreatDeflect.exe" | Where-Object { $_.Name -notmatch "CLI" } | Select-Object -First 1
+          $cli = Get-ChildItem -Path dist -Recurse -Filter "*CLI*.exe" | Select-Object -First 1
+          if ($gui) { Move-Item -Force $gui.FullName "dist/${{ matrix.gui_artifact }}" }
+          if ($cli) { Move-Item -Force $cli.FullName "dist/${{ matrix.cli_artifact }}" }
 
-      # ── Rename artifacts (Linux) ──
-      - name: Rename artifacts (Linux)
-        if: runner.os == 'Linux'
+      # ── Rename artifacts (Linux/macOS) ──
+      - name: Rename artifacts (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
-          mv dist/ThreatDeflect "dist/${{ matrix.gui_artifact }}"
-          mv dist/ThreatDeflect-CLI-Linux "dist/${{ matrix.cli_artifact }}"
-          chmod +x "dist/${{ matrix.gui_artifact }}" "dist/${{ matrix.cli_artifact }}"
-
-      # ── Rename artifacts (macOS) ──
-      - name: Rename artifacts (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          mv dist/ThreatDeflect "dist/${{ matrix.gui_artifact }}"
-          mv dist/ThreatDeflect-CLI-macOS "dist/${{ matrix.cli_artifact }}"
-          chmod +x "dist/${{ matrix.gui_artifact }}" "dist/${{ matrix.cli_artifact }}"
+          gui=$(find dist/ -type f -name "ThreatDeflect" ! -name "*CLI*" | head -1)
+          cli=$(find dist/ -type f -name "*CLI*" | head -1)
+          if [ -n "$gui" ]; then mv "$gui" "dist/${{ matrix.gui_artifact }}"; fi
+          if [ -n "$cli" ]; then mv "$cli" "dist/${{ matrix.cli_artifact }}"; fi
+          chmod +x "dist/${{ matrix.gui_artifact }}" "dist/${{ matrix.cli_artifact }}" 2>/dev/null || true
 
       # ── Upload artifacts ──
       - name: Upload GUI artifact

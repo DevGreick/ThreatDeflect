@@ -85,8 +85,6 @@ https://some-random-domain.net/path
 
 Clique em **Analisar Alvos**. O app consulta APIs em paralelo e gera um Excel com os resultados.
 
-<img src="https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/IPS.txt" alt="" width="0" height="0">
-
 ---
 
 ### Exemplo 2: Analisando um Repositório Suspeito

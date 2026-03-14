@@ -3,6 +3,7 @@ import ipaddress
 import logging
 import os
 import re
+import shlex
 import sys
 import tempfile
 import time
@@ -42,9 +43,6 @@ def get_log_path() -> Path:
 
     return default_log_path
 
-import sys
-from pathlib import Path
-
 def resource_path(relative_path: str) -> str:
     """
     Localiza recursos (imagens, configs) tanto em DEV quanto no EXE (PyInstaller).
@@ -70,18 +68,10 @@ def is_file_writable(filepath: str) -> bool:
     try:
         if not path.parent.exists():
             path.parent.mkdir(parents=True, exist_ok=True)
-        
-        path.touch()
-        path.unlink()
-        return True
-    except (IOError, OSError):
         if path.exists():
-            try:
-                with open(path, 'a'):
-                    pass
-                return True
-            except (IOError, OSError):
-                return False
+            return os.access(path, os.W_OK)
+        return os.access(path.parent, os.W_OK)
+    except (IOError, OSError):
         return False
 
 def create_updater_script(new_asset_path: str, current_executable_path: str, app_pid: int) -> Optional[str]:
@@ -109,6 +99,8 @@ echo Limpando...
 """
     else:
         script_extension = ".sh"
+        safe_new = shlex.quote(new_asset_path)
+        safe_current = shlex.quote(current_executable_path)
         script_content = f"""
 #!/bin/sh
 echo "Aguardando o ThreatDeflect (PID: {app_pid}) fechar..."
@@ -116,10 +108,10 @@ while kill -0 {app_pid} 2>/dev/null; do
     sleep 1
 done
 echo "Atualizando o executavel..."
-mv -f "{new_asset_path}" "{current_executable_path}"
-chmod +x "{current_executable_path}"
+mv -f {safe_new} {safe_current}
+chmod +x {safe_current}
 echo "Lancando nova versao..."
-nohup "{current_executable_path}" &
+nohup {safe_current} &
 echo "Limpando..."
 rm -- "$0"
 """

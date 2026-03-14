@@ -77,21 +77,26 @@ class CacheManager:
         try:
             conn = self._connect()
             cursor = conn.cursor()
-            
-            cursor.execute("DELETE FROM file_cache")
 
             rows_to_insert = []
             for file_path, data in repo_state.items():
                 data_json = json.dumps(data.get('data', {}))
                 rows_to_insert.append((file_path, data['hash'], data_json))
-            
+
+            # Use explicit transaction to avoid data loss if process dies mid-update
+            cursor.execute("BEGIN IMMEDIATE")
+            cursor.execute("DELETE FROM file_cache")
             cursor.executemany(
-                "INSERT OR REPLACE INTO file_cache (file_path, content_hash, analysis_data) VALUES (?, ?, ?)",
+                "INSERT INTO file_cache (file_path, content_hash, analysis_data) VALUES (?, ?, ?)",
                 rows_to_insert
             )
             conn.commit()
         except (sqlite3.Error, json.JSONDecodeError) as e:
             logging.error(f"Erro ao atualizar o cache: {e}")
+            try:
+                conn.rollback()
+            except Exception:
+                pass
 
     def close(self) -> None:
         """Fecha a conexão com o banco de dados."""

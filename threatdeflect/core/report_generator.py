@@ -21,7 +21,7 @@ import datetime
 import hashlib
 import logging
 import re
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Optional, Tuple
 from urllib.parse import quote
 import xlsxwriter
 from reportlab.lib import colors
@@ -41,7 +41,7 @@ from threatdeflect.utils.utils import defang_ioc, resource_path, safe_get, detec
 class ReportGenerator:
     """Gera relatórios em Excel e PDF a partir dos resultados da análise."""
 
-    def __init__(self, ip_results: Dict = None, url_results: Dict = None, file_results: Dict = None, repo_results: List = None, executive_summary: str = ""):
+    def __init__(self, ip_results: Optional[Dict] = None, url_results: Optional[Dict] = None, file_results: Optional[Dict] = None, repo_results: Optional[List] = None, executive_summary: str = ""):
         self.ip_results = ip_results or {}
         self.url_results = url_results or {}
         self.file_results = file_results or {}
@@ -506,8 +506,8 @@ class ReportGenerator:
             story.extend([table, Spacer(1, 0.2*inch)])
         
         return story
+
     def _build_security_warnings_story(self, styles: Dict) -> List:
-    
         """Constrói uma seção de aviso de segurança para o PDF se URLs suspeitas forem encontradas."""
         if not self.spoofing_warnings:
             return []

@@ -67,7 +67,7 @@ class Translator:
 
         
         try:
-            system_lang_code, _ = locale.getdefaultlocale()
+            system_lang_code, _ = locale.getlocale()
             if system_lang_code and system_lang_code.lower().startswith('pt'):
                 detected_lang = 'pt_br'
             else:

@@ -10,11 +10,11 @@ from typing import Optional, Dict, Any, List
 
 import keyring
 import requests
-import urllib3
 
 from threatdeflect.utils.utils import get_config_path, safe_get
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+# SSL warning suppression removed: verify=True is the default (and desired),
+# so there should be no InsecureRequestWarning in normal operation.
 
 RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
@@ -30,7 +30,15 @@ class ApiClient:
         self.ai_endpoint: Optional[str] = self._read_config('AI', 'endpoint')
 
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "ThreatDeflect/2.0"})
+        self.session.headers.update({"User-Agent": f"ThreatDeflect/{self._get_version()}"})
+
+    @staticmethod
+    def _get_version() -> str:
+        try:
+            from importlib.metadata import version
+            return version("threatdeflect")
+        except Exception:
+            return "3.0.0"
 
     def _read_config(self, section: str, key: str) -> Optional[str]:
         try:
@@ -63,6 +71,7 @@ class ApiClient:
             except requests.exceptions.RequestException:
                 time.sleep((backoff_factor ** retries))
                 retries += 1
+        logging.warning(f"Request to {url} failed after {max_retries} retries.")
         return None
 
     def check_package_vulnerability(self, package_name: str, ecosystem: str) -> Optional[List[Dict[str, Any]]]:
@@ -120,6 +129,8 @@ class ApiClient:
 
     def check_ip_shodan(self, ip: str) -> Optional[Dict[str, Any]]:
         if not self.shodan_api_key: return None
+        # NOTE: Shodan API only supports key-based auth via query string parameter.
+        # Ensure logging does not capture full request URLs to avoid leaking the API key.
         return self._make_request('GET', f"https://api.shodan.io/shodan/host/{ip}", params={'key': self.shodan_api_key})
 
     def check_ip_multi(self, ip: str) -> Dict[str, Any]:

@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "threatdeflect"
-version = "2.0.0"
+version = "3.1.0"
 description = "Ferramenta de análise de ameaças com interfaces GUI e CLI e motor híbrido Rust."
 authors = [{name = "DevGreick", email = "seczeror.ocelot245@passmail.net"}]
 requires-python = ">=3.11"

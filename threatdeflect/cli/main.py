@@ -18,7 +18,81 @@ from threatdeflect.core import engine
 from threatdeflect.core.engine import AnalysisError, NoValidTargetsError
 from threatdeflect.utils.utils import is_file_writable, parse_repo_urls, get_config_path, get_log_path
 from threatdeflect.api.api_client import ApiClient
-from threatdeflect.ui.translations import T
+from threatdeflect.ui.translations import T, translator
+import click
+
+# --- i18n: Translate Click/Typer internal labels to match active language ---
+if translator.language == "pt_br":
+    _orig_write_heading = click.HelpFormatter.write_heading
+    _PT_HEADINGS = {
+        "Options": "Opções",
+        "Commands": "Comandos",
+        "Arguments": "Argumentos",
+    }
+
+    def _i18n_heading(self, heading):
+        return _orig_write_heading(self, _PT_HEADINGS.get(heading, heading))
+    click.HelpFormatter.write_heading = _i18n_heading
+
+    _orig_write_usage = click.HelpFormatter.write_usage
+
+    def _i18n_usage(self, prog, args="", prefix=None):
+        return _orig_write_usage(self, prog, args, prefix=("Uso: " if prefix is None else prefix))
+    click.HelpFormatter.write_usage = _i18n_usage
+
+    _orig_get_help_option = click.Command.get_help_option
+
+    def _i18n_help_option(self, ctx):
+        opt = _orig_get_help_option(self, ctx)
+        if opt is not None:
+            opt.help = "Mostra esta mensagem e encerra."
+        return opt
+    click.Command.get_help_option = _i18n_help_option
+
+    _orig_multi_format_usage = click.MultiCommand.format_usage
+
+    def _i18n_multi_format_usage(self, ctx, formatter):
+        orig_opts, orig_sub = self.options_metavar, self.subcommand_metavar
+        self.options_metavar = "[OPÇÕES]"
+        self.subcommand_metavar = "COMANDO [ARGS]..."
+        _orig_multi_format_usage(self, ctx, formatter)
+        self.options_metavar, self.subcommand_metavar = orig_opts, orig_sub
+    click.MultiCommand.format_usage = _i18n_multi_format_usage
+
+    _orig_collect_usage = click.Command.collect_usage_pieces
+
+    def _i18n_collect_usage(self, ctx):
+        pieces = _orig_collect_usage(self, ctx)
+        return ["[OPÇÕES]" if p == "[OPTIONS]" else p for p in pieces]
+    click.Command.collect_usage_pieces = _i18n_collect_usage
+
+    # Patch Typer's Rich panel titles (Options/Commands/Arguments boxes)
+    try:
+        from typer import rich_utils
+        _orig_panel_title = getattr(rich_utils, '_get_rich_console', None)
+        # Typer uses these module-level constants for panel titles
+        if hasattr(rich_utils, 'STYLE_OPTIONS_PANEL_BORDER'):
+            _PT_PANELS = {
+                "Options": "Opções",
+                "Commands": "Comandos",
+                "Arguments": "Argumentos",
+                "Default": "Padrão",
+            }
+            _orig_make_rich_text = rich_utils._make_rich_rext if hasattr(rich_utils, '_make_rich_rext') else None
+
+            _orig_get_help_text = rich_utils._get_help_text if hasattr(rich_utils, '_get_help_text') else None
+
+            # Monkey-patch the Rich help rendering to translate panel titles
+            import rich.panel
+            _orig_panel_init = rich.panel.Panel.__init__
+
+            def _i18n_panel_init(self, *args, **kwargs):
+                if 'title' in kwargs and isinstance(kwargs['title'], str):
+                    kwargs['title'] = _PT_PANELS.get(kwargs['title'], kwargs['title'])
+                _orig_panel_init(self, *args, **kwargs)
+            rich.panel.Panel.__init__ = _i18n_panel_init
+    except (ImportError, AttributeError):
+        pass
 
 
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
@@ -49,6 +123,10 @@ if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
 
 
 main_epilog = dedent(f"""
+    [bold]{T('cli_main_epilog_apis')}[/bold]  {T('cli_main_epilog_api_list')}
+    [bold]{T('cli_main_epilog_ai')}[/bold]     {T('cli_main_epilog_ai_desc')}
+    [bold]{T('cli_main_epilog_gui')}[/bold]       {T('cli_main_epilog_gui_desc')}
+
     [bold]{T('cli_help_more_info')}[/bold]
       [green]$ threatdeflect [COMMAND] --help[/green]
 """)
@@ -61,6 +139,12 @@ ioc_examples = dedent(f"""
 
       [cyan]# {T('cli_ioc_example2_desc')}[/cyan]
       [green]$ threatdeflect ioc --file targets.txt[/green]
+
+      [cyan]# {T('cli_ioc_example3_desc')}[/cyan]
+      [green]$ threatdeflect ioc 1.1.1.1 -o report_cloudflare.xlsx[/green]
+
+      [cyan]# {T('cli_ioc_example4_desc')}[/cyan]
+      [green]$ threatdeflect ioc 8.8.8.8 1.1.1.1 https://example.com https://test.org[/green]
 """)
 
 repo_examples = dedent(f"""
@@ -68,6 +152,12 @@ repo_examples = dedent(f"""
 
       [cyan]# {T('cli_repo_example1_desc')}[/cyan]
       [green]$ threatdeflect repo https://github.com/some/repo --ai mistral[/green]
+
+      [cyan]# {T('cli_repo_example2_desc')}[/cyan]
+      [green]$ threatdeflect repo https://github.com/org/repo1 https://github.com/org/repo2[/green]
+
+      [cyan]# {T('cli_repo_example3_desc')}[/cyan]
+      [green]$ threatdeflect repo https://github.com/some/repo -o audit_results.xlsx[/green]
 """)
 
 config_examples = dedent(f"""
@@ -83,7 +173,7 @@ config_examples = dedent(f"""
       [green]$ threatdeflect config set-log-path /var/logs/threatdeflect.log[/green]
       
       [cyan]# {T('cli_config_example4_desc')}[/cyan]
-      [green]$ threatdeflect config set-lang en_us[/green]
+      [green]$ threatdeflect config set-lang pt_br[/green]
 
       [cyan]# {T('cli_config_example5_desc')}[/cyan]
       [green]$ threatdeflect config show[/green]
@@ -175,6 +265,72 @@ def analyze_iocs(
 
     except NoValidTargetsError:
         console.print(f"\n[bold yellow]{T('cli_warning_prefix')}[/] {T('cli_warning_no_valid_targets')}")
+    except AnalysisError:
+        console.print(f"\n[bold red]{T('cli_analysis_failed')}[/]")
+        raise typer.Exit(code=1)
+
+file_examples = dedent(f"""
+    [bold]{T('cli_examples_title')}[/bold]
+
+      [cyan]# {T('cli_file_example1_desc')}[/cyan]
+      [green]$ threatdeflect file suspicious.exe malware.dll --ai llama3[/green]
+
+      [cyan]# {T('cli_file_example2_desc')}[/cyan]
+      [green]$ threatdeflect file /path/to/suspicious_file.bin[/green]
+
+      [cyan]# {T('cli_file_example3_desc')}[/cyan]
+      [green]$ threatdeflect file ransomware.exe -o file_audit.xlsx[/green]
+""")
+
+@app.command(
+    name="file",
+    help=T('cli_file_command_help'),
+    epilog=file_examples
+)
+def analyze_files(
+    files: List[Path] = typer.Argument(..., help=T('cli_file_arg_files_help')),
+    output: Path = typer.Option(
+        "Analise_Arquivos.xlsx", "--output", "-o",
+        help=T('cli_file_option_output_help'),
+        writable=True, dir_okay=False
+    ),
+    ai_model: Optional[str] = typer.Option(
+        None, "--ai",
+        help=T('cli_option_ai_help')
+    )
+) -> None:
+    for f in files:
+        if not f.exists() or not f.is_file():
+            console.print(f"[bold red]{T('cli_error_prefix')}[/] {T('cli_error_file_not_found', file=f)}")
+            raise typer.Exit(code=1)
+
+    console.print(f":microscope: {T('cli_analyzing_files', count=len(files))}")
+
+    if not is_file_writable(str(output)):
+        console.print(f"[bold red]{T('cli_error_prefix')}[/] {T('cli_error_cannot_write_to', file=output)}")
+        raise typer.Exit(code=1)
+
+    try:
+        with console.status(f"[bold green]{T('cli_status_processing')}...", spinner="dots") as status:
+            def progress_callback(current: int, total: int) -> None:
+                status.update(f"[bold green]{T('cli_status_processing')}... {current}/{total}")
+
+            results = engine.run_file_analysis(
+                [str(f) for f in files], output, cli_log_callback, progress_callback
+            )
+
+        console.print(f"\n[bold green]{T('cli_analysis_success')}[/]")
+        console.print(f"{T('cli_report_saved_to')} [link=file://{output.resolve()}]{output}[/link]")
+
+        if ai_model:
+            with console.status(f"[bold magenta]{T('cli_status_generating_summary', model=ai_model)}...", spinner="moon"):
+                summary = engine.get_ai_summary(results, ai_model, cli_log_callback)
+            console.rule(f"[bold magenta]{T('cli_summary_title', model=ai_model)}")
+            console.print(Markdown(summary))
+            console.rule()
+
+    except NoValidTargetsError:
+        console.print(f"\n[bold yellow]{T('cli_warning_prefix')}[/] {T('cli_warning_no_valid_files')}")
     except AnalysisError:
         console.print(f"\n[bold red]{T('cli_analysis_failed')}[/]")
         raise typer.Exit(code=1)

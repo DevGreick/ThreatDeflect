@@ -40,6 +40,153 @@ from threatdeflect.utils.utils import (
 
 __version__ = "3.0.0"
 
+APP_STYLESHEET = """
+    QWidget {
+        font-family: 'Segoe UI', 'Inter', sans-serif;
+    }
+    QPushButton {
+        background-color: #3a3f47;
+        color: #e8eaed;
+        border: 1px solid #4a4f57;
+        border-radius: 6px;
+        padding: 7px 16px;
+    }
+    QPushButton:hover {
+        background-color: #4a5060;
+        border: 1px solid #6e9fff;
+    }
+    QPushButton:pressed {
+        background-color: #5a6577;
+    }
+    QPushButton:disabled {
+        background-color: #2a2d33;
+        color: #5a5d63;
+        border: 1px solid #33363c;
+    }
+    QTabWidget::pane {
+        border: 1px solid #3a3f47;
+        border-radius: 4px;
+        background-color: #1e2128;
+    }
+    QTabBar::tab {
+        background-color: #252830;
+        color: #9da3ae;
+        border: 1px solid #3a3f47;
+        border-bottom: none;
+        padding: 8px 18px;
+        margin-right: 2px;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+    }
+    QTabBar::tab:selected {
+        background-color: #1e2128;
+        color: #e8eaed;
+        border-bottom: 2px solid #5b9bd5;
+    }
+    QTabBar::tab:hover:!selected {
+        background-color: #2e323a;
+        color: #c4c8d0;
+    }
+    QProgressBar {
+        border: 1px solid #3a3f47;
+        border-radius: 5px;
+        text-align: center;
+        height: 25px;
+        background-color: #1e2128;
+        color: #e8eaed;
+    }
+    QProgressBar::chunk {
+        border-radius: 4px;
+        background-color: #5b9bd5;
+    }
+    QPlainTextEdit, QTextEdit, QLineEdit {
+        background-color: #1a1d23;
+        color: #e8eaed;
+        border: 1px solid #3a3f47;
+        border-radius: 4px;
+        padding: 4px;
+        selection-background-color: #5b9bd5;
+        selection-color: #ffffff;
+    }
+    QPlainTextEdit:focus, QTextEdit:focus, QLineEdit:focus {
+        border: 1px solid #5b9bd5;
+    }
+    QComboBox {
+        background-color: #2e323a;
+        color: #e8eaed;
+        border: 1px solid #3a3f47;
+        border-radius: 4px;
+        padding: 5px 10px;
+    }
+    QComboBox:hover {
+        border: 1px solid #5b9bd5;
+    }
+    QComboBox::drop-down {
+        border: none;
+        width: 20px;
+    }
+    QComboBox QAbstractItemView {
+        background-color: #1e2128;
+        color: #e8eaed;
+        border: 1px solid #5b9bd5;
+        selection-background-color: #3a4a5e;
+        selection-color: #ffffff;
+    }
+    QScrollBar:vertical {
+        background-color: #1a1d23;
+        width: 10px;
+        border: none;
+    }
+    QScrollBar::handle:vertical {
+        background-color: #3a3f47;
+        border-radius: 5px;
+        min-height: 30px;
+    }
+    QScrollBar::handle:vertical:hover {
+        background-color: #5b9bd5;
+    }
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+        height: 0px;
+    }
+    QScrollBar:horizontal {
+        background-color: #1a1d23;
+        height: 10px;
+        border: none;
+    }
+    QScrollBar::handle:horizontal {
+        background-color: #3a3f47;
+        border-radius: 5px;
+        min-width: 30px;
+    }
+    QScrollBar::handle:horizontal:hover {
+        background-color: #5b9bd5;
+    }
+    QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+        width: 0px;
+    }
+    QStatusBar {
+        background-color: #1a1d23;
+        color: #9da3ae;
+        border-top: 1px solid #3a3f47;
+        font-size: 11px;
+    }
+    QLabel {
+        color: #e8eaed;
+    }
+    QMessageBox, QDialog {
+        background-color: #252830;
+    }
+    QToolTip {
+        background-color: #2e323a;
+        color: #e8eaed;
+        border: 1px solid #5b9bd5;
+        padding: 4px;
+    }
+    QProgressDialog {
+        background-color: #252830;
+    }
+"""
+
 
 def setup_logging() -> None:
     log_formatter = logging.Formatter(
@@ -234,7 +381,7 @@ class SettingsDialog(QDialog):
         
         self.tab_widget.addTab(self._create_general_tab(), T("general_tab"))
         
-        link_style = "color:#5698f5; text-decoration: none;"
+        link_style = "color:#5b9bd5; text-decoration: none;"
         self.vt_key_entry = QLineEdit()
         self.abuse_key_entry = QLineEdit()
         self.urlhaus_key_entry = QLineEdit()
@@ -298,7 +445,7 @@ class SettingsDialog(QDialog):
         layout.addRow(QWidget()) 
 
         btn_clear_cache = QPushButton("Limpar Cache de Análise")
-        btn_clear_cache.setStyleSheet("background-color: #c0392b; color: white; font-weight: bold;")
+        btn_clear_cache.setStyleSheet("background-color: #c94040; color: white; font-weight: bold; border: 1px solid #c94040; border-radius: 6px;")
         btn_clear_cache.setToolTip("Remove todos os resultados salvos de análises de repositórios para forçar uma nova análise completa.")
         btn_clear_cache.clicked.connect(self._prompt_and_clear_cache)
         
@@ -489,8 +636,8 @@ class VtotalscanGUI(QMainWindow):
         self.last_repo_results: Optional[Dict[str, Any]] = None
         self.update_info: Dict[str, Any] = {}
         
-        self.STYLE_AI_BUTTON_INACTIVE = "background-color: #7f8c8d; color: white;"
-        self.STYLE_AI_BUTTON_ACTIVE = "background-color: #1f618d; color: white; font-weight: bold;"
+        self.STYLE_AI_BUTTON_INACTIVE = "background-color: #2a2d33; color: #5a5d63; border: 1px solid #33363c; border-radius: 6px;"
+        self.STYLE_AI_BUTTON_ACTIVE = "background-color: #7b68b5; color: white; font-weight: bold; border: 1px solid #7b68b5; border-radius: 6px;"
 
         self.setWindowTitle(T("window_title"))
         
@@ -589,7 +736,7 @@ class VtotalscanGUI(QMainWindow):
         scan_repo_layout = QVBoxLayout(scan_repo_button_container)
         scan_repo_layout.setContentsMargins(0,0,0,0)
         self.btn_scan_repo = QPushButton(T("analyze_repos_button"))
-        self.btn_scan_repo.setStyleSheet("background-color: #2980b9; color: white; font-weight: bold;")
+        self.btn_scan_repo.setStyleSheet("background-color: #5b9bd5; color: white; font-weight: bold; border: 1px solid #5b9bd5; border-radius: 6px;")
         self.btn_scan_repo.setFixedHeight(40)
         self.btn_scan_repo.setFont(QFont("Segoe UI", 10, QFont.Bold))
         self.btn_scan_repo.clicked.connect(self.start_repo_analysis)
@@ -601,14 +748,6 @@ class VtotalscanGUI(QMainWindow):
         progress_repo_layout.setContentsMargins(0,0,0,0)
         
         self.repo_progress_bar = QProgressBar()
-        self.repo_progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: 1px solid grey; border-radius: 5px; text-align: center; height: 25px;
-            }
-            QProgressBar::chunk {
-                background-color: #2980b9; width: 10px; border-radius: 5px;
-            }
-        """)
         
         self.btn_cancel_repo_scan = QPushButton(T("cancel_button"))
         self.btn_cancel_repo_scan.setFixedHeight(30)
@@ -651,7 +790,7 @@ class VtotalscanGUI(QMainWindow):
         scan_ioc_layout = QVBoxLayout(scan_ioc_button_container)
         scan_ioc_layout.setContentsMargins(0,0,0,0)
         self.btn_scan_iocs = QPushButton(T("analyze_targets_button"))
-        self.btn_scan_iocs.setStyleSheet("background-color: #03A062; color: white; font-weight: bold;")
+        self.btn_scan_iocs.setStyleSheet("background-color: #2ea87a; color: white; font-weight: bold; border: 1px solid #2ea87a; border-radius: 6px;")
         self.btn_scan_iocs.setFixedHeight(40)
         self.btn_scan_iocs.setFont(QFont("Segoe UI", 10, QFont.Bold))
         self.btn_scan_iocs.clicked.connect(self.start_ioc_analysis)
@@ -663,14 +802,6 @@ class VtotalscanGUI(QMainWindow):
         progress_ioc_layout.setContentsMargins(0,0,0,0)
 
         self.ioc_progress_bar = QProgressBar()
-        self.ioc_progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: 1px solid grey; border-radius: 5px; text-align: center; height: 25px;
-            }
-            QProgressBar::chunk {
-                background-color: #03A062; width: 10px; border-radius: 5px;
-            }
-        """)
 
         self.btn_cancel_ioc_scan = QPushButton(T("cancel_button"))
         self.btn_cancel_ioc_scan.setFixedHeight(30)
@@ -761,13 +892,13 @@ class VtotalscanGUI(QMainWindow):
             self.update_info = {"url": asset.get("browser_download_url") if asset else None, "asset_name": asset.get("name") if asset else None}
             
             self.update_notification_widget = QWidget()
-            self.update_notification_widget.setStyleSheet("background-color: #2c3e50; border-radius: 5px;")
+            self.update_notification_widget.setStyleSheet("background-color: #252830; border: 1px solid #5b9bd5; border-radius: 6px;")
             layout = QVBoxLayout(self.update_notification_widget)
             title = QLabel(f"Nova versão {latest_version_str} disponível!")
-            title.setStyleSheet("color: #2ecc71; font-size: 16px; font-weight: bold;"); title.setAlignment(Qt.AlignCenter)
-            subtitle = QLabel(f"Sua versão atual é a {__version__}."); subtitle.setStyleSheet("color: white;"); subtitle.setAlignment(Qt.AlignCenter)
+            title.setStyleSheet("color: #5b9bd5; font-size: 16px; font-weight: bold;"); title.setAlignment(Qt.AlignCenter)
+            subtitle = QLabel(f"Sua versão atual é a {__version__}."); subtitle.setStyleSheet("color: #9da3ae;"); subtitle.setAlignment(Qt.AlignCenter)
             self.btn_update_now = QPushButton("Atualizar Agora")
-            self.btn_update_now.setStyleSheet("background-color: #2ecc71; color: white; padding: 10px; font-weight: bold;")
+            self.btn_update_now.setStyleSheet("background-color: #2ea87a; color: white; padding: 10px; font-weight: bold; border: 1px solid #2ea87a; border-radius: 6px;")
             if not self.update_info["url"]:
                 self.btn_update_now.setText(f"Executável para {sys.platform} não encontrado")
                 self.btn_update_now.setEnabled(False)
@@ -777,13 +908,13 @@ class VtotalscanGUI(QMainWindow):
             self.update_tab_layout.insertWidget(0, self.update_notification_widget)
         else:
             self.update_notification_widget = QWidget()
-            self.update_notification_widget.setStyleSheet("background-color: #27ae60; border-radius: 5px; padding: 10px;")
+            self.update_notification_widget.setStyleSheet("background-color: #252830; border: 1px solid #2ea87a; border-radius: 6px; padding: 10px;")
             layout = QHBoxLayout(self.update_notification_widget)
-            label = QLabel("Seu ThreatDeflect está atualizado!"); label.setStyleSheet("color: white; font-weight: bold;"); label.setAlignment(Qt.AlignCenter)
+            label = QLabel("Seu ThreatDeflect está atualizado!"); label.setStyleSheet("color: #2ea87a; font-weight: bold;"); label.setAlignment(Qt.AlignCenter)
             layout.addWidget(label)
             self.update_tab_layout.insertWidget(0, self.update_notification_widget)
         
-        line = QWidget(); line.setFixedHeight(1); line.setStyleSheet("background-color: #7f8c8d;")
+        line = QWidget(); line.setFixedHeight(1); line.setStyleSheet("background-color: #3a3f47;")
         self.update_tab_layout.insertWidget(1, line)
         
         body = release_info.get('body', 'Conteúdo não disponível.').replace('\r\n', '<br>')
@@ -1138,8 +1269,21 @@ def main():
 
     app.setStyle("Fusion")
     palette = QPalette()
-    palette.setColor(QPalette.Window, QColor(45, 45, 45)); palette.setColor(QPalette.WindowText, Qt.white); palette.setColor(QPalette.Base, QColor(25, 25, 25)); palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53)); palette.setColor(QPalette.ToolTipBase, Qt.white); palette.setColor(QPalette.ToolTipText, Qt.white); palette.setColor(QPalette.Text, Qt.white); palette.setColor(QPalette.Button, QColor(53, 53, 53)); palette.setColor(QPalette.ButtonText, Qt.white); palette.setColor(QPalette.BrightText, Qt.red); palette.setColor(QPalette.Link, QColor(42, 130, 218)); palette.setColor(QPalette.Highlight, QColor(42, 130, 218)); palette.setColor(QPalette.HighlightedText, Qt.black)
+    palette.setColor(QPalette.Window, QColor(30, 33, 40))
+    palette.setColor(QPalette.WindowText, QColor(232, 234, 237))
+    palette.setColor(QPalette.Base, QColor(26, 29, 35))
+    palette.setColor(QPalette.AlternateBase, QColor(37, 40, 48))
+    palette.setColor(QPalette.ToolTipBase, QColor(46, 50, 58))
+    palette.setColor(QPalette.ToolTipText, QColor(232, 234, 237))
+    palette.setColor(QPalette.Text, QColor(232, 234, 237))
+    palette.setColor(QPalette.Button, QColor(58, 63, 71))
+    palette.setColor(QPalette.ButtonText, QColor(232, 234, 237))
+    palette.setColor(QPalette.BrightText, QColor(91, 155, 213))
+    palette.setColor(QPalette.Link, QColor(91, 155, 213))
+    palette.setColor(QPalette.Highlight, QColor(91, 155, 213))
+    palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
     app.setPalette(palette)
+    app.setStyleSheet(APP_STYLESHEET)
     gui = VtotalscanGUI()
     gui.show()
     sys.exit(app.exec())

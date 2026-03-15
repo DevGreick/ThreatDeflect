@@ -9,8 +9,8 @@ copyright: ""
 theme:
   name: material
   language: pt-BR
-  logo: https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/threatlogo.png
-  favicon: https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/threatlogo.png
+  logo: https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/threatdeflect-logo.png
+  favicon: https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/threatdeflect-logo.png
   custom_dir: docs/overrides
   palette:
     - scheme: slate

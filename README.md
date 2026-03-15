@@ -61,7 +61,7 @@ Baixe o executável para o seu sistema operacional na página de [Releases](http
 | Linux   | `ThreatDeflect-CLI-Linux` | `chmod +x` e execute |
 | macOS   | `ThreatDeflect-CLI-macOS` | Veja nota abaixo |
 
-> **macOS:** Após baixar, execute no terminal: `chmod +x ThreatDeflect-*-macOS && xattr -cr ThreatDeflect-*-macOS`. O macOS bloqueia binários de fontes externas — o `xattr -cr` remove essa restrição. O Finder não executa binários sem `.app`, use o terminal.
+> **macOS:** Após baixar, execute no terminal: `chmod +x ThreatDeflect-*-macOS && xattr -cr ThreatDeflect-*-macOS`. O macOS bloqueia binários de fontes externas o `xattr -cr` remove essa restrição. O Finder não executa binários sem `.app`, use o terminal.
 
 > Após abrir, vá em **Configurações** e insira pelo menos a chave do **VirusTotal** para começar a analisar.
 

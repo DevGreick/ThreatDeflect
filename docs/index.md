@@ -1,5 +1,5 @@
 <div align="center" class="td-hero">
-  <img src="https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/spy2-1.png" alt="ThreatDeflect Logo" width="150" class="td-logo-main"/>
+  <img src="https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/threatlogo.png" alt="ThreatDeflect Logo" width="150" class="td-logo-main"/>
   <h1 class="td-title-animated">ThreatDeflect</h1>
 </div>
 

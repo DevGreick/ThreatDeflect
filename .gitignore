@@ -1,9 +1,6 @@
-# Python bytecode/cache
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Test/lint caches
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -11,25 +8,24 @@ coverage/
 htmlcov/
 .coverage
 
-# Virtual environments
 venv/
 .venv/
 env/
 .env
+.env.*
+!.env.example
+secrets.*
 
-# Logs and local databases
 *.log
 .threatdeflect_cache/
 *.sqlite3
 *.db
 
-# Generated reports
 *.xlsx
 *.pdf
 *.html
 *.xml
 
-# Build/dist
 dist/
 build/
 *.egg-info/
@@ -37,30 +33,28 @@ build/
 *.whl
 *.tar.gz
 
-# Rust build artifacts
-rust_core/target/
-threatdeflect_rs/target/
+**/target/
+Cargo.lock.unused
 
-# IDEs
 .idea/
 .vscode/
 *.swp
 *.swo
+*.un~
 *~
 
-# Claude Code
 .claude/
 .claudesignore
+.python-version
 
-# OS junk
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Node (if any tooling)
 node_modules/
 
-# Compiled extensions
 *.so
 *.dll
 *.pyd
+*.exe
+*.bin

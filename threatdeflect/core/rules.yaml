@@ -447,6 +447,18 @@ file_scan_targets:
     - .netrc
     - .htpasswd
 
+    # Docker & Kubernetes
+    - docker-compose.override.yml
+    - .dockerenv
+    - kubeconfig.yaml
+    - kube_config
+
+    # Git hooks (podem conter backdoors)
+    - .git/hooks/pre-commit
+    - .git/hooks/post-checkout
+    - .git/hooks/post-merge
+    - .git/hooks/pre-push
+
     # Shell history (podem conter tokens/senhas)
     - .bash_history
     - .zsh_history
@@ -478,6 +490,11 @@ severity_map:
   Malicious Dependency: CRITICAL
   Database Connection String: CRITICAL
   Supabase Service Key: CRITICAL
+  Discord Webhook: CRITICAL
+  Slack Incoming Webhook: CRITICAL
+  Crypto Mining: CRITICAL
+  JNDI Injection: CRITICAL
+  GCP Service Account Key: CRITICAL
 
   # HIGH: Credenciais provaveis ou execucao remota
   Heroku API Key: HIGH
@@ -489,8 +506,16 @@ severity_map:
   Hidden IOC (Base64): HIGH
   PowerShell Encoded: HIGH
   NPM Dangerous Hook: HIGH
+  Cloud Metadata SSRF: HIGH
+  Encoded Payload Execution: HIGH
+  Docker Socket Mount: HIGH
+  SSH Key Injection: HIGH
+  Sensitive File Access: HIGH
   Validated Generic API Key: HIGH
   Validated Suspicious Command: MEDIUM
+  Crontab Injection: MEDIUM
+  Tunnel Service URL: MEDIUM
+  Unsafe Deserialization: MEDIUM
 
   # MEDIUM: Requer contexto para confirmar
   Password in URL: MEDIUM
@@ -504,6 +529,7 @@ severity_map:
   Generic API Key: LOW
   Suspicious Command: LOW
   Suspicious JS Keyword: LOW
+  Invisible Whitespace: LOW
 
 # --- REGRAS DE DETECCAO ---
 # Cada regra tem um id (referenciado no severity_map) e um pattern (regex).
@@ -611,6 +637,74 @@ rules:
   # ── PowerShell ofuscado ──
   - id: PowerShell Encoded
     pattern: '(?i)powershell[^\n]*-e(n|nc|nco|ncod|ncode|ncoded|ncodedC|ncodedCo|ncodedCom|ncodedComm|ncodedComma|ncodedComman|ncodedCommand)?\s+[a-zA-Z0-9+/=]{40,}'
+
+  # ── Webhook URLs (exfiltracao de dados via webhooks) ──
+  # Atacantes hardcodam webhooks para exfiltrar segredos, tokens e dados
+  - id: Discord Webhook
+    pattern: 'https://(discord(app)?\.com|canary\.discord\.com)/api/webhooks/[0-9]{17,20}/[A-Za-z0-9_-]{60,68}'
+  - id: Slack Incoming Webhook
+    pattern: 'https://hooks\.slack\.com/services/T[A-Z0-9]{8,12}/B[A-Z0-9]{8,12}/[a-zA-Z0-9]{24}'
+
+  # ── Cloud Metadata SSRF ──
+  # Acesso ao metadata service para roubar credenciais IAM/tokens temporarios
+  # 169.254.169.254 (AWS/GCP/Azure), metadata.google.internal, metadata.azure.com
+  - id: Cloud Metadata SSRF
+    pattern: '(169\.254\.169\.254|metadata\.google\.internal|metadata\.azure\.com|100\.100\.100\.200)'
+
+  # ── Crypto Mining ──
+  # Mineradores escondidos no codigo: protocolos stratum, binarios conhecidos, pools
+  - id: Crypto Mining
+    pattern: '(?i)(stratum\+tcp://|stratum\+ssl://|\bxmrig\b|coinhive|cryptonight|moneroocean\.stream|minergate\.com|nanopool\.org|nicehash\.com|hashvault\.pro|supportxmr\.com)'
+
+  # ── JNDI Injection (Log4Shell e variantes) ──
+  # ${jndi:ldap://attacker.com/exploit} — CVE-2021-44228 e bypass variants
+  - id: JNDI Injection
+    pattern: '\$\{jndi:(ldap|rmi|dns|iiop|corba|nds|http)://'
+
+  # ── Encoded Payload Execution ──
+  # Base64/hex decodificado e executado: backdoor ofuscado classico
+  - id: Encoded Payload Execution
+    pattern: '(base64\s+(-d|--decode)\s*\|\s*(sudo\s+)?(bash|sh|zsh|python[23]?|perl|ruby|node)|exec\s*\(.*b64decode\s*\(|eval\s*\(\s*atob\s*\(|echo\s+[A-Za-z0-9+/=]{40,}\s*\|\s*base64\s+(-d|--decode))'
+
+  # ── Docker Socket Mount (escape de container) ──
+  # Montar docker.sock da acesso root ao host — escape trivial
+  - id: Docker Socket Mount
+    pattern: '(/var/run/docker\.sock|docker\.sock:/var/run/docker\.sock|-v\s+/var/run/docker\.sock)'
+
+  # ── NPM Malicious Install Hook ──
+  # Scripts de postinstall/preinstall que baixam e executam payloads
+  - id: NPM Dangerous Hook
+    pattern: '(?i)"(pre|post)install"\s*:\s*"[^"]*\b(curl|wget|nc|ncat|python|node\s+-e|bash\s+-c|sh\s+-c|powershell)'
+
+  # ── SSH Key Injection (backdoor de acesso persistente) ──
+  # Atacante injeta chave publica no authorized_keys para acesso permanente
+  - id: SSH Key Injection
+    pattern: '(>>?\s*~?/?(\.ssh/authorized_keys|\.ssh/authorized_keys2)|echo\s+.*ssh-(rsa|ed25519|ecdsa|dsa)\s+.*>>)'
+
+  # ── Crontab Injection (persistencia via cron) ──
+  # Adicionar entries no cron para manter backdoor ativo apos reboot
+  - id: Crontab Injection
+    pattern: '(echo\s+.*\|\s*crontab|crontab\s+-[^l].*\||\(crontab\s+-l|/etc/cron\.(d|daily|hourly|weekly|monthly)/[^\s]+)'
+
+  # ── Sensitive System File Access ──
+  # Leitura de arquivos criticos do sistema: /etc/shadow, sudoers, etc.
+  - id: Sensitive File Access
+    pattern: '(cat|head|tail|less|more|strings|xxd|curl\s+file://)\s+.*/etc/(shadow|master\.passwd|sudoers|gshadow)'
+
+  # ── GCP Service Account Key (vazamento de credencial cloud) ──
+  # Arquivos JSON com "type": "service_account" sao chaves GCP completas
+  - id: GCP Service Account Key
+    pattern: '"type"\s*:\s*"service_account"'
+
+  # ── Tunnel Service URL (C2 via tunnel) ──
+  # URLs de servicos de tunnel usados como C2 ou exfiltracao
+  - id: Tunnel Service URL
+    pattern: '(?i)(https?://[a-z0-9-]+\.(ngrok\.io|ngrok-free\.app|trycloudflare\.com|localtunnel\.me|loca\.lt|serveo\.net|localhost\.run))'
+
+  # ── Unsafe Deserialization ──
+  # Desserializacao insegura permite RCE: pickle, yaml.unsafe_load, PHP unserialize
+  - id: Unsafe Deserialization
+    pattern: '(pickle\.loads?\s*\(|yaml\.unsafe_load\s*\(|marshal\.loads?\s*\(|phpinfo\s*\(\s*\)|unserialize\s*\()'
 
   # ── Whitespace invisivel (tecnicas de ofuscacao) ──
   - id: Invisible Whitespace

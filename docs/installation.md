@@ -39,23 +39,77 @@ ThreatDeflect-CLI-Windows.exe --help
 
 ### Linux
 
+**GUI:** Baixe, de permissao e execute:
+
 ```bash
-chmod +x ThreatDeflect-CLI-Linux
-./ThreatDeflect-CLI-Linux --help
+chmod +x ThreatDeflect-GUI-Linux
+./ThreatDeflect-GUI-Linux
 ```
+
+**CLI:** Para usar de qualquer lugar no terminal:
+
+1. Mova o executavel para uma pasta no PATH:
+
+```bash
+sudo mv ThreatDeflect-CLI-Linux /usr/local/bin/threatdeflect
+sudo chmod +x /usr/local/bin/threatdeflect
+```
+
+2. Teste:
+
+```bash
+threatdeflect --help
+```
+
+!!! tip "Alternativa sem sudo"
+    Se preferir instalar so para o seu usuario:
+    ```bash
+    mkdir -p ~/.local/bin
+    mv ThreatDeflect-CLI-Linux ~/.local/bin/threatdeflect
+    chmod +x ~/.local/bin/threatdeflect
+    ```
+    Certifique-se de que `~/.local/bin` esta no seu PATH (adicione `export PATH="$HOME/.local/bin:$PATH"` ao seu `.bashrc` ou `.zshrc`).
 
 ### macOS
 
-O macOS bloqueia binarios de fontes externas. Execute no terminal:
+O macOS bloqueia binarios de fontes externas. Primeiro remova o bloqueio:
 
 ```bash
-chmod +x ThreatDeflect-CLI-macOS
-xattr -cr ThreatDeflect-CLI-macOS
-./ThreatDeflect-CLI-macOS --help
+chmod +x ThreatDeflect-GUI-macOS ThreatDeflect-CLI-macOS
+xattr -cr ThreatDeflect-GUI-macOS ThreatDeflect-CLI-macOS
+```
+
+**GUI:** Execute pelo terminal:
+
+```bash
+./ThreatDeflect-GUI-macOS
 ```
 
 !!! warning "Finder"
     O Finder nao executa binarios sem extensao `.app`. Use sempre o terminal.
+
+**CLI:** Para usar de qualquer lugar no terminal:
+
+1. Mova o executavel para uma pasta no PATH:
+
+```bash
+sudo mv ThreatDeflect-CLI-macOS /usr/local/bin/threatdeflect
+sudo chmod +x /usr/local/bin/threatdeflect
+```
+
+2. Teste:
+
+```bash
+threatdeflect --help
+```
+
+!!! tip "Alternativa sem sudo"
+    ```bash
+    mkdir -p ~/.local/bin
+    mv ThreatDeflect-CLI-macOS ~/.local/bin/threatdeflect
+    chmod +x ~/.local/bin/threatdeflect
+    ```
+    Adicione `export PATH="$HOME/.local/bin:$PATH"` ao seu `.zshrc` se necessario.
 
 ---
 

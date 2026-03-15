@@ -6,7 +6,7 @@
 <div align="center">
 <strong>Ferramenta de análise de ameaças com motor híbrido Python + Rust que automatiza a consulta de IOCs, repositórios e arquivos em múltiplas fontes, gera relatórios e cria resumos com IA local.</strong>
 <br><br>
-⭐ Dê uma estrela se o projeto te ajudou! | <a href="https://github.com/DevGreick/ThreatDeflect/releases"><strong>Baixar a Última Versão »</strong></a> | <a href="https://devgreick.github.io/ThreatDeflect/"><strong>Documentação Completa »</strong></a>
+<a href="https://github.com/DevGreick/ThreatDeflect/releases"><strong>Baixar »</strong></a> | <a href="https://devgreick.github.io/ThreatDeflect/"><strong>Documentação »</strong></a>
 </div>
 
 <br>
@@ -17,50 +17,33 @@
 <img src="https://img.shields.io/badge/status-active-success.svg" alt="Project Status">
 <a href="https://doc.qt.io/qtforpython/"><img src="https://img.shields.io/badge/GUI-PySide6-purple.svg" alt="GUI Framework"></a>
 <img src="https://img.shields.io/badge/engine-Rust+Python-orange.svg?logo=rust" alt="Rust Engine">
-<a href="https://devgreick.github.io/ThreatDeflect/contributing/"><img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg" alt="Contributions"></a>
 </div>
 
 <br>
 <div align="center">
-<img src="https://github.com/DevGreick/ThreatDeflect/blob/main/Abertura.png" alt="Screenshot da interface do ThreatDeflect" width="700"/>
+<img src="https://github.com/DevGreick/ThreatDeflect/blob/main/Abertura.png" alt="Screenshot" width="700"/>
 </div>
 
 ---
 
-## ⚡ Instale em 30 Segundos
+## O que faz
 
-Baixe o executável na página de [Releases](https://github.com/DevGreick/ThreatDeflect/releases). Não precisa de Python.
-
-| Sistema | Arquivo | Execução |
-|---------|---------|----------|
-| Windows | `ThreatDeflect-GUI-Windows.exe` | Duplo clique |
-| Linux   | `ThreatDeflect-CLI-Linux` | `chmod +x` e execute |
-| macOS   | `ThreatDeflect-CLI-macOS` | `chmod +x && xattr -cr` no terminal |
-
-> Após abrir, vá em **Configurações** e insira a chave do **VirusTotal** para começar.
-
----
-
-## 🚀 O que faz
-
-| Módulo | O que faz | Fontes |
-|--------|-----------|----|
-| **IOCs** | Consulta massiva de IPs e URLs | VirusTotal, AbuseIPDB, Shodan, URLHaus |
-| **Repositórios** | Varredura de repos GitHub/GitLab | Segredos, dependências, IOCs, padrões suspeitos |
-| **Arquivos** | Reputação por hash SHA256 | VirusTotal, MalwareBazaar |
-
-### Destaques
-
-- **GUI + CLI** completas e bilíngues (PT-BR / EN-US)
-- **Motor Rust** para detecção de alta performance via PyO3
-- **IA local** com Ollama para resumos executivos (nenhum dado sai da sua máquina)
-- **46 regras de detecção** para segredos, backdoors, crypto miners, SSRF e mais
-- **Relatórios** em Excel e PDF
-- **Chaves seguras** no keyring do sistema operacional
+- **Analise de IOCs** via VirusTotal, AbuseIPDB, Shodan, URLHaus
+- **Varredura de repositorios** GitHub/GitLab (segredos, backdoors, dependencias maliciosas)
+- **Reputacao de arquivos** por hash SHA256
+- **46 regras de deteccao** para segredos, crypto miners, SSRF, reverse shells e mais
+- **Motor Rust** de alta performance via PyO3
+- **IA local** com Ollama (nenhum dado sai da sua maquina)
+- **GUI + CLI** bilingues (PT-BR / EN-US)
+- **Relatorios** em Excel e PDF
 
 ---
 
-## 📦 Instalação pelo Código-Fonte
+## Inicio Rapido
+
+**Executavel:** Baixe na pagina de [Releases](https://github.com/DevGreick/ThreatDeflect/releases) e execute. Nao precisa de Python.
+
+**Codigo-fonte:**
 
 ```bash
 git clone https://github.com/DevGreick/ThreatDeflect.git
@@ -70,57 +53,16 @@ uv run threatdeflect --help
 uv run threatdeflect-gui
 ```
 
----
-
-## 💻 Uso Rápido
-
-Após instalar via código-fonte ou executável:
-
-```bash
-# CLI
-threatdeflect ioc 8.8.8.8 --ai llama3
-threatdeflect repo https://github.com/org/repo
-threatdeflect file suspicious.exe
-
-# GUI
-threatdeflect-gui
-```
+Para instrucoes detalhadas de instalacao, configuracao de APIs e uso completo, consulte a **[Documentacao](https://devgreick.github.io/ThreatDeflect/)**.
 
 ---
 
-## 📖 Documentação
+## Licenca
 
-Para guias detalhados, referência completa do CLI, configuração de APIs, motor de regras, integração com IA e mais:
-
-**[devgreick.github.io/ThreatDeflect](https://devgreick.github.io/ThreatDeflect/)**
-
----
-
-## ⚖️ Segurança e Privacidade
-
-- IPs e URLs são enviados para as APIs configuradas
-- Arquivos **nunca são enviados**, apenas hashes SHA256
-- Resumos de IA são gerados **localmente** via Ollama
-- Chaves armazenadas no keyring do OS
-
----
-
-## 🤝 Contribuição
-
-1. Fork → Branch → Commit → PR
-
-Detalhes na [documentação de contribuição](https://devgreick.github.io/ThreatDeflect/contributing/).
-
----
+GPLv3. Veja [LICENSE](./LICENSE).
 
 <div align="center">
 <a href="https://buymeacoffee.com/devgreick" target="_blank">
 <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" width="200">
 </a>
 </div>
-
----
-
-## 📜 Licença
-
-Distribuído sob a licença GPLv3. Consulte o arquivo [LICENSE](./LICENSE) para mais informações.

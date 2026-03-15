@@ -295,18 +295,25 @@
 /* Sidebar links hover glow */
 [data-md-color-scheme="slate"] .md-nav__link {
   transition: all 0.25s ease;
-  border-left: 2px solid transparent;
-  padding-left: 8px;
 }
 
 [data-md-color-scheme="slate"] .md-nav__link:hover {
   color: var(--td-cyan);
-  border-left: 2px solid var(--td-cyan);
   text-shadow: 0 0 8px rgba(51, 255, 119, 0.3);
 }
 
-[data-md-color-scheme="slate"] .md-nav__link--active {
-  border-left: 2px solid var(--td-cyan);
+/* Remove sidebar vertical separator */
+[data-md-color-scheme="slate"] .md-sidebar {
+  border-right: none;
+}
+
+[data-md-color-scheme="slate"] .md-sidebar--primary .md-sidebar__inner {
+  border-right: none;
+}
+
+[data-md-color-scheme="slate"] .md-nav--primary .md-nav__title {
+  border: none;
+  box-shadow: none;
 }
 
 /* Code blocks hover highlight */

@@ -1,7 +1,6 @@
-# ThreatDeflect
-
-<div align="center">
-  <img src="https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/spy2-1.png" alt="ThreatDeflect Logo" width="150"/>
+<div align="center" class="td-hero">
+  <img src="https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/spy2-1.png" alt="ThreatDeflect Logo" width="150" class="td-logo-main"/>
+  <h1 class="td-title-animated">ThreatDeflect</h1>
 </div>
 
 <div align="center" markdown>
@@ -12,7 +11,7 @@
   <img src="https://img.shields.io/badge/engine-Rust+Python-orange.svg?logo=rust" alt="Engine">
 </div>
 
-**Ferramenta de analise de ameacas com motor hibrido Python + Rust que automatiza a consulta de IOCs, repositorios e arquivos em multiplas fontes, gera relatorios e cria resumos com IA local.**
+<p align="center" class="td-tagline"><strong>Ferramenta de analise de ameacas com motor hibrido Python + Rust que automatiza a consulta de IOCs, repositorios e arquivos em multiplas fontes, gera relatorios e cria resumos com IA local.</strong></p>
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/Abertura.png" alt="Screenshot" width="700"/>

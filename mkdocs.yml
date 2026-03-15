@@ -4,12 +4,14 @@ site_author: DevGreick
 site_url: https://devgreick.github.io/ThreatDeflect/
 repo_name: DevGreick/ThreatDeflect
 repo_url: https://github.com/DevGreick/ThreatDeflect
+copyright: ""
 
 theme:
   name: material
   language: pt-BR
   logo: https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/spy2-1.png
   favicon: https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/spy2-1.png
+  custom_dir: docs/overrides
   palette:
     - scheme: slate
       primary: custom
@@ -28,10 +30,12 @@ theme:
     - navigation.sections
     - navigation.top
     - navigation.indexes
+    - navigation.footer
     - content.code.copy
     - content.code.select
     - search.suggest
     - search.highlight
+    - announce.dismiss
   icon:
     repo: fontawesome/brands/github
 
@@ -70,6 +74,10 @@ nav:
   - Changelog: changelog.md
 
 extra:
+  generator: false
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/DevGreick
+    - icon: fontawesome/solid/mug-hot
+      link: https://buymeacoffee.com/devgreick
+      name: Apoie o projeto

@@ -1,6 +1,6 @@
 <div align="center">
-  <h1>🛡️ ThreatDeflect</h1>
-  <img src="https://github.com/DevGreick/ThreatDeflect/blob/main/threatdeflect-logo.png" alt="Logo do ThreatDeflect" width="150"/>
+    <img src="https://github.com/DevGreick/ThreatDeflect/blob/main/threatdeflect-logo.png" alt="Logo do ThreatDeflect" width="150"/>
+    <h1>ThreatDeflect</h1>
 </div>
 
 <div align="center">

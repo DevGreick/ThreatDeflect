@@ -1,0 +1,75 @@
+site_name: ThreatDeflect
+site_description: Ferramenta de análise de ameaças com motor híbrido Python + Rust
+site_author: DevGreick
+site_url: https://devgreick.github.io/ThreatDeflect/
+repo_name: DevGreick/ThreatDeflect
+repo_url: https://github.com/DevGreick/ThreatDeflect
+
+theme:
+  name: material
+  language: pt-BR
+  logo: https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/spy2-1.png
+  favicon: https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/spy2-1.png
+  palette:
+    - scheme: slate
+      primary: custom
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Modo claro
+    - scheme: default
+      primary: custom
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Modo escuro
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - content.code.copy
+    - content.code.select
+    - search.suggest
+    - search.highlight
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - Instalacao: installation.md
+  - Guia da GUI: gui-guide.md
+  - Referencia CLI: cli-reference.md
+  - Motor de Regras: rules-engine.md
+  - Motor Rust: rust-engine.md
+  - APIs: api-configuration.md
+  - IA Local: ai-integration.md
+  - Contribuicao: contributing.md
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/DevGreick

@@ -1,5 +1,43 @@
 [data-md-color-scheme="slate"] {
-  --md-primary-fg-color: #1a1a2e;
+  --md-primary-fg-color: #0d1117;
   --md-primary-bg-color: #e0e0ff;
   --md-accent-fg-color: #5b9bd5;
+  --md-default-bg-color: #0d1117;
+  --md-default-fg-color: #c9d1d9;
+  --md-typeset-color: #c9d1d9;
+  --md-typeset-a-color: #5b9bd5;
+}
+
+/* Tables */
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th {
+  background-color: #161b22;
+  color: #e0e0ff;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) td {
+  color: #c9d1d9;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) tr {
+  border-color: #30363d;
+}
+
+/* Links in tables */
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) td a {
+  color: #5b9bd5;
+}
+
+/* Navigation tabs */
+[data-md-color-scheme="slate"] .md-tabs {
+  background-color: #0d1117;
+}
+
+/* Header */
+[data-md-color-scheme="slate"] .md-header {
+  background-color: #0d1117;
+}
+
+/* Sidebar */
+[data-md-color-scheme="slate"] .md-sidebar {
+  background-color: #0d1117;
 }

@@ -4,14 +4,12 @@
   <img src="https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/spy2-1.png" alt="ThreatDeflect Logo" width="150"/>
 </div>
 
-<div align="center">
-
-[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/License-GPLv3-blue.svg?logo=gnu)](https://github.com/DevGreick/ThreatDeflect/blob/master/LICENSE)
-![Status](https://img.shields.io/badge/status-active-success.svg)
-[![GUI](https://img.shields.io/badge/GUI-PySide6-purple.svg)](https://doc.qt.io/qtforpython/)
-![Engine](https://img.shields.io/badge/engine-Rust+Python-orange.svg?logo=rust)
-
+<div align="center" markdown>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
+  <a href="https://github.com/DevGreick/ThreatDeflect/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg?logo=gnu" alt="License"></a>
+  <img src="https://img.shields.io/badge/status-active-success.svg" alt="Status">
+  <a href="https://doc.qt.io/qtforpython/"><img src="https://img.shields.io/badge/GUI-PySide6-purple.svg" alt="GUI"></a>
+  <img src="https://img.shields.io/badge/engine-Rust+Python-orange.svg?logo=rust" alt="Engine">
 </div>
 
 **Ferramenta de analise de ameacas com motor hibrido Python + Rust que automatiza a consulta de IOCs, repositorios e arquivos em multiplas fontes, gera relatorios e cria resumos com IA local.**

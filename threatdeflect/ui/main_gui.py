@@ -646,7 +646,7 @@ class VtotalscanGUI(QMainWindow):
         self.setWindowTitle(T("window_title"))
         
         try:
-            self.setWindowIcon(QIcon(resource_path("spy2.ico")))
+            self.setWindowIcon(QIcon(resource_path("threatlogo.ico")))
         except Exception as e:
             logging.error(f"Erro ao carregar ícone: {e}")
         self._setup_ui()
@@ -675,7 +675,7 @@ class VtotalscanGUI(QMainWindow):
         main_layout = QVBoxLayout(central_widget)
         header_layout = QHBoxLayout()
         logo_label = QLabel()
-        pixmap = QPixmap(resource_path("spy2-1.png")).scaled(50, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        pixmap = QPixmap(resource_path("threatlogo.png")).scaled(50, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         logo_label.setPixmap(pixmap)
         btn_update_usage = QPushButton(T("update_usage_button"))
         btn_update_usage.clicked.connect(self._update_api_usage)
@@ -1286,7 +1286,7 @@ def main():
 
     app = QApplication(sys.argv)
     
-    app.setWindowIcon(QIcon(resource_path("spy2.ico")))
+    app.setWindowIcon(QIcon(resource_path("threatlogo.ico")))
 
     app.setStyle("Fusion")
     palette = QPalette()

@@ -17,11 +17,11 @@ is_linux = sys.platform.startswith('linux')
 # 1. Definição do Ícone (usa .ico no Windows, .icns no Mac, .png no Linux)
 # Faz fallback para None se o arquivo não existir (ex: sem .icns no macOS)
 if is_win:
-    icon_file = ASSETS_DIR / 'spy2.ico'
+    icon_file = ASSETS_DIR / 'threatlogo.ico'
 elif is_mac:
-    icon_file = ASSETS_DIR / 'spy2.icns'
+    icon_file = ASSETS_DIR / 'threatlogo.icns'
 else:
-    icon_file = ASSETS_DIR / 'spy2.png'
+    icon_file = ASSETS_DIR / 'threatlogo.png'
 
 if icon_file and not icon_file.exists():
     print(f"AVISO: Ícone {icon_file} não encontrado. Build continuará sem ícone.")

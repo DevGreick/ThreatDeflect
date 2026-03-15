@@ -15,9 +15,9 @@ is_linux = sys.platform.startswith('linux')
 
 # 1. Icone
 if is_win:
-    icon_file = ASSETS_DIR / 'spy2.ico'
+    icon_file = ASSETS_DIR / 'threatlogo.ico'
 elif is_mac:
-    icon_file = ASSETS_DIR / 'spy2.icns'
+    icon_file = ASSETS_DIR / 'threatlogo.icns'
 else:
     icon_file = None
 

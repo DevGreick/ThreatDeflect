@@ -397,7 +397,7 @@
 }
 
 .td-logo-main {
-  animation: logoEntrance 0.8s ease-out both;
+  animation: logoEntrance 0.8s ease-out both !important;
 }
 
 /* Title typing glow */

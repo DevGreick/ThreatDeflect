@@ -60,3 +60,5 @@ node_modules/
 *.exe
 *.bin
 CLAUDE.md
+.~lock.*
+uv.lock

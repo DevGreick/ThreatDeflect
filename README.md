@@ -60,7 +60,21 @@ Baixe o executável na página de [Releases](https://github.com/DevGreick/Threat
 
 ---
 
+## 📦 Instalação pelo Código-Fonte
+
+```bash
+git clone https://github.com/DevGreick/ThreatDeflect.git
+cd ThreatDeflect
+uv sync
+uv run threatdeflect --help
+uv run threatdeflect-gui
+```
+
+---
+
 ## 💻 Uso Rápido
+
+Após instalar via código-fonte ou executável:
 
 ```bash
 # CLI
@@ -70,18 +84,6 @@ threatdeflect file suspicious.exe
 
 # GUI
 threatdeflect-gui
-```
-
----
-
-## 📦 Instalação pelo Código-Fonte
-
-```bash
-git clone https://github.com/DevGreick/ThreatDeflect.git
-cd ThreatDeflect
-uv sync
-uv run threatdeflect --help
-uv run threatdeflect-gui
 ```
 
 ---

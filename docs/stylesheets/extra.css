@@ -422,9 +422,10 @@
   text-align: center;
   color: var(--td-text-bright) !important;
   border-bottom: 2px solid var(--td-cyan) !important;
-  display: inline-block;
+  display: block;
   padding-bottom: 0.3em;
   text-shadow: 0 0 20px rgba(51, 255, 119, 0.3);
+  margin-top: 0.5em;
 }
 
 /* Tagline fade */

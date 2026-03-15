@@ -12,7 +12,30 @@ Baixe o executavel para o seu sistema na pagina de [Releases](https://github.com
 
 ### Windows
 
-Basta baixar o `.exe` e executar com duplo clique.
+**GUI:** Baixe o `.exe` e execute com duplo clique.
+
+**CLI:** Para usar o CLI no terminal (CMD ou PowerShell):
+
+1. Crie uma pasta, por exemplo `C:\Tools\`
+2. Mova o `ThreatDeflect-CLI-Windows.exe` para essa pasta
+3. Adicione ao PATH do sistema:
+    - Abra **Configuracoes > Sistema > Sobre > Configuracoes avancadas do sistema**
+    - Clique em **Variaveis de Ambiente**
+    - Em **Variaveis do sistema**, selecione `Path` e clique em **Editar**
+    - Clique em **Novo** e adicione `C:\Tools\`
+    - Clique **OK** em tudo
+4. Abra um novo terminal e teste:
+
+```powershell
+ThreatDeflect-CLI-Windows.exe --help
+```
+
+!!! tip "Alternativa rapida"
+    Se nao quiser adicionar ao PATH, navegue ate a pasta do executavel e rode direto:
+    ```powershell
+    cd C:\Users\SeuUsuario\Downloads
+    .\ThreatDeflect-CLI-Windows.exe --help
+    ```
 
 ### Linux
 

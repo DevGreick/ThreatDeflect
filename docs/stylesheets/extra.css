@@ -260,26 +260,26 @@
   }
 }
 
-[data-md-color-scheme="slate"] .md-content h1,
-[data-md-color-scheme="slate"] .md-content h2,
-[data-md-color-scheme="slate"] .md-content h3,
-[data-md-color-scheme="slate"] .md-content p,
-[data-md-color-scheme="slate"] .md-content table,
-[data-md-color-scheme="slate"] .md-content pre,
-[data-md-color-scheme="slate"] .md-content .admonition,
-[data-md-color-scheme="slate"] .md-content details,
-[data-md-color-scheme="slate"] .md-content blockquote,
-[data-md-color-scheme="slate"] .md-content ul,
-[data-md-color-scheme="slate"] .md-content ol,
-[data-md-color-scheme="slate"] .md-content img {
+.md-content h1,
+.md-content h2,
+.md-content h3,
+.md-content p,
+.md-content table,
+.md-content pre,
+.md-content .admonition,
+.md-content details,
+.md-content blockquote,
+.md-content ul,
+.md-content ol,
+.md-content img {
   animation: fadeInUp 0.5s ease-out both;
 }
 
-[data-md-color-scheme="slate"] .md-content h1 { animation-delay: 0.05s; }
-[data-md-color-scheme="slate"] .md-content h2 { animation-delay: 0.08s; }
-[data-md-color-scheme="slate"] .md-content p { animation-delay: 0.1s; }
-[data-md-color-scheme="slate"] .md-content pre { animation-delay: 0.12s; }
-[data-md-color-scheme="slate"] .md-content table { animation-delay: 0.12s; }
+.md-content h1 { animation-delay: 0.05s; }
+.md-content h2 { animation-delay: 0.08s; }
+.md-content p { animation-delay: 0.1s; }
+.md-content pre { animation-delay: 0.12s; }
+.md-content table { animation-delay: 0.12s; }
 
 /* Logo pulse */
 @keyframes logoPulse {

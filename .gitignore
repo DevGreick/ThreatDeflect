@@ -24,6 +24,7 @@ secrets.*
 *.xlsx
 *.pdf
 *.html
+!docs/**/*.html
 *.xml
 
 dist/

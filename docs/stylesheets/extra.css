@@ -6,10 +6,10 @@
   --td-cyan: #00d4aa;
   --td-cyan-dim: #00a88a;
   --td-blue: #5b9bd5;
-  --td-bg-deep: #0a0e14;
-  --td-bg-surface: #0d1117;
-  --td-bg-card: #161b22;
-  --td-bg-elevated: #1c2128;
+  --td-bg-deep: #000000;
+  --td-bg-surface: #000000;
+  --td-bg-card: #0a0a0a;
+  --td-bg-elevated: #111111;
   --td-border: #30363d;
   --td-text: #c9d1d9;
   --td-text-bright: #e6edf3;

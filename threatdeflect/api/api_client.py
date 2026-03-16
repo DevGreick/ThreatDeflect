@@ -59,7 +59,12 @@ class ApiClient:
                 if response.status_code == 404:
                     return {"error": "Not Found", "data": {"attributes": {"stats": {"malicious": 0}}}}
                 response.raise_for_status()
-                return response.json() if response.content else {}
+                if not response.content:
+                    return {}
+                content_type = response.headers.get('Content-Type', '')
+                if 'json' not in content_type and 'javascript' not in content_type:
+                    logging.warning(f"Unexpected Content-Type: {content_type}")
+                return response.json()
             except requests.exceptions.HTTPError as e:
                 status_code = e.response.status_code if e.response else 500
                 if status_code in RETRYABLE_STATUS_CODES:
@@ -71,7 +76,8 @@ class ApiClient:
             except requests.exceptions.RequestException:
                 time.sleep((backoff_factor ** retries))
                 retries += 1
-        logging.warning(f"Request to {url} failed after {max_retries} retries.")
+        redact_url = urlparse(url)._replace(query="").geturl()
+        logging.warning(f"Request to {redact_url} failed after {max_retries} retries.")
         return None
 
     def check_package_vulnerability(self, package_name: str, ecosystem: str) -> Optional[List[Dict[str, Any]]]:
@@ -167,8 +173,8 @@ class ApiClient:
 
     def _get_shodan_usage(self) -> Dict[str, Any]:
         if not self.shodan_api_key: return {"error": "Chave não configurada"}
-        url = f"https://api.shodan.io/api-info?key={self.shodan_api_key}"
-        data = self._make_request('GET', url)
+        url = "https://api.shodan.io/api-info"
+        data = self._make_request('GET', url, params={'key': self.shodan_api_key})
         if data and 'query_credits' in data:
             return {"remaining": data.get('query_credits', 0), "allowed": data.get('usage_limits', {}).get('query_credits', 0)}
         return {"error": "Falha ao buscar dados"}
@@ -266,8 +272,11 @@ class ApiClient:
 
     def _get_platform_from_url(self, repo_url: str) -> Optional[str]:
         if hostname := urlparse(repo_url).hostname:
-            if 'github.com' in hostname: return 'github'
-            if 'gitlab.com' in hostname: return 'gitlab'
+            hostname = hostname.lower()
+            if hostname == 'github.com' or hostname.endswith('.github.com'):
+                return 'github'
+            if hostname == 'gitlab.com' or hostname.endswith('.gitlab.com'):
+                return 'gitlab'
         return None
 
     def _get_gitlab_project_details(self, project_path: str, gitlab_host: str) -> Optional[Dict[str, Any]]:
@@ -297,8 +306,17 @@ class ApiClient:
         except Exception:
             return None
 
+    _ALLOWED_AI_HOSTS = {"localhost", "127.0.0.1", "::1", "0.0.0.0"}
+
+    def _is_safe_ai_endpoint(self) -> bool:
+        if not self.ai_endpoint:
+            return False
+        parsed = urlparse(self.ai_endpoint)
+        return parsed.hostname in self._ALLOWED_AI_HOSTS
+
     def get_local_models(self) -> List[str]:
         if not self.ai_endpoint: return ["Erro: Endpoint não configurado"]
+        if not self._is_safe_ai_endpoint(): return ["Erro: Endpoint deve ser localhost"]
         try:
             base_url = "/".join(self.ai_endpoint.split('/')[:3])
             response = self.session.get(f"{base_url}/api/tags", timeout=5)
@@ -308,6 +326,7 @@ class ApiClient:
 
     def get_ai_summary(self, model: str, prompt: str) -> str:
         if not self.ai_endpoint or not model: return "Erro configuração IA"
+        if not self._is_safe_ai_endpoint(): return "Erro: Endpoint deve ser localhost"
         try:
             payload = {"model": model, "prompt": prompt, "stream": False}
             response = self.session.post(self.ai_endpoint, json=payload, timeout=300)
@@ -317,6 +336,7 @@ class ApiClient:
 
     def get_ai_judge_response(self, model: str, prompt: str) -> str:
         if not self.ai_endpoint or not model: return "FALHA"
+        if not self._is_safe_ai_endpoint(): return "FALHA"
         try:
             payload = {"model": model, "prompt": prompt, "stream": False}
             response = self.session.post(self.ai_endpoint, json=payload, timeout=60)

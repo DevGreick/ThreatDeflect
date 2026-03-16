@@ -11,6 +11,7 @@ import tempfile
 import subprocess
 from pathlib import Path
 from typing import Optional, Dict, Any, List
+from urllib.parse import urlparse
 
 import keyring
 import requests
@@ -218,12 +219,22 @@ class DownloadWorker(QThread):
 
     def run(self) -> None:
         try:
+            parsed_url = urlparse(self.url)
+            if parsed_url.hostname not in ("github.com", "objects.githubusercontent.com"):
+                self.finished.emit(False, "", "URL de download fora do dominio permitido.")
+                return
+
+            safe_name = os.path.basename(self.asset_name).replace("..", "").strip()
+            if not safe_name:
+                self.finished.emit(False, "", "Nome de arquivo invalido.")
+                return
+
             response = requests.get(self.url, stream=True, timeout=30)
             response.raise_for_status()
             total_size = int(response.headers.get('content-length', 0))
             downloaded_size = 0
             temp_dir = tempfile.gettempdir()
-            download_path = os.path.join(temp_dir, self.asset_name)
+            download_path = os.path.join(temp_dir, safe_name)
 
             with open(download_path, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
@@ -880,7 +891,8 @@ class VtotalscanGUI(QMainWindow):
             self.update_notification_widget.deleteLater()
 
         if "error" in release_info:
-            self.release_notes_box.setHtml(f"<b>Não foi possível carregar as notas da versão:</b><br>{release_info['error']}")
+            safe_error = str(release_info['error']).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            self.release_notes_box.setHtml(f"<b>Não foi possível carregar as notas da versão:</b><br>{safe_error}")
             return
 
         latest_version_str = re.sub(r'[^0-9.]', '', release_info.get("tag_name", "0.0.0"))
@@ -926,7 +938,12 @@ class VtotalscanGUI(QMainWindow):
         line = QWidget(); line.setFixedHeight(1); line.setStyleSheet("background-color: #3a3f47;")
         self.update_tab_layout.insertWidget(1, line)
         
-        body = release_info.get('body', 'Conteúdo não disponível.')
+        raw_body = release_info.get('body', 'Conteúdo não disponível.')
+        raw_name = release_info.get('name', '')
+
+        body = raw_body.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+        safe_name = raw_name.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
         body = re.sub(r'### (.+)', r'<h3>\1</h3>', body)
         body = re.sub(r'## (.+)', r'<h2>\1</h2>', body)
         body = re.sub(r'# (.+)', r'<h1>\1</h1>', body)
@@ -940,7 +957,7 @@ class VtotalscanGUI(QMainWindow):
         body = body.replace('<br><h', '<h').replace('</h1><br>', '</h1>').replace('</h2><br>', '</h2>').replace('</h3><br>', '</h3>')
         body = body.replace('<br><ul>', '<ul>').replace('</ul><br>', '</ul>').replace('<br><li>', '<li>').replace('</li><br>', '</li>')
         body = body.replace('<br><hr>', '<hr>').replace('<hr><br>', '<hr>')
-        release_html = f"<h2>Notas da Versao: {release_info.get('name')}</h2>{body}"
+        release_html = f"<h2>Notas da Versao: {safe_name}</h2>{body}"
         self.release_notes_box.setHtml(release_html)
     
     def start_update_process(self) -> None:
@@ -973,11 +990,14 @@ class VtotalscanGUI(QMainWindow):
                 QMessageBox.critical(self, "Erro Crítico", "Não foi possível criar o script de atualização.")
                 return
             try:
-                subprocess.Popen([updater_script_path], shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE if sys.platform == "win32" else 0)
+                if sys.platform == "win32":
+                    subprocess.Popen(["cmd", "/c", updater_script_path], creationflags=subprocess.CREATE_NEW_CONSOLE)
+                else:
+                    subprocess.Popen([updater_script_path])
                 QApplication.instance().quit()
             except Exception as e:
                 logging.error(f"Falha ao executar o script de atualizacao: {e}", exc_info=True)
-                QMessageBox.critical(self, "Erro ao Atualizar", f"Não foi possível iniciar o atualizador:\n{e}")
+                QMessageBox.critical(self, "Erro ao Atualizar", "Não foi possível iniciar o atualizador. Verifique os logs.")
 
     def check_api_key_on_startup(self) -> None:
         if not keyring.get_password("vtotalscan", "virustotal_api_key"):

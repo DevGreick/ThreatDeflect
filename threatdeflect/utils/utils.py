@@ -37,9 +37,12 @@ def get_log_path() -> Path:
         config = configparser.ConfigParser()
         config.read(config_path)
         if log_path_str := config.get('General', 'log_path', fallback=None):
-            log_path = Path(log_path_str)
-            log_path.parent.mkdir(parents=True, exist_ok=True)
-            return log_path
+            log_path = Path(log_path_str).resolve()
+            home = Path.home().resolve()
+            if str(log_path).startswith(str(home)):
+                log_path.parent.mkdir(parents=True, exist_ok=True)
+                return log_path
+            logging.warning("log_path rejeitado: fora do diretorio home do usuario.")
 
     return default_log_path
 
@@ -116,13 +119,13 @@ echo "Limpando..."
 rm -- "$0"
 """
     try:
-        updater_path = os.path.join(temp_dir, f"updater_{int(time.time())}{script_extension}")
-        with open(updater_path, "w", encoding='utf-8') as f:
+        fd, updater_path = tempfile.mkstemp(suffix=script_extension, prefix="td_updater_", dir=temp_dir)
+        with os.fdopen(fd, "w", encoding='utf-8') as f:
             f.write(script_content)
-        
+
         if sys.platform != "win32":
-            os.chmod(updater_path, 0o755)
-            
+            os.chmod(updater_path, 0o700)
+
         return updater_path
     except Exception as e:
         logging.error(f"Falha ao criar script de atualizacao: {e}")

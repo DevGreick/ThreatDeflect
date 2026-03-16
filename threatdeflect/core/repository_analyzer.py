@@ -291,8 +291,14 @@ class RepositoryAnalyzer:
 
         self._update_status(msg_status)
 
+        def _mask_secret(value: str) -> str:
+            if len(value) <= 8:
+                return value[:2] + "*" * (len(value) - 2)
+            return value[:4] + "*" * (len(value) - 8) + value[-4:]
+
         def validate_single(finding: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
             snippet = finding.get("match_content", "")
+            masked_snippet = _mask_secret(snippet) if len(snippet) > 12 else snippet
             f_type = finding["type"]
             f_file = finding["file"]
             f_conf = finding.get("confidence", 0.5)
@@ -301,7 +307,7 @@ class RepositoryAnalyzer:
             prompt = (
                 f"Analyze this code snippet from '{f_file}' (context: {f_ctx}, engine confidence: {f_conf:.2f}).\n"
                 f"Detection type: '{f_type}'.\n"
-                f"Snippet: `{snippet}`\n\n"
+                f"Snippet: `{masked_snippet}`\n\n"
                 "Respond EXCLUSIVELY in JSON with key 'score' (float 0.0-1.0).\n"
                 "0.0 = definitely false positive (test, placeholder, example, documentation).\n"
                 "1.0 = definitely real secret/vulnerability.\n"

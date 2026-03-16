@@ -82,6 +82,8 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
+Para topicos avancados (motor Rust, regras customizadas, Ollama), consulte a **[Documentacao completa](https://devgreick.github.io/ThreatDeflect/)**.
+
 ---
 
 ## Configuracao de APIs

@@ -4,9 +4,9 @@
 </div>
 
 <div align="center">
-<strong>Ferramenta de análise de ameaças com motor híbrido Python + Rust que automatiza a consulta de IOCs, repositórios e arquivos em múltiplas fontes, gera relatórios e cria resumos com IA local.</strong>
+<strong>Ferramenta de analise de ameacas com motor hibrido Python + Rust que automatiza a consulta de IOCs, repositorios e arquivos em multiplas fontes, gera relatorios e cria resumos com IA local.</strong>
 <br><br>
-⭐ Dê uma estrela se o projeto te ajudou! | <a href="https://github.com/DevGreick/ThreatDeflect/releases"><strong>Baixar »</strong></a> | <a href="https://devgreick.github.io/ThreatDeflect/"><strong>Documentação »</strong></a>
+⭐ De uma estrela se o projeto te ajudou! | <a href="https://github.com/DevGreick/ThreatDeflect/releases"><strong>Baixar »</strong></a> | <a href="https://devgreick.github.io/ThreatDeflect/"><strong>Documentacao completa »</strong></a>
 </div>
 
 <br>
@@ -39,12 +39,31 @@
 
 ---
 
-## Inicio Rapido
+## Instalacao
 
-**Executavel:** Baixe na pagina de [Releases](https://github.com/DevGreick/ThreatDeflect/releases) e execute. Nao precisa de Python.
+### Opcao 1 — Executavel (sem Python)
 
-**Codigo-fonte:**
+Baixe o binario da pagina de [Releases](https://github.com/DevGreick/ThreatDeflect/releases) e execute:
 
+**Windows:** clique duplo em `ThreatDeflect-GUI-Windows.exe`
+
+**Linux:**
+```bash
+chmod +x ThreatDeflect-GUI-Linux
+./ThreatDeflect-GUI-Linux
+# opcional: mover para o PATH
+sudo mv ThreatDeflect-GUI-Linux /usr/local/bin/threatdeflect
+```
+
+**macOS:**
+```bash
+xattr -cr ThreatDeflect-GUI-macOS
+./ThreatDeflect-GUI-macOS
+```
+
+### Opcao 2 — Codigo-fonte (Python 3.11+)
+
+**Com uv (recomendado):**
 ```bash
 git clone https://github.com/DevGreick/ThreatDeflect.git
 cd ThreatDeflect
@@ -53,7 +72,97 @@ uv run threatdeflect --help
 uv run threatdeflect-gui
 ```
 
-Para instrucoes detalhadas de instalacao, configuracao de APIs e uso completo, consulte a **[Documentacao](https://devgreick.github.io/ThreatDeflect/)**.
+**Com pip:**
+```bash
+git clone https://github.com/DevGreick/ThreatDeflect.git
+cd ThreatDeflect
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install -e .
+```
+
+---
+
+## Configuracao de APIs
+
+Apenas o **VirusTotal** e obrigatorio. As demais ampliam a cobertura de analise.
+
+| Servico | Obrigatorio | Limite gratuito | Onde obter |
+|---|---|---|---|
+| VirusTotal | **Sim** | 500 req/dia | [virustotal.com](https://www.virustotal.com) → perfil → API Key |
+| GitHub | Recomendado | 5.000 req/h | [github.com/settings/tokens](https://github.com/settings/tokens) (public read) |
+| GitLab | Recomendado | — | Settings → Access Tokens → `read_api` |
+| AbuseIPDB | Opcional | 1.000 checks/dia | [abuseipdb.com](https://www.abuseipdb.com) → API |
+| Shodan | Opcional | Limitado | [shodan.io](https://www.shodan.io) → dashboard |
+| URLHaus | Opcional | Ilimitado | Gratuito, sem autenticacao |
+| MalwareBazaar | Opcional | Ilimitado | Gratuito, sem autenticacao |
+
+**Configurando via CLI:**
+```bash
+threatdeflect config set virustotal  SUA_CHAVE
+threatdeflect config set abuseipdb   SUA_CHAVE
+threatdeflect config set shodan      SUA_CHAVE
+threatdeflect config set github      SEU_TOKEN
+threatdeflect config set gitlab      SEU_TOKEN
+```
+
+**Ou via GUI:** Configuracoes → Aba "API Keys" → cole as chaves nos campos correspondentes.
+
+As chaves ficam armazenadas no keyring do sistema operacional (Windows Credential Locker, macOS Keychain, Linux Secret Service).
+
+---
+
+## Uso
+
+### Analisar IPs e URLs (IOCs)
+
+```bash
+# alvo unico
+threatdeflect ioc 8.8.8.8
+
+# multiplos alvos
+threatdeflect ioc 8.8.8.8 1.1.1.1 https://dominio-suspeito.com
+
+# a partir de arquivo (um alvo por linha)
+threatdeflect ioc -f targets.txt -o relatorio.xlsx
+
+# com resumo por IA local
+threatdeflect ioc -f targets.txt --ai llama3
+```
+
+### Verificar arquivos por hash
+
+```bash
+threatdeflect file suspeito.exe
+threatdeflect file malware.dll trojan.pdf --ai llama3 -o auditoria.xlsx
+```
+
+> Nenhum arquivo e enviado — a verificacao e feita apenas pelo hash SHA256.
+
+### Varrer repositorios
+
+```bash
+threatdeflect repo https://github.com/org/repo
+threatdeflect repo https://github.com/org/repo https://gitlab.com/org/repo2 --ai mistral
+```
+
+### Ver configuracoes atuais
+
+```bash
+threatdeflect config show
+```
+
+---
+
+## IA local (opcional)
+
+Com [Ollama](https://ollama.com) instalado, o ThreatDeflect gera resumos executivos dos relatorios sem enviar dados para a nuvem:
+
+```bash
+ollama pull llama3
+threatdeflect ioc -f targets.txt --ai llama3
+```
 
 ---
 

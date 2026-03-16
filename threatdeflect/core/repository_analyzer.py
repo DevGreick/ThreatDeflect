@@ -8,6 +8,7 @@ from typing import Any, Dict, Callable, Optional, List, Tuple
 import yaml
 
 from threatdeflect.api.api_client import ApiClient
+from threatdeflect.core.secret_validator import validate_finding
 from threatdeflect.utils.utils import resource_path
 
 try:
@@ -18,7 +19,11 @@ except ImportError as e:
 
 class RepositoryAnalyzer:
     MAX_IOC_CHECKS: int = 50
-    MAX_AI_CHECKS: int = 20
+    MAX_AI_CHECKS: int = 50
+    CONFIDENCE_AUTO_DISCARD: float = 0.15
+    CONFIDENCE_AUTO_ACCEPT: float = 0.70
+    CONFIDENCE_AI_LOW: float = 0.15
+    CONFIDENCE_AI_HIGH: float = 0.70
 
     def __init__(self, repo_url: str, api_client: ApiClient, status_callback: Optional[Callable[[str], None]] = None, cached_data: Optional[Dict[str, Any]] = None) -> None:
         self.repo_url = repo_url
@@ -97,27 +102,26 @@ class RepositoryAnalyzer:
 
         local_findings: List[Dict[str, Any]] = []
 
-        validation_targets = {
-            "Generic API Key",
-            "Suspicious Command",
-            "High Entropy String",
-            "Password in URL",
-            "Sensitive File",
-            "Suspicious JS Keyword"
-        }
-
         for f in rust_findings:
             f_type = f["type"]
+            f["confidence"] = validate_finding(f)
+            confidence = f["confidence"]
+            f["severity"] = self.severity_map.get(f_type, "LOW")
+
+            if confidence < self.CONFIDENCE_AUTO_DISCARD:
+                logging.debug(f"Auto-descartado (conf={confidence:.2f}): {f_type} em {file_path}")
+                continue
+
+            if confidence >= self.CONFIDENCE_AUTO_ACCEPT:
+                if "match_content" in f:
+                    f.pop("match_content")
+                local_findings.append(f)
+                continue
 
             if "match_content" in f:
-                match_content = f.pop("match_content")
-                if f_type in validation_targets:
-                    f["match_content"] = match_content
-                    self.candidates_for_ai_validation.append(f)
-                    continue
-
-            f["severity"] = self.severity_map.get(f_type, "LOW")
-            local_findings.append(f)
+                self.candidates_for_ai_validation.append(f)
+            else:
+                local_findings.append(f)
 
         local_iocs = rust_iocs
         local_deps: Dict[str, List[str]] = {}
@@ -291,14 +295,17 @@ class RepositoryAnalyzer:
             snippet = finding.get("match_content", "")
             f_type = finding["type"]
             f_file = finding["file"]
+            f_conf = finding.get("confidence", 0.5)
+            f_ctx = finding.get("file_context", "Unknown")
 
             prompt = (
-                f"Analise este trecho de codigo do arquivo '{f_file}'. O sistema detectou como '{f_type}'.\n"
-                f"Trecho: `{snippet}`\n\n"
-                "Responda EXCLUSIVAMENTE em formato JSON contendo a chave 'status'.\n"
-                "O valor de 'status' deve ser OBRIGATORIAMENTE 'REAL' (se for uma vulnerabilidade/credencial verdadeira) "
-                "ou 'FALSO' (se for falso positivo, exemplo, teste, placeholder).\n"
-                "Exemplo de saida esperada: {\"status\": \"REAL\"}"
+                f"Analyze this code snippet from '{f_file}' (context: {f_ctx}, engine confidence: {f_conf:.2f}).\n"
+                f"Detection type: '{f_type}'.\n"
+                f"Snippet: `{snippet}`\n\n"
+                "Respond EXCLUSIVELY in JSON with key 'score' (float 0.0-1.0).\n"
+                "0.0 = definitely false positive (test, placeholder, example, documentation).\n"
+                "1.0 = definitely real secret/vulnerability.\n"
+                "Example: {\"score\": 0.85}"
             )
 
             try:
@@ -310,28 +317,40 @@ class RepositoryAnalyzer:
                     raise ValueError("Output nao contem JSON valido.")
 
                 parsed_json = json.loads(raw_response[start_idx:end_idx])
+
+                if "score" in parsed_json:
+                    ai_score = float(parsed_json["score"])
+                    ai_score = max(0.0, min(1.0, ai_score))
+                    if ai_score >= 0.6:
+                        return finding, "REAL", ai_score
+                    elif ai_score <= 0.3:
+                        return finding, "FALSO", ai_score
+                    return finding, "INCONCLUSIVO", ai_score
+
                 status = parsed_json.get("status", "").upper()
+                if status == "REAL":
+                    return finding, "REAL", 0.8
+                elif status == "FALSO":
+                    return finding, "FALSO", 0.2
+                return finding, "INCONCLUSIVO", 0.5
 
-                if status not in ["REAL", "FALSO"]:
-                    raise ValueError(f"Status invalido retornado pela IA: {status}")
-
-                return finding, status
             except Exception as e:
                 logging.warning(f"Falha de guardrail na IA para o arquivo {f_file}: {e}")
-                return finding, "FALHA"
+                return finding, "FALHA", 0.5
 
-        with ThreadPoolExecutor(max_workers=2) as executor:
+        with ThreadPoolExecutor(max_workers=3) as executor:
             futures = [executor.submit(validate_single, f) for f in items_to_analyze]
 
             completed = 0
             for future in as_completed(futures):
                 try:
-                    original_finding, verdict = future.result()
+                    original_finding, verdict, ai_score = future.result()
                     completed += 1
                     if completed % 5 == 0:
                          self._update_status(f"IA: Processando {completed}/{len(items_to_analyze)}...")
 
                     if verdict == "REAL":
+                        original_finding["confidence"] = ai_score
                         severity = "HIGH" if "Key" in original_finding["type"] or "Token" in original_finding["type"] else "MEDIUM"
                         self._add_finding(
                             f"[IA Confirmou] {original_finding['description']}",
@@ -340,8 +359,9 @@ class RepositoryAnalyzer:
                             severity=severity
                         )
                     elif verdict == "FALSO":
-                        logging.info(f"IA descartou falso positivo em {original_finding['file']}: {original_finding['type']}")
+                        logging.info(f"IA descartou (score={ai_score:.2f}) em {original_finding['file']}: {original_finding['type']}")
                     else:
+                        original_finding["confidence"] = ai_score
                         self._add_finding(
                             f"[IA Inconclusiva] {original_finding['description']}",
                             original_finding["file"],
@@ -353,6 +373,56 @@ class RepositoryAnalyzer:
                     logging.error(f"Erro na validacao IA: {e}")
                     f = items_to_analyze[0]
                     self._add_finding(f["description"], f["file"], f["type"], severity="LOW")
+
+    def _calculate_risk_score(self, findings: List[Dict[str, Any]]) -> int:
+        if not findings:
+            return 0
+
+        weight_map = {"CRITICAL": 30, "HIGH": 15, "MEDIUM": 5, "LOW": 1}
+        total_weighted = 0.0
+        total_weight = 0.0
+        unique_types: set = set()
+        production_count = 0
+
+        for f in findings:
+            severity = f.get("severity", "LOW")
+            confidence = f.get("confidence", 0.5)
+            weight = weight_map.get(severity, 1)
+            total_weighted += weight * confidence
+            total_weight += weight
+            unique_types.add(f.get("type", ""))
+            if f.get("file_context", "Production") == "Production":
+                production_count += 1
+
+        if total_weight == 0:
+            return 0
+
+        base_score = (total_weighted / total_weight) * 100
+        diversity_bonus = min(len(unique_types) * 3, 15)
+        production_ratio = production_count / len(findings) if findings else 0
+        production_bonus = 10 if production_ratio > 0.5 else 0
+
+        return min(int(base_score + diversity_bonus + production_bonus), 100)
+
+    def _deduplicate_findings(self, findings: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        if not findings:
+            return findings
+
+        groups: Dict[str, List[Dict[str, Any]]] = {}
+        for f in findings:
+            match_key = f.get("match_content", f.get("description", ""))
+            key = f"{f.get('type', '')}::{hash(match_key)}"
+            groups.setdefault(key, []).append(f)
+
+        deduplicated: List[Dict[str, Any]] = []
+        for group in groups.values():
+            best = max(group, key=lambda x: x.get("confidence", 0.5))
+            if len(group) > 1:
+                best["locations"] = [g.get("file", "") for g in group]
+                best["occurrence_count"] = len(group)
+            deduplicated.append(best)
+
+        return deduplicated
 
     def run_analysis(self) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         self._update_status(f"Iniciando: {os.path.basename(self.repo_url)}")
@@ -437,13 +507,11 @@ class RepositoryAnalyzer:
         for file, deps_list in self.results["dependencies"].items():
             self.results["dependencies"][file] = sorted(list(set(deps_list)))
 
+        self.results["findings"] = self._deduplicate_findings(self.results["findings"])
+
         severity_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
         self.results["findings"].sort(key=lambda x: severity_order.get(x["severity"], 99))
 
-        score_map = {"CRITICAL": 95, "HIGH": 75, "MEDIUM": 50, "LOW": 10}
-        if self.results["findings"]:
-            self.results["risk_score"] = max([score_map.get(f["severity"], 0) for f in self.results["findings"]])
-        else:
-            self.results["risk_score"] = 0
+        self.results["risk_score"] = self._calculate_risk_score(self.results["findings"])
 
         return self.results, current_repo_state

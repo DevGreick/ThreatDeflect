@@ -1,0 +1,40 @@
+name: New Detection Rule
+description: Suggest a new detection rule for ThreatDeflect
+labels: ["detection-rule"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What should this rule detect?
+      description: Describe the threat or secret pattern
+    validations:
+      required: true
+
+  - type: input
+    id: pattern
+    attributes:
+      label: Regex Pattern (if known)
+      description: The regex pattern for detection
+      placeholder: "(?i)api[_-]?key\\s*[:=]\\s*['\"]?[A-Za-z0-9]{20,}"
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Suggested Severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+        - Info
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples
+      description: Provide examples of what should and should NOT be detected
+      render: shell
+    validations:
+      required: true

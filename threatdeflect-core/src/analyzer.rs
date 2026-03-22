@@ -409,9 +409,12 @@ impl SecretAnalyzer {
             let hex_str = caps.get(1).or_else(|| caps.get(2));
             if let Some(m) = hex_str {
                 let raw = m.as_str().replace("\\x", "");
+                if raw.len() % 2 != 0 {
+                    continue;
+                }
                 let bytes: Result<Vec<u8>, _> = (0..raw.len())
                     .step_by(2)
-                    .map(|i| u8::from_str_radix(&raw[i..i.saturating_add(2).min(raw.len())], 16))
+                    .map(|i| u8::from_str_radix(&raw[i..i + 2], 16))
                     .collect();
                 if let Ok(bytes) = bytes {
                     if let Ok(decoded) = String::from_utf8(bytes) {
@@ -472,7 +475,12 @@ impl SecretAnalyzer {
                     let hex: String = chars.by_ref().take(2).collect();
                     if hex.len() == 2 {
                         if let Ok(byte) = u8::from_str_radix(&hex, 16) {
-                            decoded.push(byte as char);
+                            if byte.is_ascii() {
+                                decoded.push(byte as char);
+                            } else {
+                                decoded.push('%');
+                                decoded.push_str(&hex);
+                            }
                             continue;
                         }
                     }
@@ -516,48 +524,49 @@ impl SecretAnalyzer {
     ) {
         for caps in self.char_array_regex.captures_iter(content) {
             if let Some(m) = caps.get(1) {
-                let nums: Result<Vec<u8>, _> = m
+                let parsed: Vec<Option<u8>> = m
                     .as_str()
                     .split(',')
-                    .map(|s| s.trim().parse::<u32>())
-                    .map(|r| r.map(|n| if n <= 127 { n as u8 } else { 0 }))
+                    .map(|s| s.trim().parse::<u32>().ok().and_then(|n| u8::try_from(n).ok()))
                     .collect();
-                if let Ok(bytes) = nums {
-                    if bytes.iter().all(|&b| b >= 32 && b <= 126) {
-                        let decoded = String::from_utf8_lossy(&bytes).to_string();
-                        for url_match in self.url_regex.find_iter(&decoded) {
-                            let url = url_match.as_str();
-                            if is_public_ioc(url) {
-                                let conf = (0.80 * context_multiplier).clamp(0.0, 1.0);
-                                result.findings.push(Finding {
-                                    description: format!(
-                                        "Obfuscated URL in char array: {}...",
-                                        &url[..std::cmp::min(50, url.len())]
-                                    ),
-                                    finding_type: "Hidden IOC (Char Array)".to_string(),
-                                    file: file_path.to_string(),
-                                    match_content: url.to_string(),
-                                    confidence: conf,
-                                    file_context,
-                                });
-                                result.iocs.push(Ioc {
-                                    ioc: url.to_string(),
-                                    source_file: file_path.to_string(),
-                                });
-                            }
+                if parsed.iter().any(|b| b.is_none()) {
+                    continue;
+                }
+                let bytes: Vec<u8> = parsed.into_iter().flatten().collect();
+                if bytes.iter().all(|&b| b >= 32 && b <= 126) {
+                    let decoded = String::from_utf8_lossy(&bytes).to_string();
+                    for url_match in self.url_regex.find_iter(&decoded) {
+                        let url = url_match.as_str();
+                        if is_public_ioc(url) {
+                            let conf = (0.80 * context_multiplier).clamp(0.0, 1.0);
+                            result.findings.push(Finding {
+                                description: format!(
+                                    "Obfuscated URL in char array: {}...",
+                                    &url[..std::cmp::min(50, url.len())]
+                                ),
+                                finding_type: "Hidden IOC (Char Array)".to_string(),
+                                file: file_path.to_string(),
+                                match_content: url.to_string(),
+                                confidence: conf,
+                                file_context,
+                            });
+                            result.iocs.push(Ioc {
+                                ioc: url.to_string(),
+                                source_file: file_path.to_string(),
+                            });
                         }
-                        for (id, re) in &self.secret_patterns {
-                            if re.is_match(&decoded) {
-                                let conf = (0.85 * context_multiplier).clamp(0.0, 1.0);
-                                result.findings.push(Finding {
-                                    description: format!("Secret '{}' hidden in char array", id),
-                                    finding_type: "Hidden IOC (Char Array)".to_string(),
-                                    file: file_path.to_string(),
-                                    match_content: decoded.clone(),
-                                    confidence: conf,
-                                    file_context,
-                                });
-                            }
+                    }
+                    for (id, re) in &self.secret_patterns {
+                        if re.is_match(&decoded) {
+                            let conf = (0.85 * context_multiplier).clamp(0.0, 1.0);
+                            result.findings.push(Finding {
+                                description: format!("Secret '{}' hidden in char array", id),
+                                finding_type: "Hidden IOC (Char Array)".to_string(),
+                                file: file_path.to_string(),
+                                match_content: decoded.clone(),
+                                confidence: conf,
+                                file_context,
+                            });
                         }
                     }
                 }
@@ -671,7 +680,17 @@ mod tests {
     #[test]
     fn test_detect_hex_url() {
         let analyzer = test_analyzer();
-        let hex_url = "687474703a2f2f6576696c2e61747461636b65722e636f6d2f7374eal";
+        let hex_url = "687474703a2f2f6576696c2e61747461636b65722e636f6d2f payload";
+        let content = format!("var payload = '{}';", hex_url);
+        let result = analyzer.analyze_content(&content, "src/loader.js", "loader.js");
+        assert!(result.findings.iter().all(|f| f.finding_type != "Hidden IOC (Hex)"),
+            "odd-length hex should be skipped, not decoded");
+    }
+
+    #[test]
+    fn test_detect_valid_hex_url() {
+        let analyzer = test_analyzer();
+        let hex_url = "687474703a2f2f6576696c2e61747461636b65722e636f6d2f7374656164";
         let content = format!("var payload = '{}';", hex_url);
         let result = analyzer.analyze_content(&content, "src/loader.js", "loader.js");
         let hex_findings: Vec<_> = result
@@ -679,10 +698,7 @@ mod tests {
             .iter()
             .filter(|f| f.finding_type == "Hidden IOC (Hex)")
             .collect();
-        assert!(
-            hex_findings.is_empty() || !hex_findings.is_empty(),
-            "hex detection ran without panic"
-        );
+        assert!(!hex_findings.is_empty(), "should detect URL hidden in valid hex string");
     }
 
     #[test]

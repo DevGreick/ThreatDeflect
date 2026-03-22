@@ -1,0 +1,3 @@
+[workspace]
+members = ["threatdeflect-core", "rust_core"]
+resolver = "2"

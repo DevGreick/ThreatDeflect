@@ -1,0 +1,19 @@
+[package]
+name = "threatdeflect-core"
+version = "0.1.1"
+edition = "2021"
+description = "High-performance secret detection, confidence scoring, and IOC extraction engine"
+license = "GPL-3.0"
+repository = "https://github.com/DevGreick/threatdeflect"
+keywords = ["security", "secrets", "detection", "ioc", "threat-intelligence"]
+categories = ["development-tools", "parser-implementations"]
+readme = "README.md"
+
+[dependencies]
+regex = "1.11"
+base64 = "0.22"
+url = "2.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2"
+zeroize = { version = "1.8", features = ["derive"] }

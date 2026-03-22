@@ -34,7 +34,7 @@ pub fn list_scannable_files(root: &Path) -> Result<Vec<PathBuf>, AnalyzerError> 
     }
 
     let walker = WalkBuilder::new(root)
-        .hidden(true)
+        .hidden(false)
         .git_ignore(true)
         .git_global(true)
         .git_exclude(true)

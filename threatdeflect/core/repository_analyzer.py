@@ -73,7 +73,7 @@ class RepositoryAnalyzer:
 
         except Exception as e:
             logging.error(f"FALHA CRITICA: Erro ao configurar analisador: {e}", exc_info=True)
-            raise ValueError("Falha na inicializacao da configuracao ou do motor Rust.") from e
+            raise ValueError("Falha na inicializacao da configuracao ou do Rust engine.") from e
 
     def _update_status(self, message: str) -> None:
         if self.status_callback:
@@ -98,7 +98,7 @@ class RepositoryAnalyzer:
         try:
             rust_findings, rust_iocs = self.rust_analyzer.process_file_content(content, file_path, file_name)
         except Exception as e:
-            logging.error(f"Erro no motor Rust ao processar {file_path}: {e}")
+            logging.error(f"Erro no Rust engine ao processar {file_path}: {e}")
             return [], [], {}
 
         local_findings: List[Dict[str, Any]] = []

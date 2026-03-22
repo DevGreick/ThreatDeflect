@@ -121,7 +121,7 @@ threatdeflect --help
 |------|-----------|
 | **Executavel (Release)** | Nenhum |
 | **Codigo-fonte** | Python 3.11+, Git |
-| **Motor Rust (opcional)** | Rust toolchain, Maturin |
+| **Rust engine (opcional)** | Rust toolchain, Maturin |
 | **IA local (opcional)** | Ollama instalado e em execucao |
 
 ### Com `uv` (recomendado)

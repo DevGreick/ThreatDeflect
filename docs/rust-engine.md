@@ -1,12 +1,12 @@
-# Motor Rust
+# Rust Engine
 
-O ThreatDeflect possui um motor hibrido em Rust compilado via **Maturin/PyO3** que oferece performance nativa para as operacoes mais pesadas da analise.
+O ThreatDeflect possui um hybrid engine em Rust compilado via **Maturin/PyO3** que oferece performance nativa para as operacoes mais pesadas da analise.
 
-O motor e publicado como crate independente no crates.io: [**threatdeflect-core**](https://crates.io/crates/threatdeflect-core)
+O engine e publicado como crate independente no crates.io: [**threatdeflect-core**](https://crates.io/crates/threatdeflect-core)
 
 ---
 
-## O que o motor Rust acelera
+## O que o Rust engine acelera
 
 | Funcao | Descricao |
 |--------|-----------|
@@ -69,7 +69,7 @@ Documentacao completa da crate: [docs.rs/threatdeflect-core](https://docs.rs/thr
 
 ## Fallback automatico
 
-O motor Rust e **opcional** no contexto Python. Se o modulo `threatdeflect_rs` nao estiver compilado, o ThreatDeflect usa automaticamente a implementacao em Python puro. Todas as funcionalidades permanecem disponiveis, apenas com menor performance em analises grandes.
+O Rust engine e **opcional** no contexto Python. Se o modulo `threatdeflect_rs` nao estiver compilado, o ThreatDeflect usa automaticamente a implementacao em Python puro. Todas as funcionalidades permanecem disponiveis, apenas com menor performance em analises grandes.
 
 ---
 
@@ -96,7 +96,7 @@ O comando `maturin develop --release` compila o modulo Rust e instala diretament
 ### Verificando a instalacao
 
 ```python
-python -c "import threatdeflect_rs; print('Motor Rust disponivel')"
+python -c "import threatdeflect_rs; print('Rust engine available')"
 ```
 
 ---

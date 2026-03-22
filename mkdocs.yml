@@ -1,5 +1,5 @@
 site_name: ThreatDeflect
-site_description: Ferramenta de análise de ameaças com motor híbrido Python + Rust
+site_description: Ferramenta de análise de ameaças com hybrid Python + Rust engine
 site_author: DevGreick
 site_url: https://devgreick.github.io/ThreatDeflect/
 repo_name: DevGreick/ThreatDeflect
@@ -89,8 +89,8 @@ nav:
   - Instalacao: installation.md
   - Guia da GUI: gui-guide.md
   - Referencia CLI: cli-reference.md
-  - Motor de Regras: rules-engine.md
-  - Motor Rust: rust-engine.md
+  - Rules Engine: rules-engine.md
+  - Rust Engine: rust-engine.md
   - APIs: api-configuration.md
   - IA Local: ai-integration.md
   - Contribuicao: contributing.md

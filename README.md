@@ -141,7 +141,7 @@ threatdeflect file suspeito.exe
 threatdeflect file malware.dll trojan.pdf --ai llama3 -o auditoria.xlsx
 ```
 
-> Nenhum arquivo e enviado — a verificacao e feita apenas pelo hash SHA256.
+> Nenhum arquivo e enviado a verificacao e feita apenas pelo hash SHA256.
 
 ### Varrer repositorios
 

@@ -30,7 +30,9 @@ pub mod confidence;
 pub mod context;
 pub mod error;
 pub mod types;
+pub mod walker;
 
 pub use analyzer::SecretAnalyzer;
 pub use error::AnalyzerError;
 pub use types::{AnalysisResult, FileContext, Finding, Ioc};
+pub use walker::list_scannable_files;

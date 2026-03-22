@@ -15,7 +15,7 @@ jobs:
 
       - name: Block unauthorized direct pushes
         run: |
-          ALLOWED_EMAILS="github.distrust024@passinbox.com 39761156+DevGreick@users.noreply.github.com devgreick@users.noreply.github.com jacksongreick@protonmail.com 41898282+github-actions[bot]@users.noreply.github.com"
+          ALLOWED_EMAILS="github.distrust024@passinbox.com 39761156+DevGreick@users.noreply.github.com devgreick@users.noreply.github.com jacksongreick@protonmail.com 41898282+github-actions[bot]@users.noreply.github.com noreply@github.com"
 
           AUTHOR_EMAIL=$(git log --format='%ae' -1)
           COMMITTER_EMAIL=$(git log --format='%ce' -1)

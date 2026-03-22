@@ -8,4 +8,10 @@ pub enum AnalyzerError {
         rule_id: String,
         source: regex::Error,
     },
+
+    #[error("I/O error at '{path}': {source}")]
+    IoError {
+        path: String,
+        source: std::io::Error,
+    },
 }

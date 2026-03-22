@@ -1,7 +1,8 @@
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use std::collections::HashMap;
-use threatdeflect_core::{AnalysisResult, SecretAnalyzer};
+use std::path::Path;
+use threatdeflect_core::{AnalysisResult, SecretAnalyzer, list_scannable_files};
 
 #[pyclass]
 struct RustAnalyzer {
@@ -58,8 +59,16 @@ fn iocs_to_pylist<'py>(py: Python<'py>, result: &AnalysisResult) -> PyResult<Bou
     Ok(iocs)
 }
 
+#[pyfunction]
+fn list_files(root: &str) -> PyResult<Vec<String>> {
+    let files = list_scannable_files(Path::new(root))
+        .map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))?;
+    Ok(files.into_iter().filter_map(|p| p.to_str().map(String::from)).collect())
+}
+
 #[pymodule]
 fn threatdeflect_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<RustAnalyzer>()?;
+    m.add_function(wrap_pyfunction!(list_files, m)?)?;
     Ok(())
 }

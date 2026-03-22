@@ -17,6 +17,7 @@
 <img src="https://img.shields.io/badge/status-active-success.svg" alt="Project Status">
 <a href="https://doc.qt.io/qtforpython/"><img src="https://img.shields.io/badge/GUI-PySide6-purple.svg" alt="GUI Framework"></a>
 <img src="https://img.shields.io/badge/engine-Rust+Python-orange.svg?logo=rust" alt="Rust Engine">
+<a href="https://crates.io/crates/threatdeflect-core"><img src="https://img.shields.io/crates/v/threatdeflect-core.svg?logo=rust&label=crates.io" alt="Crates.io"></a>
 </div>
 
 <br>
@@ -165,6 +166,27 @@ Com [Ollama](https://ollama.com) instalado, o ThreatDeflect gera resumos executi
 ollama pull llama3
 threatdeflect ioc -f targets.txt --ai llama3
 ```
+
+---
+
+## Crate Rust (uso independente)
+
+O motor de deteccao e publicado como crate independente no [crates.io](https://crates.io/crates/threatdeflect-core), permitindo integracao direta em projetos Rust sem depender do Python:
+
+```toml
+[dependencies]
+threatdeflect-core = "0.1"
+```
+
+```rust
+use threatdeflect_core::SecretAnalyzer;
+
+let rules = vec![("AWS Key".to_string(), r"AKIA[0-9A-Z]{16}".to_string())];
+let analyzer = SecretAnalyzer::new(rules, vec![])?;
+let result = analyzer.analyze_content("key = AKIAIOSFODNN7EXAMPLE1", "config.py", "config.py");
+```
+
+Documentacao da crate: [docs.rs/threatdeflect-core](https://docs.rs/threatdeflect-core)
 
 ---
 

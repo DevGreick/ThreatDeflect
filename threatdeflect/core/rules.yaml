@@ -512,6 +512,8 @@ severity_map:
   SSH Key Injection: HIGH
   Sensitive File Access: HIGH
   Validated Generic API Key: HIGH
+  Remote Code Loading: HIGH
+  Paste Service C2: HIGH
   Validated Suspicious Command: MEDIUM
   Crontab Injection: MEDIUM
   Tunnel Service URL: MEDIUM
@@ -522,13 +524,13 @@ severity_map:
   Twilio SID: MEDIUM
   JSON Web Token (JWT): MEDIUM
   Google OAuth Client ID: MEDIUM
+  Suspicious JS Keyword: MEDIUM
+  High Entropy String: MEDIUM
 
   # LOW: Indicadores fracos, dependem de validacao por IA
   Sensitive File: LOW
-  High Entropy String: LOW
   Generic API Key: LOW
   Suspicious Command: LOW
-  Suspicious JS Keyword: LOW
   Invisible Whitespace: LOW
 
 # --- REGRAS DE DETECCAO ---
@@ -705,6 +707,16 @@ rules:
   # Desserializacao insegura permite RCE: pickle, yaml.unsafe_load, PHP unserialize
   - id: Unsafe Deserialization
     pattern: '(pickle\.loads?\s*\(|yaml\.unsafe_load\s*\(|marshal\.loads?\s*\(|phpinfo\s*\(\s*\)|unserialize\s*\()'
+
+  # ── Remote Code Loading (fetch + eval/exec) ──
+  # Busca codigo de URL externa e executa: padrao classico de supply chain attack
+  - id: Remote Code Loading
+    pattern: '(?i)(fetch|axios|https?\.get|request|got)\s*\([^)]*\).*\.(then|catch|await)\s*.*\b(eval|Function|exec|execSync|child_process)\b|(eval|Function|new\s+Function)\s*\(\s*(await\s+)?(fetch|axios|https?\.get|response\.(text|data|body))\b'
+
+  # ── Paste Service C2 (C2/exfiltration via paste services) ──
+  # URLs de servicos de paste usados como C2, staging ou exfiltracao de dados
+  - id: Paste Service C2
+    pattern: '(?i)https?://[a-z0-9.-]*\b(npoint\.io|pastebin\.com|paste\.ee|hastebin\.com|dpaste\.org|ghostbin\.|rentry\.(co|org)|controlc\.com|justpaste\.it|paste\.mozilla\.org|termbin\.com|ix\.io|sprunge\.us|0x0\.st|transfer\.sh|file\.io)\b'
 
   # ── Whitespace invisivel (tecnicas de ofuscacao) ──
   - id: Invisible Whitespace

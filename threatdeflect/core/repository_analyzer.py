@@ -63,7 +63,8 @@ class RepositoryAnalyzer:
                 if not rule_id or not pattern:
                     continue
 
-                if "command" in rule_id.lower() or "execution" in rule_id.lower():
+                suspicious_keywords = ("command", "execution", "c2", "loading", "injection", "hook", "mount", "deserialization", "whitespace")
+                if any(kw in rule_id.lower() for kw in suspicious_keywords):
                     suspicious_map[rule_id] = pattern
                 else:
                     rules_map[rule_id] = pattern
@@ -105,8 +106,12 @@ class RepositoryAnalyzer:
         for f in rust_findings:
             f_type = f["type"]
             f["confidence"] = validate_finding(f)
-            confidence = f["confidence"]
             f["severity"] = self.severity_map.get(f_type, "LOW")
+
+            if f["severity"] in ("CRITICAL", "HIGH") and f["confidence"] < self.CONFIDENCE_AUTO_ACCEPT:
+                f["confidence"] = max(f["confidence"], 0.70)
+
+            confidence = f["confidence"]
 
             if confidence < self.CONFIDENCE_AUTO_DISCARD:
                 logging.debug(f"Auto-descartado (conf={confidence:.2f}): {f_type} em {file_path}")
@@ -380,6 +385,52 @@ class RepositoryAnalyzer:
                     f = items_to_analyze[0]
                     self._add_finding(f["description"], f["file"], f["type"], severity="LOW")
 
+    def _correlate_findings(self) -> None:
+        findings = self.results.get("findings", [])
+        iocs = self.results.get("extracted_iocs", [])
+        if not findings:
+            return
+
+        files_with_eval: set = set()
+        files_with_entropy: set = set()
+        files_with_external_url: set = set()
+
+        eval_types = {"Suspicious JS Keyword", "Remote Code Loading", "Encoded Payload Execution"}
+        entropy_types = {"High Entropy String"}
+
+        for f in findings:
+            ftype = f.get("type", "")
+            fpath = f.get("file", "")
+            if ftype in eval_types:
+                files_with_eval.add(fpath)
+            if ftype in entropy_types:
+                files_with_entropy.add(fpath)
+
+        for ioc in iocs:
+            files_with_external_url.add(ioc.get("source_file", ""))
+
+        correlated_files = files_with_eval & files_with_external_url
+
+        for f in findings:
+            fpath = f.get("file", "")
+            ftype = f.get("type", "")
+
+            if fpath in correlated_files and ftype in eval_types:
+                f["severity"] = "HIGH"
+                f["correlated"] = True
+                f["description"] = f.get("description", "") + " [CORRELADO: eval + URL externa no mesmo arquivo]"
+
+            if fpath in correlated_files and ftype in entropy_types:
+                f["severity"] = "HIGH"
+                f["correlated"] = True
+                f["description"] = f.get("description", "") + " [CORRELADO: payload ofuscado + URL externa]"
+
+            if fpath in files_with_eval and fpath in files_with_entropy:
+                if ftype in entropy_types and f.get("severity") != "HIGH":
+                    f["severity"] = "MEDIUM"
+                    f["correlated"] = True
+                    f["description"] = f.get("description", "") + " [CORRELADO: entropia alta + eval no mesmo arquivo]"
+
     def _calculate_risk_score(self, findings: List[Dict[str, Any]]) -> int:
         if not findings:
             return 0
@@ -508,6 +559,8 @@ class RepositoryAnalyzer:
         self._analyze_dependencies()
         self._check_extracted_iocs_reputation()
         self._validate_findings_with_ai()
+
+        self._correlate_findings()
 
         self._update_status("Finalizando analise...")
         for file, deps_list in self.results["dependencies"].items():

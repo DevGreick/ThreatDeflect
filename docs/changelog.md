@@ -14,6 +14,12 @@
 - `eval` + URL externa no mesmo arquivo = promovido para HIGH automaticamente
 - Payload ofuscado (alta entropia) + URL externa = promovido para HIGH
 
+### Deteccao de Ofuscacao
+
+- **Hidden IOC (Hex)**: detecta URLs e secrets escondidos em strings hexadecimais (`0x68747470...` ou `\x68\x74\x74\x70...`)
+- **Hidden IOC (URL Encoded)**: detecta connection strings ofuscadas com percent-encoding (`postgres%3A%2F%2F...`)
+- **Hidden IOC (Char Array)**: detecta URLs e secrets escondidos em arrays de char codes (`[104,116,116,112,...]`)
+
 ### Novas Regras de Deteccao
 
 - **Remote Code Loading**: detecta padroes de fetch + eval/exec (supply chain attack)

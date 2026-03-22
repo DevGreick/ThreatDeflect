@@ -15,17 +15,10 @@ jobs:
 
       - name: Block unauthorized direct pushes
         run: |
-          COMMITTER_EMAIL=$(git log --format='%ce' -1)
-
-          # Allow GitHub merge commits (PR merges and web edits)
-          if [ "$COMMITTER_EMAIL" = "noreply@github.com" ]; then
-            echo "GitHub merge commit, skipping author check."
-            exit 0
-          fi
-
           ALLOWED_EMAILS="github.distrust024@passinbox.com 39761156+DevGreick@users.noreply.github.com devgreick@users.noreply.github.com jacksongreick@protonmail.com 41898282+github-actions[bot]@users.noreply.github.com"
 
           AUTHOR_EMAIL=$(git log --format='%ae' -1)
+          COMMITTER_EMAIL=$(git log --format='%ce' -1)
           AUTHOR_NAME=$(git log --format='%an' -1)
 
           AUTHOR_OK=0

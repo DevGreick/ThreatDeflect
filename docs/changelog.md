@@ -1,5 +1,40 @@
 # Changelog
 
+## v3.2.0 (2026-03-22)
+
+### Crate Rust Publicada
+
+- Motor de deteccao extraido para crate independente [`threatdeflect-core`](https://crates.io/crates/threatdeflect-core) no crates.io
+- Cargo workspace com dois crates: `threatdeflect-core` (lib pura) e `rust_core` (wrapper PyO3)
+- Qualquer projeto Rust pode usar o motor de deteccao sem depender do Python
+
+### Correlacao de Findings
+
+- Novo sistema de correlacao que cruza findings no mesmo arquivo
+- `eval` + URL externa no mesmo arquivo = promovido para HIGH automaticamente
+- Payload ofuscado (alta entropia) + URL externa = promovido para HIGH
+
+### Novas Regras de Deteccao
+
+- **Remote Code Loading**: detecta padroes de fetch + eval/exec (supply chain attack)
+- **Paste Service C2**: detecta URLs de npoint.io, pastebin.com e 15+ servicos de paste usados como C2/staging
+- `Suspicious JS Keyword` promovido de LOW para MEDIUM
+- `High Entropy String` promovido de LOW para MEDIUM
+- Severity boost automatico para findings HIGH/CRITICAL com confidence baixa do Rust
+
+### Seguranca de Memoria
+
+- `zeroize` no `Drop` de `Finding` e `Ioc` (secrets limpos da memoria)
+- `serde(deny_unknown_fields)` em todos os tipos deserializaveis
+- `finding_type` agora usa o ID real da regra em vez de "Suspicious Command" generico
+
+### Documentacao
+
+- README atualizado com badge crates.io e secao de uso da crate Rust
+- `rust-engine.md` reescrito com exemplo de uso, arquitetura do workspace e tabela de seguranca
+
+---
+
 ## v3.1.0 (2026-03-15)
 
 ### Motor de Deteccao Reescrito

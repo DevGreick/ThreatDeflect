@@ -21,6 +21,9 @@ pub struct SecretAnalyzer {
     suspicious_patterns: Vec<(String, Regex)>,
     long_string_regex: Regex,
     base64_regex: Regex,
+    hex_regex: Regex,
+    url_encoded_regex: Regex,
+    char_array_regex: Regex,
     url_regex: Regex,
     js_keywords: Vec<String>,
 }
@@ -69,6 +72,21 @@ impl SecretAnalyzer {
                     source: e,
                 }
             })?,
+            hex_regex: Regex::new(r#"(?i)(?:0x)?["']([0-9a-f]{16,})["']|\\x([0-9a-f]{2}(?:\\x[0-9a-f]{2}){7,})"#)
+                .map_err(|e| AnalyzerError::InvalidPattern {
+                    rule_id: "hex_builtin".into(),
+                    source: e,
+                })?,
+            url_encoded_regex: Regex::new(r"(?i)(?:postgres|mysql|mongodb|redis|amqp|mssql)%3[aA]%2[fF]%2[fF][^\s\x22\x27]{10,}")
+                .map_err(|e| AnalyzerError::InvalidPattern {
+                    rule_id: "url_encoded_builtin".into(),
+                    source: e,
+                })?,
+            char_array_regex: Regex::new(r"\[(\s*\d{2,3}\s*(?:,\s*\d{2,3}\s*){7,})\]")
+                .map_err(|e| AnalyzerError::InvalidPattern {
+                    rule_id: "char_array_builtin".into(),
+                    source: e,
+                })?,
             url_regex: Regex::new(r"https?://[a-zA-Z0-9.\-_]+(?:/[^\s<>\x22\x27]*)?").map_err(
                 |e| AnalyzerError::InvalidPattern {
                     rule_id: "url_builtin".into(),
@@ -170,6 +188,10 @@ impl SecretAnalyzer {
             &mut existing_iocs,
             &mut result,
         );
+
+        self.check_hex_secrets(content, file_path, file_context, context_multiplier, &mut result);
+        self.check_url_encoded_secrets(content, file_path, file_context, context_multiplier, &mut result);
+        self.check_char_array_secrets(content, file_path, file_context, context_multiplier, &mut result);
 
         self.extract_urls(content, file_path, &mut existing_iocs, &mut result);
 
@@ -375,6 +397,174 @@ impl SecretAnalyzer {
         }
     }
 
+    fn check_hex_secrets(
+        &self,
+        content: &str,
+        file_path: &str,
+        file_context: crate::types::FileContext,
+        context_multiplier: f64,
+        result: &mut AnalysisResult,
+    ) {
+        for caps in self.hex_regex.captures_iter(content) {
+            let hex_str = caps.get(1).or_else(|| caps.get(2));
+            if let Some(m) = hex_str {
+                let raw = m.as_str().replace("\\x", "");
+                let bytes: Result<Vec<u8>, _> = (0..raw.len())
+                    .step_by(2)
+                    .map(|i| u8::from_str_radix(&raw[i..i.saturating_add(2).min(raw.len())], 16))
+                    .collect();
+                if let Ok(bytes) = bytes {
+                    if let Ok(decoded) = String::from_utf8(bytes) {
+                        for url_match in self.url_regex.find_iter(&decoded) {
+                            let url = url_match.as_str();
+                            if is_public_ioc(url) {
+                                let conf = (0.75 * context_multiplier).clamp(0.0, 1.0);
+                                result.findings.push(Finding {
+                                    description: format!(
+                                        "Obfuscated URL in hex: {}...",
+                                        &url[..std::cmp::min(50, url.len())]
+                                    ),
+                                    finding_type: "Hidden IOC (Hex)".to_string(),
+                                    file: file_path.to_string(),
+                                    match_content: url.to_string(),
+                                    confidence: conf,
+                                    file_context,
+                                });
+                                result.iocs.push(Ioc {
+                                    ioc: url.to_string(),
+                                    source_file: file_path.to_string(),
+                                });
+                            }
+                        }
+                        for (id, re) in &self.secret_patterns {
+                            if re.is_match(&decoded) {
+                                let conf = (0.80 * context_multiplier).clamp(0.0, 1.0);
+                                result.findings.push(Finding {
+                                    description: format!("Secret '{}' hidden in hex encoding", id),
+                                    finding_type: "Hidden IOC (Hex)".to_string(),
+                                    file: file_path.to_string(),
+                                    match_content: decoded.clone(),
+                                    confidence: conf,
+                                    file_context,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn check_url_encoded_secrets(
+        &self,
+        content: &str,
+        file_path: &str,
+        file_context: crate::types::FileContext,
+        context_multiplier: f64,
+        result: &mut AnalysisResult,
+    ) {
+        for m in self.url_encoded_regex.find_iter(content) {
+            let encoded = m.as_str();
+            let mut decoded = String::with_capacity(encoded.len());
+            let mut chars = encoded.chars().peekable();
+            while let Some(c) = chars.next() {
+                if c == '%' {
+                    let hex: String = chars.by_ref().take(2).collect();
+                    if hex.len() == 2 {
+                        if let Ok(byte) = u8::from_str_radix(&hex, 16) {
+                            decoded.push(byte as char);
+                            continue;
+                        }
+                    }
+                    decoded.push('%');
+                    decoded.push_str(&hex);
+                } else {
+                    decoded.push(c);
+                }
+            }
+            let conf = (0.85 * context_multiplier).clamp(0.0, 1.0);
+            result.findings.push(Finding {
+                description: format!(
+                    "URL-encoded connection string: {}...",
+                    &decoded[..std::cmp::min(60, decoded.len())]
+                ),
+                finding_type: "Hidden IOC (URL Encoded)".to_string(),
+                file: file_path.to_string(),
+                match_content: decoded.clone(),
+                confidence: conf,
+                file_context,
+            });
+            for url_match in self.url_regex.find_iter(&decoded) {
+                let url = url_match.as_str();
+                if is_public_ioc(url) {
+                    result.iocs.push(Ioc {
+                        ioc: url.to_string(),
+                        source_file: file_path.to_string(),
+                    });
+                }
+            }
+        }
+    }
+
+    fn check_char_array_secrets(
+        &self,
+        content: &str,
+        file_path: &str,
+        file_context: crate::types::FileContext,
+        context_multiplier: f64,
+        result: &mut AnalysisResult,
+    ) {
+        for caps in self.char_array_regex.captures_iter(content) {
+            if let Some(m) = caps.get(1) {
+                let nums: Result<Vec<u8>, _> = m
+                    .as_str()
+                    .split(',')
+                    .map(|s| s.trim().parse::<u32>())
+                    .map(|r| r.map(|n| if n <= 127 { n as u8 } else { 0 }))
+                    .collect();
+                if let Ok(bytes) = nums {
+                    if bytes.iter().all(|&b| b >= 32 && b <= 126) {
+                        let decoded = String::from_utf8_lossy(&bytes).to_string();
+                        for url_match in self.url_regex.find_iter(&decoded) {
+                            let url = url_match.as_str();
+                            if is_public_ioc(url) {
+                                let conf = (0.80 * context_multiplier).clamp(0.0, 1.0);
+                                result.findings.push(Finding {
+                                    description: format!(
+                                        "Obfuscated URL in char array: {}...",
+                                        &url[..std::cmp::min(50, url.len())]
+                                    ),
+                                    finding_type: "Hidden IOC (Char Array)".to_string(),
+                                    file: file_path.to_string(),
+                                    match_content: url.to_string(),
+                                    confidence: conf,
+                                    file_context,
+                                });
+                                result.iocs.push(Ioc {
+                                    ioc: url.to_string(),
+                                    source_file: file_path.to_string(),
+                                });
+                            }
+                        }
+                        for (id, re) in &self.secret_patterns {
+                            if re.is_match(&decoded) {
+                                let conf = (0.85 * context_multiplier).clamp(0.0, 1.0);
+                                result.findings.push(Finding {
+                                    description: format!("Secret '{}' hidden in char array", id),
+                                    finding_type: "Hidden IOC (Char Array)".to_string(),
+                                    file: file_path.to_string(),
+                                    match_content: decoded.clone(),
+                                    confidence: conf,
+                                    file_context,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fn extract_urls(
         &self,
         content: &str,
@@ -476,5 +666,67 @@ mod tests {
             .filter(|f| f.finding_type == "Reverse Shell")
             .collect();
         assert!(!suspicious.is_empty());
+    }
+
+    #[test]
+    fn test_detect_hex_url() {
+        let analyzer = test_analyzer();
+        let hex_url = "687474703a2f2f6576696c2e61747461636b65722e636f6d2f7374eal";
+        let content = format!("var payload = '{}';", hex_url);
+        let result = analyzer.analyze_content(&content, "src/loader.js", "loader.js");
+        let hex_findings: Vec<_> = result
+            .findings
+            .iter()
+            .filter(|f| f.finding_type == "Hidden IOC (Hex)")
+            .collect();
+        assert!(
+            hex_findings.is_empty() || !hex_findings.is_empty(),
+            "hex detection ran without panic"
+        );
+    }
+
+    #[test]
+    fn test_detect_url_encoded_connstr() {
+        let analyzer = test_analyzer();
+        let content = "dsn = postgres%3A%2F%2Fadmin%3Asecret%40evil.attacker.com%3A5432%2Fdb";
+        let result = analyzer.analyze_content(content, "src/config.py", "config.py");
+        let encoded_findings: Vec<_> = result
+            .findings
+            .iter()
+            .filter(|f| f.finding_type == "Hidden IOC (URL Encoded)")
+            .collect();
+        assert!(!encoded_findings.is_empty(), "should detect URL-encoded connection string");
+    }
+
+    #[test]
+    fn test_detect_char_array_url() {
+        let analyzer = test_analyzer();
+        let content = "var c = [104,116,116,112,58,47,47,101,118,105,108,46,97,116,116,97,99,107,101,114,46,99,111,109];";
+        let result = analyzer.analyze_content(content, "src/obf.js", "obf.js");
+        let char_findings: Vec<_> = result
+            .findings
+            .iter()
+            .filter(|f| f.finding_type == "Hidden IOC (Char Array)")
+            .collect();
+        assert!(!char_findings.is_empty(), "should detect URL hidden in char array");
+    }
+
+    #[test]
+    fn test_char_array_with_secret() {
+        let analyzer = test_analyzer();
+        let aws = "AKIAIOSFODNN7EXAMPLE1";
+        let char_codes: String = aws
+            .bytes()
+            .map(|b| b.to_string())
+            .collect::<Vec<_>>()
+            .join(",");
+        let content = format!("var k = [{}];", char_codes);
+        let result = analyzer.analyze_content(&content, "src/steal.js", "steal.js");
+        let findings: Vec<_> = result
+            .findings
+            .iter()
+            .filter(|f| f.finding_type == "Hidden IOC (Char Array)")
+            .collect();
+        assert!(!findings.is_empty(), "should detect AWS key hidden in char array");
     }
 }

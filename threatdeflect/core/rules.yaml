@@ -504,6 +504,9 @@ severity_map:
   Datadog API Key: HIGH
   Remote Script Execution: HIGH
   Hidden IOC (Base64): HIGH
+  Hidden IOC (Hex): HIGH
+  Hidden IOC (URL Encoded): HIGH
+  Hidden IOC (Char Array): HIGH
   PowerShell Encoded: HIGH
   NPM Dangerous Hook: HIGH
   Cloud Metadata SSRF: HIGH

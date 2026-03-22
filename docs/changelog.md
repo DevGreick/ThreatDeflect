@@ -4,9 +4,9 @@
 
 ### Crate Rust Publicada
 
-- Motor de deteccao extraido para crate independente [`threatdeflect-core`](https://crates.io/crates/threatdeflect-core) no crates.io
+- Detection engine extraido para crate independente [`threatdeflect-core`](https://crates.io/crates/threatdeflect-core) no crates.io
 - Cargo workspace com dois crates: `threatdeflect-core` (lib pura) e `rust_core` (wrapper PyO3)
-- Qualquer projeto Rust pode usar o motor de deteccao sem depender do Python
+- Qualquer projeto Rust pode usar o detection engine sem depender do Python
 
 ### Correlacao de Findings
 
@@ -43,11 +43,11 @@
 
 ## v3.1.0 (2026-03-15)
 
-### Motor de Deteccao Reescrito
+### Detection Engine Reescrito
 
 As regras de deteccao (`rules.yaml`) foram completamente reescritas com foco em precisao, reduzindo falsos positivos em ~99%.
 
-- 46 regras de deteccao (14 novas), todas compativeis com o motor Rust
+- 46 regras de deteccao (14 novas), todas compativeis com o Rust engine
 - Novas regras: AWS Secret Key, Telegram Bot Token, Discord Bot Token, Stripe, Firebase, Azure Storage, DigitalOcean, Supabase, SendGrid, Mailgun, Datadog, NPM Auth Token, PyPI Token, Database Connection String
 - Novas regras de ataque: Discord Webhook, Slack Webhook, Cloud Metadata SSRF, Crypto Mining, JNDI Injection, Encoded Payload Execution, Docker Socket Mount, SSH Key Injection, Crontab Injection, Sensitive File Access, GCP Service Account Key, Tunnel Service URL, Unsafe Deserialization
 - Regras como JWT, Heroku e comandos suspeitos agora exigem contexto
@@ -63,7 +63,7 @@ As regras de deteccao (`rules.yaml`) foram completamente reescritas com foco em 
 
 - Executaveis standalone para Linux, Windows e macOS
 - Pipeline CI/CD automatizado com GitHub Actions (PyInstaller + Maturin/PyO3)
-- Motor Rust embutido nos executaveis
+- Rust engine embutido nos executaveis
 
 ### Interface Renovada
 
@@ -79,7 +79,7 @@ As regras de deteccao (`rules.yaml`) foram completamente reescritas com foco em 
 
 ## v3.0.0 (2025-12-28)
 
-- Motor hibrido Rust + Python via PyO3/Maturin
+- Hybrid Rust + Python engine via PyO3/Maturin
 - Interface GUI redesenhada com PySide6
 - CLI com Typer e Rich
 - Integracao com Ollama para IA local

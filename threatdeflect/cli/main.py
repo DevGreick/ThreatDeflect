@@ -200,7 +200,7 @@ app.add_typer(config_app)
 
 
 def cli_log_callback(message: str) -> None:
-    """Callback para imprimir logs na consola, usado pelo motor."""
+    """Callback para imprimir logs na consola, usado pelo engine."""
     logging.info(message)
     console.log(f"[dim]{T('cli_log_engine_prefix')}[/] {message}")
 

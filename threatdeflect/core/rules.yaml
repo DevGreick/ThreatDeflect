@@ -538,7 +538,7 @@ severity_map:
 
 # --- REGRAS DE DETECCAO ---
 # Cada regra tem um id (referenciado no severity_map) e um pattern (regex).
-# O motor Rust separa regras por tipo:
+# O Rust engine separa regras por tipo:
 #   - IDs com "command" ou "execution" → so disparam fora de contextos seguros
 #   - Demais → tratados como deteccao de segredos/credenciais
 rules:

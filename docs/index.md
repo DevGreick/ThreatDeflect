@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/engine-Rust+Python-orange.svg?logo=rust" alt="Engine">
 </div>
 
-<p align="center" class="td-tagline"><strong>Ferramenta de analise de ameacas com motor hibrido Python + Rust que automatiza a consulta de IOCs, repositorios e arquivos em multiplas fontes, gera relatorios e cria resumos com IA local.</strong></p>
+<p align="center" class="td-tagline"><strong>Ferramenta de analise de ameacas com hybrid Python + Rust engine que automatiza a consulta de IOCs, repositorios e arquivos em multiplas fontes, gera relatorios e cria resumos com IA local.</strong></p>
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/DevGreick/ThreatDeflect/main/Abertura.png" alt="Screenshot" width="700"/>
@@ -42,7 +42,7 @@
 ### Destaques
 
 - **Interface dupla**: GUI completa (PySide6) e CLI robusta (Typer/Rich)
-- **Motor hibrido Rust + Python**: deteccao de segredos com performance nativa via PyO3
+- **Hybrid Rust + Python engine**: deteccao de segredos com performance nativa via PyO3
 - **IA local**: resumos executivos com Ollama, sem enviar dados para nuvem
 - **Bilingue**: Portugues (BR) e Ingles, configuravel via CLI ou GUI
 - **Relatorios**: Excel (.xlsx) e PDF com dados detalhados
@@ -58,8 +58,8 @@
 | [Instalacao](installation.md) | Executaveis, pip, uv, codigo-fonte |
 | [Guia da GUI](gui-guide.md) | Como usar a interface grafica |
 | [Referencia CLI](cli-reference.md) | Todos os comandos com exemplos |
-| [Motor de Regras](rules-engine.md) | rules.yaml, calibragem, lista de regras |
-| [Motor Rust](rust-engine.md) | Compilacao e funcionamento do motor hibrido |
+| [Rules Engine](rules-engine.md) | rules.yaml, calibragem, lista de regras |
+| [Rust Engine](rust-engine.md) | Compilacao e funcionamento do hybrid engine |
 | [APIs](api-configuration.md) | Como configurar VirusTotal, Shodan, etc. |
 | [IA Local](ai-integration.md) | Setup do Ollama e modelos recomendados |
 | [Contribuicao](contributing.md) | Como contribuir com o projeto |

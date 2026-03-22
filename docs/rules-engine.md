@@ -1,4 +1,4 @@
-# Motor de Regras
+# Rules Engine
 
 O ThreatDeflect usa o arquivo `rules.yaml` para controlar toda a logica de deteccao. Este arquivo define o que e analisado, o que e ignorado e como cada achado e classificado.
 

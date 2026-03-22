@@ -4,7 +4,7 @@
 </div>
 
 <div align="center">
-<strong>Ferramenta de analise de ameacas com motor hibrido Python + Rust que automatiza a consulta de IOCs, repositorios e arquivos em multiplas fontes, gera relatorios e cria resumos com IA local.</strong>
+<strong>Ferramenta de analise de ameacas com hybrid Python + Rust engine que automatiza a consulta de IOCs, repositorios e arquivos em multiplas fontes, gera relatorios e cria resumos com IA local.</strong>
 <br><br>
 ⭐ De uma estrela se o projeto te ajudou! | <a href="https://github.com/DevGreick/ThreatDeflect/releases"><strong>Baixar »</strong></a> | <a href="https://devgreick.github.io/ThreatDeflect/"><strong>Documentacao completa »</strong></a>
 </div>
@@ -33,7 +33,7 @@
 - **Varredura de repositorios** GitHub/GitLab (segredos, backdoors, dependencias maliciosas)
 - **Reputacao de arquivos** por hash SHA256
 - **46 regras de deteccao** para segredos, crypto miners, SSRF, reverse shells e mais
-- **Motor Rust** de alta performance via PyO3
+- **Rust engine** de alta performance via PyO3
 - **IA local** com Ollama (nenhum dado sai da sua maquina)
 - **GUI + CLI** bilingues (PT-BR / EN-US)
 - **Relatorios** em Excel e PDF
@@ -83,7 +83,7 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-Para topicos avancados (motor Rust, regras customizadas, Ollama), consulte a **[Documentacao completa](https://devgreick.github.io/ThreatDeflect/)**.
+Para topicos avancados (Rust engine, regras customizadas, Ollama), consulte a **[Documentacao completa](https://devgreick.github.io/ThreatDeflect/)**.
 
 ---
 
@@ -171,7 +171,7 @@ threatdeflect ioc -f targets.txt --ai llama3
 
 ## Crate Rust (uso independente)
 
-O motor de deteccao e publicado como crate independente no [crates.io](https://crates.io/crates/threatdeflect-core), permitindo integracao direta em projetos Rust sem depender do Python:
+O detection engine e publicado como crate independente no [crates.io](https://crates.io/crates/threatdeflect-core), permitindo integracao direta em projetos Rust sem depender do Python:
 
 ```toml
 [dependencies]

@@ -45,7 +45,7 @@ uv sync
 uv run threatdeflect --help
 uv run threatdeflect-gui
 
-# Motor Rust (opcional)
+# Rust engine (opcional)
 pip install maturin
 maturin develop --release
 ```
@@ -58,13 +58,13 @@ maturin develop --release
 threatdeflect/
   cli/main.py              # CLI (Typer)
   ui/main_gui.py           # GUI (PySide6)
-  core/engine.py           # Motor de analise
+  core/engine.py           # Analysis engine
   core/repository_analyzer.py  # Analisador de repositorios
   core/rules.yaml          # Regras de deteccao
   api/api_client.py        # Cliente de APIs
   utils/utils.py           # Utilidades
 rust_core/
-  src/lib.rs               # Motor Rust (PyO3)
+  src/lib.rs               # Rust engine (PyO3)
   Cargo.toml               # Config Rust
 ```
 

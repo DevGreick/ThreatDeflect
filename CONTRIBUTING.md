@@ -40,6 +40,7 @@ pytest
 - Follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages
 - Add tests for new detection rules
 - Ensure all tests pass before submitting
+- Direct pushes to `main` and `dev` are blocked by a CI check (`validate-author`). Always use Pull Requests
 
 ## Adding Detection Rules
 

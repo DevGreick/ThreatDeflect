@@ -297,9 +297,11 @@ class RepositoryAnalyzer:
         self._update_status(msg_status)
 
         def _mask_secret(value: str) -> str:
+            if len(value) <= 4:
+                return "*" * len(value)
             if len(value) <= 8:
-                return value[:2] + "*" * (len(value) - 2)
-            return value[:4] + "*" * (len(value) - 8) + value[-4:]
+                return value[0] + "*" * (len(value) - 1)
+            return value[:3] + "*" * (len(value) - 6) + value[-3:]
 
         def validate_single(finding: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
             snippet = finding.get("match_content", "")
@@ -382,8 +384,6 @@ class RepositoryAnalyzer:
 
                 except Exception as e:
                     logging.error(f"Erro na validacao IA: {e}")
-                    f = items_to_analyze[0]
-                    self._add_finding(f["description"], f["file"], f["type"], severity="LOW")
 
     def _correlate_findings(self) -> None:
         findings = self.results.get("findings", [])
@@ -412,6 +412,9 @@ class RepositoryAnalyzer:
         correlated_files = files_with_eval & files_with_external_url
 
         for f in findings:
+            if f.get("correlated"):
+                continue
+
             fpath = f.get("file", "")
             ftype = f.get("type", "")
 
@@ -419,14 +422,12 @@ class RepositoryAnalyzer:
                 f["severity"] = "HIGH"
                 f["correlated"] = True
                 f["description"] = f.get("description", "") + " [CORRELADO: eval + URL externa no mesmo arquivo]"
-
-            if fpath in correlated_files and ftype in entropy_types:
+            elif fpath in correlated_files and ftype in entropy_types:
                 f["severity"] = "HIGH"
                 f["correlated"] = True
                 f["description"] = f.get("description", "") + " [CORRELADO: payload ofuscado + URL externa]"
-
-            if fpath in files_with_eval and fpath in files_with_entropy:
-                if ftype in entropy_types and f.get("severity") != "HIGH":
+            elif fpath in files_with_eval and fpath in files_with_entropy:
+                if ftype in entropy_types:
                     f["severity"] = "MEDIUM"
                     f["correlated"] = True
                     f["description"] = f.get("description", "") + " [CORRELADO: entropia alta + eval no mesmo arquivo]"
@@ -455,11 +456,12 @@ class RepositoryAnalyzer:
             return 0
 
         base_score = (total_weighted / total_weight) * 100
+        volume_bonus = min(len(findings) * 0.5, 15)
         diversity_bonus = min(len(unique_types) * 3, 15)
         production_ratio = production_count / len(findings) if findings else 0
         production_bonus = 10 if production_ratio > 0.5 else 0
 
-        return min(int(base_score + diversity_bonus + production_bonus), 100)
+        return min(int(base_score + volume_bonus + diversity_bonus + production_bonus), 100)
 
     def _deduplicate_findings(self, findings: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         if not findings:

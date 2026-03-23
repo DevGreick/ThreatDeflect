@@ -26,5 +26,15 @@ jobs:
       - name: Install MkDocs Material
         run: pip install mkdocs-material mkdocs-minify-plugin
 
-      - name: Build and deploy
-        run: mkdocs gh-deploy --force
+      - name: Build MkDocs into docs subdirectory
+        run: mkdocs build -d site/docs
+
+      - name: Copy landing page to root
+        run: cp docs/landing/index.html site/index.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          force_orphan: true

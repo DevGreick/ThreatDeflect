@@ -1,7 +1,7 @@
 site_name: ThreatDeflect
 site_description: Ferramenta de análise de ameaças com hybrid Python + Rust engine
 site_author: DevGreick
-site_url: https://devgreick.github.io/ThreatDeflect/
+site_url: https://devgreick.github.io/ThreatDeflect/docs/
 repo_name: DevGreick/ThreatDeflect
 repo_url: https://github.com/DevGreick/ThreatDeflect
 copyright: ""

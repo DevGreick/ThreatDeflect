@@ -318,20 +318,14 @@ section{position:relative;z-index:2;padding:8rem 2rem}
 .arch-diagram{
   background:var(--bg-card);
   border:1px solid var(--border);
-  padding:3rem;
+  padding:3rem 1rem;
   overflow-x:auto;
   text-align:center;
   transition:border-color 0.3s;
 }
 .arch-diagram:hover{border-color:var(--border-hover)}
-.arch-diagram pre{
-  font-size:clamp(0.55rem,1.1vw,0.85rem);
-  line-height:1.5;
-  color:var(--green);
-  text-align:left;
-  display:inline-block;
-  text-shadow:0 0 8px #00ff4130;
-}
+.arch-diagram svg{transition:filter 0.3s}
+.arch-diagram:hover svg{filter:drop-shadow(0 0 8px #00ff4120)}
 
 /* Footer */
 .footer{
@@ -516,24 +510,67 @@ pip install threatdeflect
   <div class="container">
     <h2 class="section-title fade-in">// Architecture</h2>
     <div class="arch-diagram fade-in">
-      <pre>
-                    ThreatDeflect
-                         |
-            +------------+------------+
-            |                         |
-        GUI (Tk)                  CLI (Typer)
-            |                         |
-            +------------+------------+
-                         |
-                   Python Engine
-                   (Correlation, AI, APIs)
-                         |
-                   Rust Core (PyO3)
-                   (Regex, Entropy, Decode)
-                         |
-                  threatdeflect-core
-                    (crates.io)
-      </pre>
+      <svg viewBox="0 0 600 520" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;width:100%">
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <linearGradient id="line-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00ff41" stop-opacity="0.8"/><stop offset="100%" stop-color="#00ff41" stop-opacity="0.2"/></linearGradient>
+        </defs>
+        <style>
+          .node-box{fill:#0a0c10;stroke:#00ff4140;stroke-width:1.5;rx:4}
+          .node-box:hover{stroke:#00ff41;fill:#00ff4108}
+          .node-label{fill:#00ff41;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;text-anchor:middle}
+          .node-sub{fill:#b0b8c0;font-family:'JetBrains Mono',monospace;font-size:10px;text-anchor:middle;font-weight:300}
+          .conn{stroke:#00ff4140;stroke-width:1.5;stroke-dasharray:4 3}
+          .conn-solid{stroke:#00ff4160;stroke-width:1.5}
+        </style>
+
+        <!-- ThreatDeflect (top) -->
+        <rect class="node-box" x="175" y="10" width="250" height="44" filter="url(#glow)"/>
+        <text class="node-label" x="300" y="37">ThreatDeflect</text>
+
+        <!-- Lines to GUI and CLI -->
+        <line class="conn-solid" x1="240" y1="54" x2="160" y2="100"/>
+        <line class="conn-solid" x1="360" y1="54" x2="440" y2="100"/>
+
+        <!-- GUI -->
+        <rect class="node-box" x="70" y="100" width="180" height="44"/>
+        <text class="node-label" x="160" y="127">GUI (Tkinter)</text>
+
+        <!-- CLI -->
+        <rect class="node-box" x="350" y="100" width="180" height="44"/>
+        <text class="node-label" x="440" y="127">CLI (Typer)</text>
+
+        <!-- Lines down to Python Engine -->
+        <line class="conn-solid" x1="160" y1="144" x2="240" y2="200"/>
+        <line class="conn-solid" x1="440" y1="144" x2="360" y2="200"/>
+
+        <!-- Python Engine -->
+        <rect class="node-box" x="150" y="200" width="300" height="60"/>
+        <text class="node-label" x="300" y="227">Python Engine</text>
+        <text class="node-sub" x="300" y="247">Correlation, AI, APIs</text>
+
+        <!-- Line down -->
+        <line class="conn" x1="300" y1="260" x2="300" y2="310"/>
+        <circle cx="300" cy="285" r="3" fill="#00ff41" opacity="0.5"/>
+
+        <!-- Rust Core -->
+        <rect class="node-box" x="150" y="310" width="300" height="60"/>
+        <text class="node-label" x="300" y="337">Rust Core (PyO3)</text>
+        <text class="node-sub" x="300" y="357">Regex, Entropy, Decode</text>
+
+        <!-- Line down -->
+        <line class="conn" x1="300" y1="370" x2="300" y2="420"/>
+        <circle cx="300" cy="395" r="3" fill="#00ff41" opacity="0.5"/>
+
+        <!-- threatdeflect-core -->
+        <rect class="node-box" x="150" y="420" width="300" height="60" stroke="#00ff4180" stroke-width="2"/>
+        <text class="node-label" x="300" y="447">threatdeflect-core</text>
+        <text class="node-sub" x="300" y="467">crates.io</text>
+
+        <!-- Side labels -->
+        <text x="58" y="160" fill="#4a5568" font-family="JetBrains Mono" font-size="9" text-anchor="middle" transform="rotate(-90 58 160)">INTERFACE</text>
+        <text x="58" y="340" fill="#4a5568" font-family="JetBrains Mono" font-size="9" text-anchor="middle" transform="rotate(-90 58 340)">ENGINE</text>
+      </svg>
     </div>
   </div>
 </section>

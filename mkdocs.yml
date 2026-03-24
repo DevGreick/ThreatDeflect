@@ -43,6 +43,7 @@ theme:
     - announce.dismiss
   icon:
     repo: fontawesome/brands/github
+    alternate: material/web
 
 extra_css:
   - stylesheets/extra.css

@@ -24,7 +24,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install MkDocs Material
-        run: pip install mkdocs-material mkdocs-minify-plugin
+        run: pip install mkdocs-material mkdocs-minify-plugin mkdocs-static-i18n
 
       - name: Build MkDocs into docs subdirectory
         run: mkdocs build -d site/docs

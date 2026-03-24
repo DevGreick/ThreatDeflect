@@ -49,7 +49,31 @@ extra_css:
 
 plugins:
   - search:
-      lang: pt
+      lang:
+        - pt
+        - en
+  - i18n:
+      default_language: pt
+      docs_structure: suffix
+      languages:
+        - locale: pt
+          default: true
+          name: Português
+          build: true
+        - locale: en
+          name: English
+          build: true
+          nav:
+            - Home: index.md
+            - Installation: installation.md
+            - GUI Guide: gui-guide.md
+            - CLI Reference: cli-reference.md
+            - Rules Engine: rules-engine.md
+            - Rust Engine: rust-engine.md
+            - APIs: api-configuration.md
+            - Local AI: ai-integration.md
+            - Contributing: contributing.md
+            - Changelog: changelog.md
   - minify:
       minify_html: true
 
@@ -98,6 +122,13 @@ nav:
 
 extra:
   generator: false
+  alternate:
+    - name: Português
+      link: /ThreatDeflect/docs/
+      lang: pt
+    - name: English
+      link: /ThreatDeflect/docs/en/
+      lang: en
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/DevGreick

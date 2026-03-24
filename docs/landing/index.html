@@ -342,6 +342,15 @@ section{position:relative;z-index:2;padding:8rem 2rem}
 }
 .footer-links a:hover{color:var(--green)}
 
+/* Lang toggle */
+.lang-btn{
+  background:transparent;border:1px solid var(--border-hover);
+  color:var(--green);font-family:inherit;font-size:0.65rem;
+  letter-spacing:2px;padding:0.3rem 0.8rem;cursor:pointer;
+  transition:all 0.3s;text-transform:uppercase;
+}
+.lang-btn:hover{background:var(--green);color:var(--bg)}
+
 /* Scroll animations */
 .fade-in{opacity:0;transform:translateY(40px);transition:opacity 0.8s ease,transform 0.8s ease}
 .fade-in.visible{opacity:1;transform:translateY(0)}
@@ -385,12 +394,13 @@ section{position:relative;z-index:2;padding:8rem 2rem}
     <li><a href="https://github.com/DevGreick/ThreatDeflect">GITHUB</a></li>
     <li><a href="https://crates.io/crates/threatdeflect-core">CRATES.IO</a></li>
     <li><a href="https://devgreick.github.io/ThreatDeflect/docs/changelog/">CHANGELOG</a></li>
+    <li><button id="lang-toggle" class="lang-btn" onclick="toggleLang()">PT-BR</button></li>
   </ul>
 </nav>
 
 <section class="hero">
   <div class="container">
-    <div class="hero-badge">Open Source Threat Analysis Engine</div>
+    <div class="hero-badge" data-i18n="badge">Open Source Threat Analysis Engine</div>
     <div class="ascii-logo" aria-label="THREATDEFLECT">
  _____ _   _ ____  _____    _  _____  ____  _____ _____ _     _____ ____ _____
 |_   _| | | |  _ \| ____|  / \|_   _||  _ \| ____|  ___| |   | ____/ ___|_   _|
@@ -398,13 +408,13 @@ section{position:relative;z-index:2;padding:8rem 2rem}
   | | |  _  |  _ &lt;| |___ / ___ \| |  | |_| | |___|  _| | |___| |__| |___  | |
   |_| |_| |_|_| \_\_____/_/   \_\_|  |____/|_____|_|   |_____|_____\____| |_|
     </div>
-    <p class="hero-subtitle">
+    <p class="hero-subtitle" data-i18n-html="subtitle">
       <strong>Secret detection</strong>, <strong>IOC extraction</strong>, and <strong>supply chain attack</strong> identification.
       From reconnaissance to report, fully automated.
     </p>
     <div class="hero-cta">
-      <a href="https://github.com/DevGreick/ThreatDeflect" class="btn btn-primary">Star on GitHub</a>
-      <a href="https://devgreick.github.io/ThreatDeflect/docs/" class="btn">Read Docs</a>
+      <a href="https://github.com/DevGreick/ThreatDeflect" class="btn btn-primary" data-i18n="btn_star">Star on GitHub</a>
+      <a href="https://devgreick.github.io/ThreatDeflect/docs/" class="btn" data-i18n="btn_docs">Read Docs</a>
     </div>
     <div class="hero-tech">
       <span>Rust + Python</span>
@@ -423,19 +433,19 @@ section{position:relative;z-index:2;padding:8rem 2rem}
     <div class="stats fade-in">
       <div class="stat-item">
         <div><span class="stat-number" data-target="46">0</span><span class="stat-suffix">+</span></div>
-        <div class="stat-label">Detection Rules</div>
+        <div class="stat-label" data-i18n="stat_rules">Detection Rules</div>
       </div>
       <div class="stat-item">
         <div><span class="stat-number" data-target="4">0</span></div>
-        <div class="stat-label">Deobfuscation Engines</div>
+        <div class="stat-label" data-i18n="stat_deobf">Deobfuscation Engines</div>
       </div>
       <div class="stat-item">
         <div><span class="stat-number" data-target="6">0</span></div>
-        <div class="stat-label">Threat Intel APIs</div>
+        <div class="stat-label" data-i18n="stat_apis">Threat Intel APIs</div>
       </div>
       <div class="stat-item">
         <div><span class="stat-number" data-target="3">0</span></div>
-        <div class="stat-label">Platforms</div>
+        <div class="stat-label" data-i18n="stat_plat">Platforms</div>
       </div>
     </div>
   </div>
@@ -443,31 +453,31 @@ section{position:relative;z-index:2;padding:8rem 2rem}
 
 <section>
   <div class="container">
-    <h2 class="section-title fade-in">// Features</h2>
+    <h2 class="section-title fade-in" data-i18n="title_features">// Features</h2>
     <div class="features-grid">
       <div class="feature-card fade-in">
-        <h3><span class="feature-icon">&gt;</span> Detection Engine</h3>
-        <p>46 regex-based rules covering AWS keys, GitHub tokens, database credentials, reverse shells, crypto mining, and supply chain patterns.</p>
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat1_title">Detection Engine</span></h3>
+        <p data-i18n="feat1_desc">46 regex-based rules covering AWS keys, GitHub tokens, database credentials, reverse shells, crypto mining, and supply chain patterns.</p>
       </div>
       <div class="feature-card fade-in">
-        <h3><span class="feature-icon">&gt;</span> Confidence Scoring</h3>
-        <p>Shannon entropy, file context classification, assignment detection, and placeholder filtering. Scores 0.0-1.0 with intelligent routing.</p>
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat2_title">Confidence Scoring</span></h3>
+        <p data-i18n="feat2_desc">Shannon entropy, file context classification, assignment detection, and placeholder filtering. Scores 0.0-1.0 with intelligent routing.</p>
       </div>
       <div class="feature-card fade-in">
-        <h3><span class="feature-icon">&gt;</span> Obfuscation Detection</h3>
-        <p>Automatically decodes Base64, hex, URL-encoded, and character array obfuscated secrets and IOCs.</p>
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat3_title">Obfuscation Detection</span></h3>
+        <p data-i18n="feat3_desc">Automatically decodes Base64, hex, URL-encoded, and character array obfuscated secrets and IOCs.</p>
       </div>
       <div class="feature-card fade-in">
-        <h3><span class="feature-icon">&gt;</span> Cross-Evidence Correlation</h3>
-        <p>Crosses findings in the same file. Code that fetches external payload and executes it becomes a single HIGH severity alert.</p>
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat4_title">Cross-Evidence Correlation</span></h3>
+        <p data-i18n="feat4_desc">Crosses findings in the same file. Code that fetches external payload and executes it becomes a single HIGH severity alert.</p>
       </div>
       <div class="feature-card fade-in">
-        <h3><span class="feature-icon">&gt;</span> Threat Intel APIs</h3>
-        <p>Integrates with VirusTotal, Shodan, AbuseIPDB, URLHaus, MalwareBazaar. All optional, works fully offline.</p>
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat5_title">Threat Intel APIs</span></h3>
+        <p data-i18n="feat5_desc">Integrates with VirusTotal, Shodan, AbuseIPDB, URLHaus, MalwareBazaar. All optional, works fully offline.</p>
       </div>
       <div class="feature-card fade-in">
-        <h3><span class="feature-icon">&gt;</span> Local AI Analysis</h3>
-        <p>Summarize findings with Ollama. No data leaves your machine. Supports any local model.</p>
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat6_title">Local AI Analysis</span></h3>
+        <p data-i18n="feat6_desc">Summarize findings with Ollama. No data leaves your machine. Supports any local model.</p>
       </div>
     </div>
   </div>
@@ -475,10 +485,10 @@ section{position:relative;z-index:2;padding:8rem 2rem}
 
 <section>
   <div class="container">
-    <h2 class="section-title fade-in">// Quick Start</h2>
+    <h2 class="section-title fade-in" data-i18n="title_quickstart">// Quick Start</h2>
     <div class="quickstart-grid">
       <div class="code-block fade-in">
-        <div class="code-block-header">Rust Crate</div>
+        <div class="code-block-header" data-i18n="code_rust">Rust Crate</div>
         <pre><span class="cm">cargo add threatdeflect-core</span>
 
 <span class="kw">use</span> threatdeflect_core::SecretAnalyzer;
@@ -489,17 +499,17 @@ section{position:relative;z-index:2;padding:8rem 2rem}
 );</pre>
       </div>
       <div class="code-block fade-in">
-        <div class="code-block-header">CLI Tool</div>
-        <pre><span class="cm"># Install</span>
+        <div class="code-block-header" data-i18n="code_cli">CLI Tool</div>
+        <pre><span class="cm" data-i18n="cli_install"># Install</span>
 pip install threatdeflect
 
-<span class="cm"># Scan a repository</span>
+<span class="cm" data-i18n="cli_scan"># Scan a repository</span>
 <span class="kw">threatdeflect</span> repo https://github.com/org/repo
 
-<span class="cm"># Analyze IOCs</span>
+<span class="cm" data-i18n="cli_ioc"># Analyze IOCs</span>
 <span class="kw">threatdeflect</span> ioc 8.8.8.8 https://suspicious.com
 
-<span class="cm"># With AI summary</span>
+<span class="cm" data-i18n="cli_ai"># With AI summary</span>
 <span class="kw">threatdeflect</span> repo https://github.com/org/repo <span class="str">--ai</span> llama3</pre>
       </div>
     </div>
@@ -508,7 +518,7 @@ pip install threatdeflect
 
 <section>
   <div class="container">
-    <h2 class="section-title fade-in">// Architecture</h2>
+    <h2 class="section-title fade-in" data-i18n="title_arch">// Architecture</h2>
     <div class="arch-diagram fade-in">
       <svg viewBox="0 0 520 490" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;width:100%">
         <defs>
@@ -571,7 +581,7 @@ pip install threatdeflect
 </section>
 
 <footer class="footer">
-  <p>Built by <a href="https://github.com/DevGreick">DevGreick</a></p>
+  <p data-i18n-html="footer_built">Built by <a href="https://github.com/DevGreick">DevGreick</a></p>
   <p>Rust + Python | GPL-3.0</p>
   <div class="footer-links">
     <a href="https://github.com/DevGreick/ThreatDeflect">GITHUB</a>
@@ -582,6 +592,97 @@ pip install threatdeflect
 
 <script>
 (function(){
+  var i18n = {
+    en: {
+      badge: "Open Source Threat Analysis Engine",
+      subtitle: '<strong>Secret detection</strong>, <strong>IOC extraction</strong>, and <strong>supply chain attack</strong> identification. From reconnaissance to report, fully automated.',
+      btn_star: "Star on GitHub",
+      btn_docs: "Read Docs",
+      stat_rules: "Detection Rules",
+      stat_deobf: "Deobfuscation Engines",
+      stat_apis: "Threat Intel APIs",
+      stat_plat: "Platforms",
+      title_features: "// Features",
+      feat1_title: "Detection Engine",
+      feat1_desc: "46 regex-based rules covering AWS keys, GitHub tokens, database credentials, reverse shells, crypto mining, and supply chain patterns.",
+      feat2_title: "Confidence Scoring",
+      feat2_desc: "Shannon entropy, file context classification, assignment detection, and placeholder filtering. Scores 0.0-1.0 with intelligent routing.",
+      feat3_title: "Obfuscation Detection",
+      feat3_desc: "Automatically decodes Base64, hex, URL-encoded, and character array obfuscated secrets and IOCs.",
+      feat4_title: "Cross-Evidence Correlation",
+      feat4_desc: "Crosses findings in the same file. Code that fetches external payload and executes it becomes a single HIGH severity alert.",
+      feat5_title: "Threat Intel APIs",
+      feat5_desc: "Integrates with VirusTotal, Shodan, AbuseIPDB, URLHaus, MalwareBazaar. All optional, works fully offline.",
+      feat6_title: "Local AI Analysis",
+      feat6_desc: "Summarize findings with Ollama. No data leaves your machine. Supports any local model.",
+      title_quickstart: "// Quick Start",
+      code_rust: "Rust Crate",
+      code_cli: "CLI Tool",
+      cli_install: "# Install",
+      cli_scan: "# Scan a repository",
+      cli_ioc: "# Analyze IOCs",
+      cli_ai: "# With AI summary",
+      title_arch: "// Architecture",
+      footer_built: 'Built by <a href="https://github.com/DevGreick">DevGreick</a>'
+    },
+    pt: {
+      badge: "Engine Open Source de Análise de Ameaças",
+      subtitle: 'Detecção de <strong>secrets</strong>, extração de <strong>IOCs</strong> e identificação de <strong>supply chain attacks</strong>. Do reconhecimento ao relatório, totalmente automatizado.',
+      btn_star: "Star no GitHub",
+      btn_docs: "Ver Docs",
+      stat_rules: "Regras de Detecção",
+      stat_deobf: "Engines de Deobfuscação",
+      stat_apis: "APIs de Threat Intel",
+      stat_plat: "Plataformas",
+      title_features: "// Funcionalidades",
+      feat1_title: "Engine de Detecção",
+      feat1_desc: "46 regras baseadas em regex cobrindo chaves AWS, tokens GitHub, credenciais de banco, reverse shells, crypto mining e padrões de supply chain.",
+      feat2_title: "Confidence Scoring",
+      feat2_desc: "Entropia Shannon, classificação de contexto de arquivo, detecção de assignment e filtragem de placeholders. Scores 0.0-1.0 com roteamento inteligente.",
+      feat3_title: "Detecção de Ofuscação",
+      feat3_desc: "Decodifica automaticamente secrets e IOCs ofuscados em Base64, hex, URL-encoded e character arrays.",
+      feat4_title: "Correlação de Evidências",
+      feat4_desc: "Cruza findings no mesmo arquivo. Código que baixa payload externo e executa o conteúdo vira um alerta único de severidade HIGH.",
+      feat5_title: "APIs de Threat Intel",
+      feat5_desc: "Integra com VirusTotal, Shodan, AbuseIPDB, URLHaus, MalwareBazaar. Todas opcionais, funciona 100% offline.",
+      feat6_title: "IA Local",
+      feat6_desc: "Resuma findings com Ollama. Nenhum dado sai da sua máquina. Suporta qualquer modelo local.",
+      title_quickstart: "// Início Rápido",
+      code_rust: "Crate Rust",
+      code_cli: "Ferramenta CLI",
+      cli_install: "# Instalar",
+      cli_scan: "# Escanear um repositório",
+      cli_ioc: "# Analisar IOCs",
+      cli_ai: "# Com resumo por IA",
+      title_arch: "// Arquitetura",
+      footer_built: 'Criado por <a href="https://github.com/DevGreick">DevGreick</a>'
+    }
+  };
+
+  var currentLang = localStorage.getItem('td-lang') || 'en';
+
+  function applyLang(lang) {
+    var strings = i18n[lang];
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var key = el.dataset.i18n;
+      if (strings[key]) el.textContent = strings[key];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(el) {
+      var key = el.dataset.i18nHtml;
+      if (strings[key]) el.innerHTML = strings[key];
+    });
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    document.getElementById('lang-toggle').textContent = lang === 'en' ? 'PT-BR' : 'EN';
+    localStorage.setItem('td-lang', lang);
+    currentLang = lang;
+  }
+
+  window.toggleLang = function() {
+    applyLang(currentLang === 'en' ? 'pt' : 'en');
+  };
+
+  if (currentLang !== 'en') applyLang(currentLang);
+
   var observer = new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(entry.isIntersecting){

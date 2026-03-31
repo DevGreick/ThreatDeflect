@@ -31,5 +31,5 @@ def test_finds_aws_key_in_file_content(mock_api_client):
     # 4. Verifica o resultado
     assert len(findings) == 1
     assert findings[0]["type"] == "AWS Key"
-    assert findings[0]["description"] == "Possível segredo 'AWS Key' exposto"
+    assert findings[0]["description"] == "Possible exposed secret 'AWS Key'"
     assert findings[0]["file"] == "src/config.js"

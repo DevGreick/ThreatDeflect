@@ -20,7 +20,7 @@ def test_rust_finds_aws_key():
 
     assert len(findings) == 1
     assert findings[0]["type"] == "AWS Key"
-    assert findings[0]["description"] == "Possível segredo 'AWS Key' exposto"
+    assert findings[0]["description"] == "Possible exposed secret 'AWS Key'"
     assert "confidence" in findings[0]
     assert "file_context" in findings[0]
     assert findings[0]["file_context"] == "Production"

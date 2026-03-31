@@ -39,7 +39,7 @@ def get_log_path() -> Path:
         if log_path_str := config.get('General', 'log_path', fallback=None):
             log_path = Path(log_path_str).resolve()
             home = Path.home().resolve()
-            if str(log_path).startswith(str(home)):
+            if log_path.is_relative_to(home):
                 log_path.parent.mkdir(parents=True, exist_ok=True)
                 return log_path
             logging.warning("log_path rejeitado: fora do diretorio home do usuario.")
@@ -77,13 +77,53 @@ def is_file_writable(filepath: str) -> bool:
     except (IOError, OSError):
         return False
 
+_CMD_METACHAR_PATTERN = re.compile(r'[%^&|!<>()"]')
+
+def _validate_updater_paths(new_asset_path: str, current_executable_path: str, app_pid: int) -> Tuple[Path, Path]:
+    if not isinstance(app_pid, int) or app_pid <= 0:
+        raise ValueError(f"PID invalido: {app_pid}")
+
+    raw_new = Path(new_asset_path)
+    raw_current = Path(current_executable_path)
+
+    if raw_new.is_symlink() or raw_current.is_symlink():
+        raise ValueError("Symlinks nao permitidos em paths do updater")
+
+    resolved_new = raw_new.resolve(strict=True)
+    resolved_current = raw_current.resolve()
+
+    temp_dir = Path(tempfile.gettempdir()).resolve()
+    if not resolved_new.is_relative_to(temp_dir):
+        raise ValueError(f"Asset path fora do diretorio temporario: {resolved_new}")
+
+    if sys.platform == "win32":
+        for p in (str(resolved_new), str(resolved_current)):
+            if _CMD_METACHAR_PATTERN.search(p):
+                raise ValueError(f"Path contem metacaracteres cmd.exe: {p}")
+    else:
+        forbidden_dirs = {Path("/etc"), Path("/usr"), Path("/bin"), Path("/sbin"), Path("/var")}
+        for forbidden in forbidden_dirs:
+            if resolved_current.is_relative_to(forbidden.resolve()):
+                raise ValueError(f"Path do executavel em diretorio protegido: {resolved_current}")
+
+    return resolved_new, resolved_current
+
+
 def create_updater_script(new_asset_path: str, current_executable_path: str, app_pid: int) -> Optional[str]:
+    try:
+        resolved_new, resolved_current = _validate_updater_paths(new_asset_path, current_executable_path, app_pid)
+    except (ValueError, OSError) as e:
+        logging.error(f"Validacao do updater falhou: {e}")
+        return None
+
     script_content = ""
     script_extension = ""
     temp_dir = tempfile.gettempdir()
 
     if sys.platform == "win32":
         script_extension = ".bat"
+        safe_new_win = str(resolved_new).replace('"', '')
+        safe_current_win = str(resolved_current).replace('"', '')
         script_content = f"""
 @echo off
 echo Aguardando o ThreatDeflect (PID: {app_pid}) fechar...
@@ -94,16 +134,16 @@ if errorlevel 1 (
     timeout /t 5 /nobreak > nul
 )
 echo Atualizando o executavel...
-move /Y "{new_asset_path}" "{current_executable_path}"
+move /Y "{safe_new_win}" "{safe_current_win}"
 echo Lancando nova versao...
-start "" "{current_executable_path}"
+start "" "{safe_current_win}"
 echo Limpando...
 (goto) 2>nul & del "%~f0"
 """
     else:
         script_extension = ".sh"
-        safe_new = shlex.quote(new_asset_path)
-        safe_current = shlex.quote(current_executable_path)
+        safe_new = shlex.quote(str(resolved_new))
+        safe_current = shlex.quote(str(resolved_current))
         script_content = f"""
 #!/bin/sh
 echo "Aguardando o ThreatDeflect (PID: {app_pid}) fechar..."
@@ -127,7 +167,7 @@ rm -- "$0"
             os.chmod(updater_path, 0o700)
 
         return updater_path
-    except Exception as e:
+    except (OSError, PermissionError) as e:
         logging.error(f"Falha ao criar script de atualizacao: {e}")
         return None
 

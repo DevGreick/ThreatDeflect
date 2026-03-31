@@ -52,9 +52,14 @@ class ApiClient:
             logging.error(f"Erro ao ler config: {e}")
             return None
 
+    @staticmethod
+    def _redact_url(url: str) -> str:
+        return urlparse(url)._replace(query="", fragment="").geturl()
+
     def _make_request(self, method: str, url: str, max_retries: int = 3, **kwargs: Any) -> Optional[Dict[str, Any]]:
         retries = 0
         backoff_factor = 2
+        safe_url = self._redact_url(url)
         while retries < max_retries:
             try:
                 response = self.session.request(method, url, timeout=20, **kwargs)
@@ -65,7 +70,7 @@ class ApiClient:
                     return {}
                 content_type = response.headers.get('Content-Type', '')
                 if 'json' not in content_type and 'javascript' not in content_type:
-                    logging.warning(f"Unexpected Content-Type: {content_type}")
+                    logging.warning("Unexpected Content-Type from %s: %s", safe_url, content_type)
                 return response.json()
             except requests.exceptions.HTTPError as e:
                 status_code = e.response.status_code if e.response else 500
@@ -74,12 +79,13 @@ class ApiClient:
                     time.sleep(wait_time)
                     retries += 1
                 else:
+                    logging.warning("Client error %s from %s", status_code, safe_url)
                     return {"error": f"Client Error {status_code}"}
-            except requests.exceptions.RequestException:
+            except requests.exceptions.RequestException as e:
+                logging.debug("Request error on %s (attempt %d): %s", safe_url, retries + 1, type(e).__name__)
                 time.sleep((backoff_factor ** retries))
                 retries += 1
-        redact_url = urlparse(url)._replace(query="").geturl()
-        logging.warning(f"Request to {redact_url} failed after {max_retries} retries.")
+        logging.warning("Request to %s failed after %d retries.", safe_url, max_retries)
         return None
 
     def check_package_vulnerability(self, package_name: str, ecosystem: str) -> Optional[List[Dict[str, Any]]]:
@@ -164,7 +170,7 @@ class ApiClient:
 
     def _get_vt_usage(self) -> Dict[str, Any]:
         if not self.vt_api_key: return {"error": "Chave não configurada"}
-        url = f"https://www.virustotal.com/api/v3/users/{self.vt_api_key.split('-')[0]}"
+        url = "https://www.virustotal.com/api/v3/users/me"
         headers = {"x-apikey": self.vt_api_key}
         data = self._make_request('GET', url, headers=headers)
         if data and 'data' in data:
@@ -212,19 +218,24 @@ class ApiClient:
             if len(path_parts) > 3 and path_parts[2] == 'tree':
                 subdirectory_path = "/".join(path_parts[4:])
 
-            all_files = []
-            
-            def get_content_recursively(path: str):
+            MAX_FILES = 5000
+            MAX_DEPTH = 20
+            all_files: List[Dict[str, Any]] = []
+
+            def get_content_recursively(path: str, depth: int = 0) -> None:
+                if depth > MAX_DEPTH or len(all_files) >= MAX_FILES:
+                    return
                 api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
                 contents = self._make_request('GET', api_url, headers=headers)
-                
+
                 if not contents or isinstance(contents, dict) and 'error' in contents:
-                    return []
-                
+                    return
                 if isinstance(contents, dict):
                     contents = [contents]
 
                 for item in contents:
+                    if len(all_files) >= MAX_FILES:
+                        return
                     if item.get('type') == 'file':
                         all_files.append({
                             'name': item.get('name'),
@@ -235,7 +246,7 @@ class ApiClient:
                             'item_url': item.get('url')
                         })
                     elif item.get('type') == 'dir':
-                        get_content_recursively(item.get('path'))
+                        get_content_recursively(item.get('path'), depth + 1)
 
             get_content_recursively(subdirectory_path)
             return all_files
@@ -252,11 +263,13 @@ class ApiClient:
             if not default_branch: return {"error": "Branch principal não encontrada"}
 
             api_url = f"https://{parsed_url.hostname}/api/v4/projects/{project_id}/repository/tree"
+            MAX_PAGES = 50
+            MAX_FILES_GL = 5000
             all_files, page = [], 1
-            while True:
+            while page <= MAX_PAGES and len(all_files) < MAX_FILES_GL:
                 params = {'recursive': True, 'per_page': 100, 'page': page}
                 if not (files := self._make_request('GET', api_url, headers=headers, params=params)): break
-                
+
                 all_files.extend([{
                     'name': f.get('name'),
                     'path': f.get('path'),

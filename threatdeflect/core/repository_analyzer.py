@@ -165,19 +165,72 @@ class RepositoryAnalyzer:
                                 "file": file_path,
                                 "type": "Remote Code Loading",
                             })
+                elif file_name == 'package-lock.json':
+                    data = json.loads(content)
+                    lock_deps = data.get('dependencies', {})
+                    if not lock_deps:
+                        lock_deps = data.get('packages', {})
+                    for dep_name, dep_info in lock_deps.items():
+                        clean_name = dep_name.replace('node_modules/', '')
+                        if clean_name and isinstance(dep_info, dict):
+                            deps.append(clean_name)
+                elif file_name == 'yarn.lock':
+                    for line in content.splitlines():
+                        if line and not line.startswith(' ') and not line.startswith('#'):
+                            pkg = line.split('@')[0].strip('"').strip()
+                            if pkg:
+                                deps.append(pkg)
                 elif file_name == 'requirements.txt':
                     for line in content.splitlines():
                         line = line.strip()
                         if not line or line.startswith('#') or line.startswith('-'):
                             continue
-                        # Strip environment markers (e.g. "; python_version >= '3.8'")
                         line = line.split(';')[0].strip()
-                        # Strip extras (e.g. "pkg[extra1,extra2]")
                         line = re.sub(r'\[.*?\]', '', line)
-                        # Strip version specifiers
                         pkg = re.split(r'[><=!~]', line)[0].strip()
                         if pkg:
                             deps.append(pkg)
+                elif file_name == 'Pipfile.lock':
+                    data = json.loads(content)
+                    for section in ('default', 'develop'):
+                        deps.extend(data.get(section, {}).keys())
+                elif file_name == 'Cargo.lock':
+                    for line in content.splitlines():
+                        stripped = line.strip()
+                        if stripped.startswith('name = '):
+                            pkg = stripped.split('"')[1] if '"' in stripped else ''
+                            if pkg:
+                                deps.append(pkg)
+                elif file_name == 'go.sum':
+                    seen_go: set = set()
+                    for line in content.splitlines():
+                        parts = line.strip().split()
+                        if parts:
+                            mod = parts[0]
+                            if mod not in seen_go:
+                                seen_go.add(mod)
+                                deps.append(mod)
+                elif file_name == 'Gemfile.lock':
+                    in_specs = False
+                    for line in content.splitlines():
+                        stripped = line.strip()
+                        if stripped == 'specs:':
+                            in_specs = True
+                            continue
+                        if in_specs and stripped and not stripped.startswith('('):
+                            pkg = stripped.split('(')[0].strip()
+                            if pkg:
+                                deps.append(pkg)
+                        elif in_specs and not line.startswith(' '):
+                            in_specs = False
+                elif file_name == 'composer.lock':
+                    data = json.loads(content)
+                    for pkg_info in data.get('packages', []):
+                        if name := pkg_info.get('name'):
+                            deps.append(name)
+                    for pkg_info in data.get('packages-dev', []):
+                        if name := pkg_info.get('name'):
+                            deps.append(name)
 
                 if deps:
                     local_deps[file_name] = deps
@@ -190,7 +243,14 @@ class RepositoryAnalyzer:
         if not self.results.get("dependencies"):
             return
 
-        ecosystem_map = {'package.json': 'npm', 'requirements.txt': 'PyPI'}
+        ecosystem_map = {
+            'package.json': 'npm', 'package-lock.json': 'npm', 'yarn.lock': 'npm',
+            'requirements.txt': 'PyPI', 'Pipfile.lock': 'PyPI',
+            'Cargo.lock': 'crates.io', 'Cargo.toml': 'crates.io',
+            'go.sum': 'Go', 'go.mod': 'Go',
+            'Gemfile.lock': 'RubyGems', 'Gemfile': 'RubyGems',
+            'composer.lock': 'Packagist', 'composer.json': 'Packagist',
+        }
         all_deps = [{'pkg': p, 'eco': eco, 'file': f} for f, pkgs in self.results["dependencies"].items() if (eco := ecosystem_map.get(os.path.basename(f))) for p in pkgs]
 
         if not all_deps:

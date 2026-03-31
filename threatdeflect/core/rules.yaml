@@ -370,13 +370,20 @@ file_scan_targets:
 
   dependency_files:
     - package.json
+    - package-lock.json
+    - yarn.lock
     - requirements.txt
     - Pipfile
+    - Pipfile.lock
     - pyproject.toml
     - go.mod
+    - go.sum
     - Cargo.toml
+    - Cargo.lock
     - Gemfile
+    - Gemfile.lock
     - composer.json
+    - composer.lock
     - pom.xml
     - build.gradle
     - build.gradle.kts

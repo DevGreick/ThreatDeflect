@@ -88,13 +88,15 @@ def test_cancel_button_requests_interruption(MockRepoWorker, qtbot, app, monkeyp
     qtbot.mouseClick(app.btn_cancel_repo_scan, Qt.LeftButton)
     mock_worker_instance.requestInterruption.assert_called_once()
 
+@patch('threatdeflect.ui.main_gui.keyring.get_password', return_value=None)
+@patch('threatdeflect.ui.main_gui.ApiClient')
 @patch('threatdeflect.ui.main_gui.clear_all_caches')
 @patch('PySide6.QtWidgets.QMessageBox.question')
-def test_clear_cache_button_flow(mock_question, mock_clear_caches, qtbot):
+def test_clear_cache_button_flow(mock_question, mock_clear_caches, MockApiClient, mock_keyring_get, qtbot):
     """Testa se o botão 'Limpar Cache' na tela de configurações funciona como esperado."""
     mock_question.return_value = QMessageBox.Yes
     mock_clear_caches.return_value = (True, "/fake/cache/path")
-    
+
     dialog = SettingsDialog()
     qtbot.addWidget(dialog)
     

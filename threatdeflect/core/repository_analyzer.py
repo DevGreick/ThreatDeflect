@@ -138,14 +138,32 @@ class RepositoryAnalyzer:
                     data = json.loads(content)
                     deps.extend(data.get('dependencies', {}).keys())
                     deps.extend(data.get('devDependencies', {}).keys())
-                    for script in ['preinstall', 'postinstall', 'prepare']:
-                        if script in data.get('scripts', {}):
+                    dangerous_hooks = {
+                        'install', 'preinstall', 'postinstall',
+                        'prepare', 'prepublish', 'prepublishOnly',
+                        'prepack', 'postpack',
+                        'preuninstall', 'postuninstall',
+                    }
+                    pipe_patterns = re.compile(
+                        r'(curl|wget|fetch)\s.*\|\s*(sh|bash|zsh|node|python)',
+                        re.IGNORECASE,
+                    )
+                    scripts_block = data.get('scripts', {})
+                    for hook_name, hook_cmd in scripts_block.items():
+                        if hook_name in dangerous_hooks:
                             severity = self.severity_map.get("NPM Dangerous Hook", "CRITICAL")
                             local_findings.append({
                                 "severity": severity,
-                                "description": f"Hook de NPM perigoso ('{script}')",
+                                "description": f"Hook de NPM perigoso ('{hook_name}')",
                                 "file": file_path,
-                                "type": "NPM Dangerous Hook"
+                                "type": "NPM Dangerous Hook",
+                            })
+                        if isinstance(hook_cmd, str) and pipe_patterns.search(hook_cmd):
+                            local_findings.append({
+                                "severity": "CRITICAL",
+                                "description": f"Script NPM com pipe remoto para shell ('{hook_name}')",
+                                "file": file_path,
+                                "type": "Remote Code Loading",
                             })
                 elif file_name == 'requirements.txt':
                     for line in content.splitlines():
@@ -297,15 +315,11 @@ class RepositoryAnalyzer:
         self._update_status(msg_status)
 
         def _mask_secret(value: str) -> str:
-            if len(value) <= 4:
-                return "*" * len(value)
-            if len(value) <= 8:
-                return value[0] + "*" * (len(value) - 1)
-            return value[:3] + "*" * (len(value) - 6) + value[-3:]
+            return f"[REDACTED:{len(value)}]"
 
         def validate_single(finding: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
             snippet = finding.get("match_content", "")
-            masked_snippet = _mask_secret(snippet) if len(snippet) > 12 else snippet
+            masked_snippet = _mask_secret(snippet)
             f_type = finding["type"]
             f_file = finding["file"]
             f_conf = finding.get("confidence", 0.5)

@@ -51,12 +51,13 @@ def test_run_ioc_analysis_success(monkeypatch, tmp_path, mock_api_responses):
 
 def test_run_ioc_analysis_no_targets_raises_error(monkeypatch, tmp_path):
     """Testa se NoValidTargetsError é levantada quando nenhum alvo válido é fornecido."""
+    monkeypatch.setattr('threatdeflect.core.engine.ApiClient', MagicMock)
     monkeypatch.setattr('threatdeflect.core.report_generator.ReportGenerator.generate_excel', lambda self, path: None)
-    
+
     targets = "\n# Apenas comentários e linhas vazias\n"
     output_file = tmp_path / "report.xlsx"
-    
-    with pytest.raises(NoValidTargetsError, match="Nenhum alvo válido"):
+
+    with pytest.raises(NoValidTargetsError, match="Nenhum alvo valido"):
         engine.run_ioc_analysis(targets, output_file)
 
 
@@ -81,8 +82,9 @@ def test_run_file_analysis_success(monkeypatch, tmp_path, mock_api_responses):
 
 def test_run_file_analysis_no_valid_files_raises_error(monkeypatch, tmp_path):
     """Testa se a exceção correta é levantada quando nenhum hash pode ser gerado."""
+    monkeypatch.setattr('threatdeflect.core.engine.ApiClient', MagicMock)
     monkeypatch.setattr('threatdeflect.core.engine.calculate_sha256', lambda path: None)
-    
+
     with pytest.raises(NoValidTargetsError):
         engine.run_file_analysis(["nonexistent_file.txt"], tmp_path / "report.xlsx")
 
@@ -106,9 +108,12 @@ def mock_repo_analyzer(monkeypatch):
 
 def test_run_repo_analysis_success(monkeypatch, tmp_path, mock_cache_manager, mock_repo_analyzer):
     """Testa o fluxo de sucesso da análise de repositórios."""
+    mock_api = MagicMock()
+    mock_api.get_local_models.return_value = []
+    mock_api.get_ai_summary.return_value = ""
+    monkeypatch.setattr('threatdeflect.core.engine.ApiClient', lambda: mock_api)
     monkeypatch.setattr('threatdeflect.core.report_generator.ReportGenerator.generate_excel', lambda self, path: None)
     monkeypatch.setattr('threatdeflect.core.engine.build_triage_prompt', lambda *a, **k: "")
-    monkeypatch.setattr('threatdeflect.api.api_client.ApiClient.get_ai_summary', lambda *a, **k: "")
     
     repo_urls = ["https://github.com/user/repo"]
     output_file = tmp_path / "report.xlsx"

@@ -49,6 +49,7 @@ Baixe o binario da pagina de [Releases](https://github.com/DevGreick/ThreatDefle
 **Windows:** clique duplo em `ThreatDeflect-GUI-Windows.exe`
 
 **Linux:**
+
 ```bash
 chmod +x ThreatDeflect-GUI-Linux
 ./ThreatDeflect-GUI-Linux
@@ -57,6 +58,7 @@ sudo mv ThreatDeflect-GUI-Linux /usr/local/bin/threatdeflect
 ```
 
 **macOS:**
+
 ```bash
 xattr -cr ThreatDeflect-GUI-macOS
 ./ThreatDeflect-GUI-macOS
@@ -65,6 +67,7 @@ xattr -cr ThreatDeflect-GUI-macOS
 ### Opcao 2 — Codigo-fonte (Python 3.11+)
 
 **Com uv (recomendado):**
+
 ```bash
 git clone https://github.com/DevGreick/ThreatDeflect.git
 cd ThreatDeflect
@@ -74,6 +77,7 @@ uv run threatdeflect-gui
 ```
 
 **Com pip:**
+
 ```bash
 git clone https://github.com/DevGreick/ThreatDeflect.git
 cd ThreatDeflect
@@ -102,6 +106,7 @@ Apenas o **VirusTotal** e obrigatorio. As demais ampliam a cobertura de analise.
 | MalwareBazaar | Opcional | Ilimitado | Gratuito, sem autenticacao |
 
 **Configurando via CLI:**
+
 ```bash
 threatdeflect config set virustotal  SUA_CHAVE
 threatdeflect config set abuseipdb   SUA_CHAVE

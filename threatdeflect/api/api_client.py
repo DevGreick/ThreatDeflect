@@ -1,6 +1,8 @@
 import configparser
+import ipaddress
 import logging
 import base64
+import socket
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -35,9 +37,9 @@ class ApiClient:
     @staticmethod
     def _get_version() -> str:
         try:
-            from importlib.metadata import version
+            from importlib.metadata import version, PackageNotFoundError
             return version("threatdeflect")
-        except Exception:
+        except PackageNotFoundError:
             return "3.0.0"
 
     def _read_config(self, section: str, key: str) -> Optional[str]:
@@ -46,7 +48,7 @@ class ApiClient:
             config_path = get_config_path()
             config.read(config_path)
             return config.get(section, key, fallback=None)
-        except Exception as e:
+        except (configparser.Error, OSError) as e:
             logging.error(f"Erro ao ler config: {e}")
             return None
 
@@ -88,7 +90,7 @@ class ApiClient:
             if response.status_code == 200 and response.content:
                 return response.json().get('vulns')
             return None
-        except Exception:
+        except (requests.exceptions.RequestException, ValueError, KeyError):
             return None
 
     def check_ip(self, ip: str) -> Optional[Dict[str, Any]]:
@@ -303,16 +305,34 @@ class ApiClient:
                 return None
             response.raise_for_status()
             return response.text
-        except Exception:
+        except (requests.exceptions.RequestException, ValueError, KeyError):
             return None
 
-    _ALLOWED_AI_HOSTS = {"localhost", "127.0.0.1", "::1", "0.0.0.0"}
+    _ALLOWED_AI_HOSTS = {"localhost", "127.0.0.1", "::1"}
+    _ALLOWED_SCHEMES = {"http", "https"}
 
     def _is_safe_ai_endpoint(self) -> bool:
         if not self.ai_endpoint:
             return False
         parsed = urlparse(self.ai_endpoint)
-        return parsed.hostname in self._ALLOWED_AI_HOSTS
+        if parsed.scheme not in self._ALLOWED_SCHEMES:
+            return False
+        hostname = parsed.hostname
+        if not hostname:
+            return False
+        if hostname not in self._ALLOWED_AI_HOSTS:
+            return False
+        try:
+            resolved = socket.getaddrinfo(hostname, parsed.port or 443, proto=socket.IPPROTO_TCP)
+            for _, _, _, _, sockaddr in resolved:
+                addr = ipaddress.ip_address(sockaddr[0])
+                if not addr.is_loopback:
+                    logging.warning(f"Endpoint AI resolveu para endereco nao-loopback: {addr}")
+                    return False
+        except (socket.gaierror, ValueError, OSError) as e:
+            logging.error(f"Falha ao resolver endpoint AI: {e}")
+            return False
+        return True
 
     def get_local_models(self) -> List[str]:
         if not self.ai_endpoint: return ["Erro: Endpoint não configurado"]
@@ -321,7 +341,7 @@ class ApiClient:
             base_url = "/".join(self.ai_endpoint.split('/')[:3])
             response = self.session.get(f"{base_url}/api/tags", timeout=5)
             return [model['name'] for model in response.json().get("models", [])]
-        except Exception:
+        except (requests.exceptions.RequestException, ValueError, KeyError):
             return ["Ollama não encontrado"]
 
     def get_ai_summary(self, model: str, prompt: str) -> str:
@@ -331,7 +351,11 @@ class ApiClient:
             payload = {"model": model, "prompt": prompt, "stream": False}
             response = self.session.post(self.ai_endpoint, json=payload, timeout=300)
             return response.json().get("response", "").strip()
-        except Exception:
+        except requests.exceptions.Timeout:
+            logging.warning("Timeout ao contatar IA para summary")
+            return "Erro: Timeout na IA"
+        except (requests.exceptions.RequestException, ValueError, KeyError) as e:
+            logging.error(f"Falha ao contatar IA: {e}")
             return "Erro ao contatar IA"
 
     def get_ai_judge_response(self, model: str, prompt: str) -> str:
@@ -341,7 +365,11 @@ class ApiClient:
             payload = {"model": model, "prompt": prompt, "stream": False}
             response = self.session.post(self.ai_endpoint, json=payload, timeout=60)
             return response.json().get("response", "").strip()
-        except Exception:
+        except requests.exceptions.Timeout:
+            logging.warning("Timeout ao contatar IA para judge")
+            return "FALHA"
+        except (requests.exceptions.RequestException, ValueError, KeyError) as e:
+            logging.error(f"Falha no AI judge: {e}")
             return "FALHA"
 
     def get_latest_release_info(self) -> Dict[str, Any]:

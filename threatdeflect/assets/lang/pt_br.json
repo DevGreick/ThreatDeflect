@@ -129,5 +129,34 @@
     "cli_main_epilog_ai": "Resumos com IA:",
     "cli_main_epilog_ai_desc": "Requer Ollama rodando localmente. Use --ai <modelo> em qualquer comando de analise.",
     "cli_main_epilog_gui": "Modo Grafico:",
-    "cli_main_epilog_gui_desc": "Inicie a interface grafica com: threatdeflect-gui"
+    "cli_main_epilog_gui_desc": "Inicie a interface grafica com: threatdeflect-gui",
+
+    "cli_option_version_help": "Mostra a versao e encerra.",
+    "cli_prompt_api_key": "Digite a chave de API para '{service}'",
+    "cli_prompt_api_key_confirm": "Confirme a chave de API",
+    "cli_error_keys_mismatch": "As chaves nao conferem. Tente novamente.",
+    "cli_error_ollama_invalid_scheme": "URL invalida. Use http:// ou https://",
+    "cli_error_ollama_no_host": "URL invalida. Hostname ausente.",
+    "cli_error_ollama_invalid_port": "Porta invalida. Deve ser entre 1 e 65535.",
+
+    "tooltip_ioc_input": "Insira IPs (ex: 8.8.8.8) ou URLs (ex: https://exemplo.com), um por linha. IPs privados sao ignorados automaticamente.",
+    "tooltip_repo_input": "Insira URLs de repositorios GitHub ou GitLab, uma por linha. Formatos aceitos: URL completa ou usuario/repositorio.",
+    "tooltip_ai_model": "Selecione o modelo Ollama para gerar resumos. Requer Ollama rodando localmente.",
+    "tooltip_file_reputation": "Selecione arquivos locais para verificar reputacao. Somente o hash SHA-256 e enviado, nunca o arquivo.",
+
+    "wizard_title": "Bem-vindo ao ThreatDeflect",
+    "wizard_description": "Para comecar, configure pelo menos uma chave de API. O VirusTotal e recomendado como fonte principal de inteligencia.",
+    "wizard_vt_label": "Chave VirusTotal (obrigatoria):",
+    "wizard_vt_placeholder": "Cole sua chave de API do VirusTotal aqui",
+    "wizard_ollama_label": "Endpoint Ollama (opcional):",
+    "wizard_ollama_placeholder": "http://localhost:11434/api/generate",
+    "wizard_save_button": "Salvar e Comecar",
+    "wizard_skip_button": "Pular (configurar depois)",
+    "wizard_error_no_vt": "A chave do VirusTotal e necessaria para a maioria das analises.",
+    "wizard_success": "Configuracao salva! Voce pode alterar em Configuracoes a qualquer momento.",
+
+    "error_api_key_missing": "Chave de API nao configurada. Va em Configuracoes > Chaves de API para adicionar.",
+    "error_ollama_not_running": "Ollama nao encontrado. Verifique se esta rodando e se o endpoint esta correto em Configuracoes.",
+    "error_network_timeout": "Timeout na conexao. Verifique sua internet e tente novamente.",
+    "error_no_results": "Nenhum resultado encontrado. Verifique se os alvos sao validos e se as chaves de API estao configuradas."
 }

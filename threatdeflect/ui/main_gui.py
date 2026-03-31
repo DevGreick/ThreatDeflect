@@ -738,6 +738,7 @@ class VtotalscanGUI(QMainWindow):
         repo_label.setFont(QFont("Segoe UI", 10, QFont.Bold))
         self.repo_url_input = QPlainTextEdit()
         self.repo_url_input.setPlaceholderText("https://github.com/owner/repo\nowner/repo (assume GitHub)\nhttps://gitlab.com/owner/repo")
+        self.repo_url_input.setToolTip(T("tooltip_repo_input"))
         repo_action_layout = QHBoxLayout()
         btn_load_repos = QPushButton(T("import_repos_button"))
         btn_load_repos.clicked.connect(self.select_repo_file)
@@ -788,11 +789,13 @@ class VtotalscanGUI(QMainWindow):
         input_label.setFont(QFont("Segoe UI", 10, QFont.Bold))
         self.text_area = QPlainTextEdit()
         self.text_area.setPlaceholderText("8.8.8.8\n185.172.128.150\ngoogle.com\nhttps://some-random-domain.net/path")
+        self.text_area.setToolTip(T("tooltip_ioc_input"))
         action_bar_layout = QHBoxLayout()
         btn_load = QPushButton(T("import_targets_button"))
         btn_load.clicked.connect(self.select_file)
         
         self.btn_scan_files = QPushButton(T("check_file_reputation_button"))
+        self.btn_scan_files.setToolTip(T("tooltip_file_reputation"))
         self.btn_scan_files.clicked.connect(self.start_file_analysis)
         
         btn_clear = QPushButton(T("clear_button"))
@@ -841,6 +844,7 @@ class VtotalscanGUI(QMainWindow):
         self.selected_model = QComboBox()
         self.selected_model.addItem("Carregando...")
         self.selected_model.setEnabled(False)
+        self.selected_model.setToolTip(T("tooltip_ai_model"))
         self.btn_ai_summary = QPushButton(T("generate_text_summary_button"))
         self.btn_ai_summary.setStyleSheet(self.STYLE_AI_BUTTON_INACTIVE)
         self.btn_ai_summary.setEnabled(False)
@@ -1001,9 +1005,67 @@ class VtotalscanGUI(QMainWindow):
 
     def check_api_key_on_startup(self) -> None:
         if not keyring.get_password("vtotalscan", "virustotal_api_key"):
-            self.log("Nenhuma chave de API do VirusTotal encontrada.")
-            if QMessageBox.warning(self, "Configuração Necessária", "A chave da API do VirusTotal não foi encontrada. Configure-a para continuar.", QMessageBox.Ok | QMessageBox.Cancel) == QMessageBox.Ok:
-                self.open_settings_window()
+            self.log(T("error_api_key_missing"))
+            self._show_first_run_wizard()
+
+    def _show_first_run_wizard(self) -> None:
+        wizard = QDialog(self)
+        wizard.setWindowTitle(T("wizard_title"))
+        wizard.setMinimumWidth(480)
+        wizard.setModal(True)
+        layout = QVBoxLayout(wizard)
+
+        desc = QLabel(T("wizard_description"))
+        desc.setWordWrap(True)
+        desc.setFont(QFont("Segoe UI", 10))
+        layout.addWidget(desc)
+
+        form = QFormLayout()
+        vt_input = QLineEdit()
+        vt_input.setPlaceholderText(T("wizard_vt_placeholder"))
+        vt_input.setEchoMode(QLineEdit.Password)
+        form.addRow(T("wizard_vt_label"), vt_input)
+
+        ollama_input = QLineEdit()
+        ollama_input.setPlaceholderText(T("wizard_ollama_placeholder"))
+        ollama_input.setText("http://localhost:11434/api/generate")
+        form.addRow(T("wizard_ollama_label"), ollama_input)
+        layout.addLayout(form)
+
+        status_label = QLabel("")
+        status_label.setStyleSheet("color: #e74c3c;")
+        layout.addWidget(status_label)
+
+        btn_layout = QHBoxLayout()
+        btn_save = QPushButton(T("wizard_save_button"))
+        btn_save.setStyleSheet("background-color: #5b9bd5; color: white; font-weight: bold; border-radius: 6px; padding: 8px 16px;")
+        btn_skip = QPushButton(T("wizard_skip_button"))
+        btn_layout.addWidget(btn_skip)
+        btn_layout.addWidget(btn_save)
+        layout.addLayout(btn_layout)
+
+        def on_save() -> None:
+            vt_key = vt_input.text().strip()
+            if not vt_key:
+                status_label.setText(T("wizard_error_no_vt"))
+                return
+            keyring.set_password("vtotalscan", "virustotal_api_key", vt_key)
+            endpoint = ollama_input.text().strip()
+            if endpoint:
+                config_path = get_config_path()
+                config = configparser.ConfigParser()
+                config.read(config_path)
+                if not config.has_section('AI'):
+                    config.add_section('AI')
+                config.set('AI', 'endpoint', endpoint)
+                with open(config_path, 'w') as f:
+                    config.write(f)
+            self.log(T("wizard_success"))
+            wizard.accept()
+
+        btn_save.clicked.connect(on_save)
+        btn_skip.clicked.connect(wizard.reject)
+        wizard.exec()
 
     def load_models_async(self) -> None:
         threading.Thread(target=self.populate_model_menu, daemon=True).start()
@@ -1212,19 +1274,30 @@ class VtotalscanGUI(QMainWindow):
                 report_path_text=report_path
             ))
             msg_box.exec()
-        else: 
+        else:
             if filepath_or_error == "NO_TARGETS":
-                QMessageBox.warning(self, "Aviso", "Nenhum IP ou URL válido foi encontrado.")
-                self.log("Nenhum alvo válido.")
+                QMessageBox.warning(self, "Aviso", T("error_no_results"))
+                self.log(T("error_no_results"))
             elif filepath_or_error == "NO_VALID_FILES":
-                QMessageBox.warning(self, "Aviso", "Nenhum arquivo válido ou legível foi processado.")
-                self.log("Nenhum arquivo válido para análise.")
+                QMessageBox.warning(self, "Aviso", T("error_no_results"))
+                self.log(T("error_no_results"))
             else:
-                self.log(f"A análise falhou: {filepath_or_error}")
-                QMessageBox.critical(self, "Erro na Análise", f"Ocorreu um erro: {filepath_or_error}")
+                user_msg = self._map_error_to_guidance(filepath_or_error)
+                self.log(f"{filepath_or_error}")
+                QMessageBox.critical(self, "Erro", user_msg)
         
         self._set_ui_for_analysis(False)
                 
+
+    def _map_error_to_guidance(self, error_msg: str) -> str:
+        lower = error_msg.lower()
+        if "api" in lower or "chave" in lower or "key" in lower or "401" in lower or "403" in lower:
+            return T("error_api_key_missing")
+        if "ollama" in lower or "modelo" in lower or "model" in lower:
+            return T("error_ollama_not_running")
+        if "timeout" in lower or "timed out" in lower or "conexão" in lower or "connection" in lower:
+            return T("error_network_timeout")
+        return f"{error_msg}\n\n{T('error_no_results')}"
 
     def _initiate_ai_summary(self, generate_pdf: bool) -> None:
         if not any([self.last_ioc_results, self.last_file_results, self.last_repo_results]):

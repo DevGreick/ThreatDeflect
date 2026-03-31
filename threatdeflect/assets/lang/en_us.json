@@ -129,5 +129,34 @@
     "cli_main_epilog_ai": "AI Summaries:",
     "cli_main_epilog_ai_desc": "Requires Ollama running locally. Use --ai <model> on any analysis command.",
     "cli_main_epilog_gui": "GUI Mode:",
-    "cli_main_epilog_gui_desc": "Launch the graphical interface with: threatdeflect-gui"
+    "cli_main_epilog_gui_desc": "Launch the graphical interface with: threatdeflect-gui",
+
+    "cli_option_version_help": "Show version and exit.",
+    "cli_prompt_api_key": "Enter the API key for '{service}'",
+    "cli_prompt_api_key_confirm": "Confirm the API key",
+    "cli_error_keys_mismatch": "Keys do not match. Try again.",
+    "cli_error_ollama_invalid_scheme": "Invalid URL. Use http:// or https://",
+    "cli_error_ollama_no_host": "Invalid URL. Missing hostname.",
+    "cli_error_ollama_invalid_port": "Invalid port. Must be between 1 and 65535.",
+
+    "tooltip_ioc_input": "Enter IPs (e.g. 8.8.8.8) or URLs (e.g. https://example.com), one per line. Private IPs are automatically filtered.",
+    "tooltip_repo_input": "Enter GitHub or GitLab repository URLs, one per line. Accepted formats: full URL or user/repo.",
+    "tooltip_ai_model": "Select the Ollama model for generating summaries. Requires Ollama running locally.",
+    "tooltip_file_reputation": "Select local files to check reputation. Only the SHA-256 hash is sent, never the file itself.",
+
+    "wizard_title": "Welcome to ThreatDeflect",
+    "wizard_description": "To get started, configure at least one API key. VirusTotal is recommended as the primary intelligence source.",
+    "wizard_vt_label": "VirusTotal Key (required):",
+    "wizard_vt_placeholder": "Paste your VirusTotal API key here",
+    "wizard_ollama_label": "Ollama Endpoint (optional):",
+    "wizard_ollama_placeholder": "http://localhost:11434/api/generate",
+    "wizard_save_button": "Save & Start",
+    "wizard_skip_button": "Skip (configure later)",
+    "wizard_error_no_vt": "VirusTotal key is required for most analyses.",
+    "wizard_success": "Settings saved! You can change them in Settings at any time.",
+
+    "error_api_key_missing": "API key not configured. Go to Settings > API Keys to add it.",
+    "error_ollama_not_running": "Ollama not found. Check if it's running and the endpoint is correct in Settings.",
+    "error_network_timeout": "Connection timeout. Check your internet and try again.",
+    "error_no_results": "No results found. Check that targets are valid and API keys are configured."
 }

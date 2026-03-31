@@ -1,15 +1,13 @@
 <div align="center">
-    <img src="https://github.com/DevGreick/ThreatDeflect/blob/main/threatdeflect-logo.png" alt="Logo do ThreatDeflect" width="150"/>
+    <img src="https://github.com/DevGreick/ThreatDeflect/blob/main/threatdeflect-logo.png" alt="ThreatDeflect Logo" width="150"/>
     <h1>ThreatDeflect</h1>
 </div>
 
 <div align="center">
-<strong>Ferramenta de analise de ameacas com hybrid Python + Rust engine que automatiza a consulta de IOCs, repositorios e arquivos em multiplas fontes, gera relatorios e cria resumos com IA local.</strong>
-<br><br>
-⭐ De uma estrela se o projeto te ajudou! | <a href="https://github.com/DevGreick/ThreatDeflect/releases"><strong>Baixar »</strong></a> | <a href="https://devgreick.github.io/ThreatDeflect/"><strong>Documentacao completa »</strong></a>
-</div>
 
-<br>
+**[Portugues](#pt-br)** | **[English](#en-us)**
+
+</div>
 
 <div align="center">
 <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python Version"></a>
@@ -27,7 +25,11 @@
 
 ---
 
-## O que faz
+<a name="pt-br"></a>
+
+## 🇧🇷 Portugues
+
+### O que faz
 
 - **Analise de IOCs** via VirusTotal, AbuseIPDB, Shodan, URLHaus
 - **Varredura de repositorios** GitHub/GitLab (segredos, backdoors, dependencias maliciosas)
@@ -38,11 +40,9 @@
 - **GUI + CLI** bilingues (PT-BR / EN-US)
 - **Relatorios** em Excel e PDF
 
----
+### Instalacao
 
-## Instalacao
-
-### Opcao 1 — Executavel (sem Python)
+#### Opcao 1 — Executavel (sem Python)
 
 Baixe o binario da pagina de [Releases](https://github.com/DevGreick/ThreatDeflect/releases) e execute:
 
@@ -64,7 +64,7 @@ xattr -cr ThreatDeflect-GUI-macOS
 ./ThreatDeflect-GUI-macOS
 ```
 
-### Opcao 2 — Codigo-fonte (Python 3.11+)
+#### Opcao 2 — Codigo-fonte (Python 3.11+)
 
 **Com uv (recomendado):**
 
@@ -89,9 +89,7 @@ pip install -e .
 
 Para topicos avancados (Rust engine, regras customizadas, Ollama), consulte a **[Documentacao completa](https://devgreick.github.io/ThreatDeflect/)**.
 
----
-
-## Configuracao de APIs
+### Configuracao de APIs
 
 Apenas o **VirusTotal** e obrigatorio. As demais ampliam a cobertura de analise.
 
@@ -119,11 +117,9 @@ threatdeflect config set gitlab      SEU_TOKEN
 
 As chaves ficam armazenadas no keyring do sistema operacional (Windows Credential Locker, macOS Keychain, Linux Secret Service).
 
----
+### Uso
 
-## Uso
-
-### Analisar IPs e URLs (IOCs)
+#### Analisar IPs e URLs (IOCs)
 
 ```bash
 # alvo unico
@@ -139,7 +135,7 @@ threatdeflect ioc -f targets.txt -o relatorio.xlsx
 threatdeflect ioc -f targets.txt --ai llama3
 ```
 
-### Verificar arquivos por hash
+#### Verificar arquivos por hash
 
 ```bash
 threatdeflect file suspeito.exe
@@ -148,22 +144,20 @@ threatdeflect file malware.dll trojan.pdf --ai llama3 -o auditoria.xlsx
 
 > Nenhum arquivo e enviado a verificacao e feita apenas pelo hash SHA256.
 
-### Varrer repositorios
+#### Varrer repositorios
 
 ```bash
 threatdeflect repo https://github.com/org/repo
 threatdeflect repo https://github.com/org/repo https://gitlab.com/org/repo2 --ai mistral
 ```
 
-### Ver configuracoes atuais
+#### Ver configuracoes atuais
 
 ```bash
 threatdeflect config show
 ```
 
----
-
-## IA local (opcional)
+### IA local (opcional)
 
 Com [Ollama](https://ollama.com) instalado, o ThreatDeflect gera resumos executivos dos relatorios sem enviar dados para a nuvem:
 
@@ -172,9 +166,7 @@ ollama pull llama3
 threatdeflect ioc -f targets.txt --ai llama3
 ```
 
----
-
-## Crate Rust (uso independente)
+### Crate Rust (uso independente)
 
 O detection engine e publicado como crate independente no [crates.io](https://crates.io/crates/threatdeflect-core), permitindo integracao direta em projetos Rust sem depender do Python:
 
@@ -195,9 +187,171 @@ Documentacao da crate: [docs.rs/threatdeflect-core](https://docs.rs/threatdeflec
 
 ---
 
-## Licenca
+<a name="en-us"></a>
 
-GPLv3. Veja [LICENSE](./LICENSE).
+## 🇺🇸 English
+
+### What it does
+
+- **IOC analysis** via VirusTotal, AbuseIPDB, Shodan, URLHaus
+- **Repository scanning** on GitHub/GitLab (secrets, backdoors, malicious dependencies)
+- **File reputation** by SHA256 hash
+- **46 detection rules** for secrets, crypto miners, SSRF, reverse shells and more
+- **High-performance Rust engine** via PyO3
+- **Local AI** with Ollama (no data leaves your machine)
+- **GUI + CLI** bilingual (PT-BR / EN-US)
+- **Reports** in Excel and PDF
+
+### Installation
+
+#### Option 1 — Standalone binary (no Python needed)
+
+Download the binary from the [Releases](https://github.com/DevGreick/ThreatDeflect/releases) page and run:
+
+**Windows:** double-click `ThreatDeflect-GUI-Windows.exe`
+
+**Linux:**
+
+```bash
+chmod +x ThreatDeflect-GUI-Linux
+./ThreatDeflect-GUI-Linux
+# optional: move to PATH
+sudo mv ThreatDeflect-GUI-Linux /usr/local/bin/threatdeflect
+```
+
+**macOS:**
+
+```bash
+xattr -cr ThreatDeflect-GUI-macOS
+./ThreatDeflect-GUI-macOS
+```
+
+#### Option 2 — From source (Python 3.11+)
+
+**With uv (recommended):**
+
+```bash
+git clone https://github.com/DevGreick/ThreatDeflect.git
+cd ThreatDeflect
+uv sync
+uv run threatdeflect --help
+uv run threatdeflect-gui
+```
+
+**With pip:**
+
+```bash
+git clone https://github.com/DevGreick/ThreatDeflect.git
+cd ThreatDeflect
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install -e .
+```
+
+For advanced topics (Rust engine, custom rules, Ollama), see the **[Full documentation](https://devgreick.github.io/ThreatDeflect/)**.
+
+### API Configuration
+
+Only **VirusTotal** is required. The others extend analysis coverage.
+
+| Service | Required | Free tier | Where to get |
+|---|---|---|---|
+| VirusTotal | **Yes** | 500 req/day | [virustotal.com](https://www.virustotal.com) → profile → API Key |
+| GitHub | Recommended | 5,000 req/h | [github.com/settings/tokens](https://github.com/settings/tokens) (public read) |
+| GitLab | Recommended | — | Settings → Access Tokens → `read_api` |
+| AbuseIPDB | Optional | 1,000 checks/day | [abuseipdb.com](https://www.abuseipdb.com) → API |
+| Shodan | Optional | Limited | [shodan.io](https://www.shodan.io) → dashboard |
+| URLHaus | Optional | Unlimited | Free, no authentication |
+| MalwareBazaar | Optional | Unlimited | Free, no authentication |
+
+**Configure via CLI:**
+
+```bash
+threatdeflect config set virustotal  YOUR_KEY
+threatdeflect config set abuseipdb   YOUR_KEY
+threatdeflect config set shodan      YOUR_KEY
+threatdeflect config set github      YOUR_TOKEN
+threatdeflect config set gitlab      YOUR_TOKEN
+```
+
+**Or via GUI:** Settings → "API Keys" tab → paste your keys in the corresponding fields.
+
+Keys are stored in the OS keyring (Windows Credential Locker, macOS Keychain, Linux Secret Service).
+
+### Usage
+
+#### Analyze IPs and URLs (IOCs)
+
+```bash
+# single target
+threatdeflect ioc 8.8.8.8
+
+# multiple targets
+threatdeflect ioc 8.8.8.8 1.1.1.1 https://suspicious-domain.com
+
+# from file (one target per line)
+threatdeflect ioc -f targets.txt -o report.xlsx
+
+# with local AI summary
+threatdeflect ioc -f targets.txt --ai llama3
+```
+
+#### Check files by hash
+
+```bash
+threatdeflect file suspicious.exe
+threatdeflect file malware.dll trojan.pdf --ai llama3 -o audit.xlsx
+```
+
+> No file is uploaded — verification is done by SHA256 hash only.
+
+#### Scan repositories
+
+```bash
+threatdeflect repo https://github.com/org/repo
+threatdeflect repo https://github.com/org/repo https://gitlab.com/org/repo2 --ai mistral
+```
+
+#### View current settings
+
+```bash
+threatdeflect config show
+```
+
+### Local AI (optional)
+
+With [Ollama](https://ollama.com) installed, ThreatDeflect generates executive summaries without sending data to the cloud:
+
+```bash
+ollama pull llama3
+threatdeflect ioc -f targets.txt --ai llama3
+```
+
+### Rust Crate (standalone usage)
+
+The detection engine is published as an independent crate on [crates.io](https://crates.io/crates/threatdeflect-core), enabling direct integration in Rust projects without Python:
+
+```toml
+[dependencies]
+threatdeflect-core = "0.1"
+```
+
+```rust
+use threatdeflect_core::SecretAnalyzer;
+
+let rules = vec![("AWS Key".to_string(), r"AKIA[0-9A-Z]{16}".to_string())];
+let analyzer = SecretAnalyzer::new(rules, vec![])?;
+let result = analyzer.analyze_content("key = AKIAIOSFODNN7EXAMPLE1", "config.py", "config.py");
+```
+
+Crate documentation: [docs.rs/threatdeflect-core](https://docs.rs/threatdeflect-core)
+
+---
+
+## License
+
+GPLv3. See [LICENSE](./LICENSE).
 
 <div align="center">
 <a href="https://buymeacoffee.com/devgreick" target="_blank">

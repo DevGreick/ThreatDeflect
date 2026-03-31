@@ -4,6 +4,12 @@
 </div>
 
 <div align="center">
+<strong>Ferramenta de analise de ameacas com hybrid Python + Rust engine que automatiza a consulta de IOCs, repositorios e arquivos em multiplas fontes, gera relatorios e cria resumos com IA local.</strong>
+<br><br>
+⭐ De uma estrela se o projeto te ajudou! | <a href="https://github.com/DevGreick/ThreatDeflect/releases"><strong>Baixar »</strong></a> | <a href="https://devgreick.github.io/ThreatDeflect/"><strong>Documentacao completa »</strong></a>
+</div>
+
+<div align="center">
 
 **[Portugues](#pt-br)** | **[English](#en-us)**
 

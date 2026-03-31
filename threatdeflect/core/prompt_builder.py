@@ -3,10 +3,17 @@ from typing import Dict, Any, List
 from threatdeflect.utils.utils import safe_get
 
 
+_INJECTION_PATTERNS = [
+    re.compile(r'(?i)(ignore|disregard|forget|override|bypass|skip)\s+(all\s+)?(previous|above|prior|system|original)\s+(instructions?|rules?|prompts?|context)'),
+    re.compile(r'(?i)(you\s+are\s+now|new\s+instructions?|system\s*prompt|act\s+as|role\s*:\s*|debug\s+mode|developer\s+mode|jailbreak)'),
+    re.compile(r'(?i)(respond\s+only\s+with|always\s+(say|respond|output)|from\s+now\s+on)'),
+    re.compile(r'(?i)```\s*(system|instruction|prompt)'),
+]
+
 def _sanitize_data(text: str) -> str:
-    """Sanitize data fields to mitigate prompt injection via IOC values."""
-    # Remove sequences that look like LLM instructions embedded in data
-    text = re.sub(r'(?i)(ignore|disregard|forget)\s+(all\s+)?(previous|above|prior)\s+(instructions?|rules?|prompts?)', '[SANITIZED]', text)
+    for pattern in _INJECTION_PATTERNS:
+        text = pattern.sub('[SANITIZED]', text)
+    text = ''.join(c for c in text if c.isprintable() or c in ('\n', '\t'))
     return text
 
 def build_dossier_prompt(analysis_data: Dict[str, Any]) -> str:

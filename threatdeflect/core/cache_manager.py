@@ -1,5 +1,6 @@
 # threatdeflect/core/cache_manager.py
 
+import hashlib
 import sqlite3
 import json
 import logging
@@ -24,16 +25,16 @@ class CacheManager:
         cache_dir = config_dir / ".threatdeflect_cache"
         cache_dir.mkdir(exist_ok=True)
         
-        repo_id = "".join(filter(str.isalnum, self.repo_url))
+        repo_id = hashlib.sha256(self.repo_url.encode('utf-8')).hexdigest()[:16]
         return cache_dir / f"{repo_id}.sqlite"
 
     def _connect(self) -> sqlite3.Connection:
         """Estabelece a conexão com o banco de dados."""
         if self._conn is None:
             try:
-                self._conn = sqlite3.connect(self.db_path)
+                self._conn = sqlite3.connect(self.db_path, timeout=10)
             except sqlite3.Error as e:
-                logging.error(f"Erro ao conectar ao banco de dados de cache {self.db_path}: {e}")
+                logging.error("Erro ao conectar ao banco de dados de cache %s: %s", self.db_path, e)
                 raise
         return self._conn
 
@@ -51,7 +52,7 @@ class CacheManager:
             """)
             conn.commit()
         except sqlite3.Error as e:
-            logging.error(f"Erro ao criar a tabela de cache: {e}")
+            logging.error("Erro ao criar a tabela de cache: %s", e)
 
     def get_cached_results(self) -> Dict[str, Dict[str, Any]]:
         """Recupera todos os resultados em cache para o repositório."""
@@ -67,7 +68,7 @@ class CacheManager:
                     'data': json.loads(data_json)
                 }
         except (sqlite3.Error, json.JSONDecodeError) as e:
-            logging.error(f"Erro ao ler o cache: {e}. O cache será ignorado.")
+            logging.error("Erro ao ler o cache: %s. O cache sera ignorado.", e)
             self.update_cache({})
             return {}
         return cached_data
@@ -92,7 +93,7 @@ class CacheManager:
             )
             conn.commit()
         except (sqlite3.Error, json.JSONDecodeError) as e:
-            logging.error(f"Erro ao atualizar o cache: {e}")
+            logging.error("Erro ao atualizar o cache: %s", e)
             try:
                 conn.rollback()
             except Exception:
@@ -113,15 +114,15 @@ def clear_all_caches() -> Tuple[bool, str]:
         config_dir = get_config_path().parent
         cache_dir = config_dir / ".threatdeflect_cache"
         
-        if cache_dir.exists() and cache_dir.is_dir():
+        if cache_dir.exists() and cache_dir.is_dir() and not cache_dir.is_symlink():
             shutil.rmtree(cache_dir)
             cache_dir.mkdir(exist_ok=True)
-            logging.info(f"Diretório de cache removido com sucesso: {cache_dir}")
+            logging.info("Diretorio de cache removido com sucesso: %s", cache_dir)
             return True, str(cache_dir)
         else:
             logging.info("Nenhum diretório de cache encontrado para limpar.")
             return True, "Nenhum cache para limpar."
             
     except Exception as e:
-        logging.error(f"Falha ao tentar limpar o diretório de cache: {e}", exc_info=True)
+        logging.error("Falha ao tentar limpar o diretorio de cache: %s", e, exc_info=True)
         return False, str(e)

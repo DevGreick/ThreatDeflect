@@ -117,7 +117,7 @@ class ApiClient:
                 return {"data": {"attributes": {"stats": {"malicious": 0}, "last_analysis_results": {}}}}
                 
             return report
-        except Exception as e:
+        except (requests.exceptions.RequestException, ValueError, KeyError) as e:
             logging.error(f"Erro URL ID: {e}")
             return None
 

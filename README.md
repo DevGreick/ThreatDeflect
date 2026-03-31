@@ -13,7 +13,7 @@
 
 <a href="https://github.com/DevGreick/ThreatDeflect/releases"><strong>📥 Baixar / Download »</strong></a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://devgreick.github.io/ThreatDeflect/"><strong>📖 Documentacao / Docs »</strong></a>
 <br>
-⭐ De uma estrela! / Star if it helped you!
+⭐ De uma estrela se te ajudou! / Star if it helped you!
 
 <br>
 

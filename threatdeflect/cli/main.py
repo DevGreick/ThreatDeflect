@@ -180,13 +180,29 @@ config_examples = dedent(f"""
 """)
 
 
+def _version_callback(value: bool) -> None:
+    if value:
+        try:
+            from importlib.metadata import version as pkg_version, PackageNotFoundError
+            ver = pkg_version("threatdeflect")
+        except PackageNotFoundError:
+            ver = "dev"
+        typer.echo(f"ThreatDeflect {ver}")
+        raise typer.Exit()
+
 app = typer.Typer(
     name="threatdeflect",
     help=T('cli_app_help'),
     epilog=main_epilog,
     add_completion=False,
-    rich_markup_mode="rich"
+    rich_markup_mode="rich",
 )
+
+@app.callback(invoke_without_command=True)
+def main_callback(
+    version: bool = typer.Option(False, "--version", "-V", help=T('cli_option_version_help'), callback=_version_callback, is_eager=True),
+) -> None:
+    pass
 console = Console()
 
 
@@ -392,13 +408,20 @@ KEYRING_MAP = {
 @config_app.command("set", help=T('cli_config_set_help'))
 def set_key(
     service: str = typer.Argument(..., help=T('cli_config_set_arg_service_help', services=', '.join(KEYRING_MAP.keys()))),
-    key: str = typer.Argument(..., help=T('cli_config_set_arg_key_help'))
+    key: Optional[str] = typer.Argument(None, help=T('cli_config_set_arg_key_help'))
 ):
     service_lower = service.lower()
     if service_lower not in KEYRING_MAP:
         console.print(f"[bold red]{T('cli_error_prefix')}[/] {T('cli_error_invalid_service', service=service)}")
         raise typer.Exit(code=1)
-    
+
+    if key is None:
+        key = typer.prompt(T('cli_prompt_api_key', service=service_lower), hide_input=True)
+        key_confirm = typer.prompt(T('cli_prompt_api_key_confirm'), hide_input=True)
+        if key != key_confirm:
+            console.print(f"[bold red]{T('cli_error_prefix')}[/] {T('cli_error_keys_mismatch')}")
+            raise typer.Exit(code=1)
+
     keyring.set_password("vtotalscan", KEYRING_MAP[service_lower], key)
     console.print(f"[bold green]{T('cli_success_prefix')}[/] {T('cli_success_key_saved', service=service_lower)}")
 
@@ -406,6 +429,18 @@ def set_key(
 def set_ollama_endpoint(
     endpoint: str = typer.Argument(..., help=T('cli_config_set_ollama_arg_endpoint_help'))
 ):
+    from urllib.parse import urlparse as _urlparse
+    parsed = _urlparse(endpoint)
+    if parsed.scheme not in ("http", "https"):
+        console.print(f"[bold red]{T('cli_error_prefix')}[/] {T('cli_error_ollama_invalid_scheme')}")
+        raise typer.Exit(code=1)
+    if not parsed.hostname:
+        console.print(f"[bold red]{T('cli_error_prefix')}[/] {T('cli_error_ollama_no_host')}")
+        raise typer.Exit(code=1)
+    if parsed.port is not None and not (1 <= parsed.port <= 65535):
+        console.print(f"[bold red]{T('cli_error_prefix')}[/] {T('cli_error_ollama_invalid_port')}")
+        raise typer.Exit(code=1)
+
     config_path = get_config_path()
     config = configparser.ConfigParser()
     config.read(config_path)

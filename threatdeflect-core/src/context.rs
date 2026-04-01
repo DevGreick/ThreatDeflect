@@ -182,11 +182,44 @@ pub fn is_public_ioc(url_str: &str) -> bool {
                     || d == "example.com"
                     || d.ends_with(".local")
                     || d.ends_with(".test")
+                    || d.ends_with(".example")
                     || d == "www.w3.org"
                     || d == "schemas.microsoft.com"
                     || d == "json-schema.org"
                     || d == "bugs.python.org"
                     || d == "github.com"
+                    || d == "gitlab.com"
+                    || d.ends_with(".github.io")
+                    || d.ends_with(".githubusercontent.com")
+                    || d.ends_with(".vercel.app")
+                    || d.ends_with(".netlify.app")
+                    || d.ends_with(".herokuapp.com")
+                    || d.ends_with(".render.com")
+                    || d.ends_with(".railway.app")
+                    || d.ends_with(".fly.dev")
+                    || d.ends_with(".supabase.co")
+                    || d.ends_with(".firebaseapp.com")
+                    || d.ends_with(".web.app")
+                    || d.ends_with(".azurewebsites.net")
+                    || d.ends_with(".cloudfront.net")
+                    || d == "registry.npmjs.org"
+                    || d == "pypi.org"
+                    || d == "crates.io"
+                    || d == "rubygems.org"
+                    || d == "packagist.org"
+                    || d == "docs.rs"
+                    || d == "readthedocs.org"
+                    || d.ends_with(".readthedocs.io")
+                    || d == "stackoverflow.com"
+                    || d == "mozilla.org"
+                    || d.ends_with(".mozilla.org")
+                    || d == "creativecommons.org"
+                    || d == "opensource.org"
+                    || d.ends_with(".apache.org")
+                    || d == "golang.org"
+                    || d == "pkg.go.dev"
+                    || d == "cve.mitre.org"
+                    || d == "nvd.nist.gov"
                 {
                     return false;
                 }

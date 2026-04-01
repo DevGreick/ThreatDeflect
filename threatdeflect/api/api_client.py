@@ -88,10 +88,12 @@ class ApiClient:
         logging.warning("Request to %s failed after %d retries.", safe_url, max_retries)
         return None
 
-    def check_package_vulnerability(self, package_name: str, ecosystem: str) -> Optional[List[Dict[str, Any]]]:
+    def check_package_vulnerability(self, package_name: str, ecosystem: str, version: str = "") -> Optional[List[Dict[str, Any]]]:
         try:
             api_url = "https://api.osv.dev/v1/query"
-            payload = {"package": {"name": package_name, "ecosystem": ecosystem}}
+            payload: Dict[str, Any] = {"package": {"name": package_name, "ecosystem": ecosystem}}
+            if version:
+                payload["version"] = version
             response = self.session.post(api_url, json=payload, timeout=10)
             if response.status_code == 200 and response.content:
                 return response.json().get('vulns')
@@ -114,7 +116,7 @@ class ApiClient:
             report = self._make_request('GET', api_url, headers=headers)
             
             if report and report.get('error') == 'Not Found':
-                return {"data": {"attributes": {"stats": {"malicious": 0}, "last_analysis_results": {}}}}
+                return {"data": {"attributes": {"last_analysis_stats": {"malicious": 0}, "last_analysis_results": {}}}}
                 
             return report
         except (requests.exceptions.RequestException, ValueError, KeyError) as e:
@@ -203,53 +205,123 @@ class ApiClient:
             }
         return {"error": "Falha ao buscar dados do GitHub"}
 
+    def check_github_rate_limit(self) -> Dict[str, Any]:
+        headers = {}
+        if self.github_api_key:
+            headers["Authorization"] = f"token {self.github_api_key}"
+        data = self._make_request('GET', "https://api.github.com/rate_limit", headers=headers)
+        if data and 'resources' in data:
+            core = data['resources'].get('core', {})
+            return {
+                "remaining": core.get('remaining', 0),
+                "limit": core.get('limit', 0),
+                "reset": core.get('reset', 0),
+            }
+        return {"remaining": 0, "limit": 0, "reset": 0}
+
+    def _list_github_files_via_trees(self, owner: str, repo: str, ref: str, headers: Dict[str, str]) -> Optional[List[Dict[str, Any]]]:
+        repo_info = self._make_request('GET', f"https://api.github.com/repos/{owner}/{repo}", headers=headers)
+        if not repo_info or isinstance(repo_info, dict) and 'error' in repo_info:
+            return None
+
+        if not ref:
+            ref = repo_info.get('default_branch', 'main')
+
+        ref_data = self._make_request('GET', f"https://api.github.com/repos/{owner}/{repo}/git/ref/heads/{ref}", headers=headers)
+        if not ref_data or isinstance(ref_data, dict) and 'error' in ref_data:
+            return None
+
+        tree_sha = safe_get(ref_data, 'object.sha')
+        if not tree_sha:
+            return None
+
+        tree_data = self._make_request('GET', f"https://api.github.com/repos/{owner}/{repo}/git/trees/{tree_sha}", headers=headers, params={"recursive": "1"})
+        if not tree_data or isinstance(tree_data, dict) and 'error' in tree_data:
+            return None
+
+        if tree_data.get('truncated', False):
+            logging.warning("Git Trees API retornou resultado truncado para %s/%s. Usando fallback.", owner, repo)
+            return None
+
+        MAX_FILES = 5000
+        all_files: List[Dict[str, Any]] = []
+        for item in tree_data.get('tree', []):
+            if len(all_files) >= MAX_FILES:
+                break
+            if item.get('type') != 'blob':
+                continue
+            path = item.get('path', '')
+            name = path.rsplit('/', 1)[-1] if '/' in path else path
+            all_files.append({
+                'name': name,
+                'path': path,
+                'sha': item.get('sha'),
+                'type': 'file',
+                'platform': 'github',
+                'item_url': f"https://api.github.com/repos/{owner}/{repo}/contents/{path}",
+            })
+        return all_files
+
+    def _list_github_files_via_contents(self, owner: str, repo: str, ref: str, subdirectory: str, headers: Dict[str, str]) -> List[Dict[str, Any]]:
+        MAX_FILES = 5000
+        MAX_DEPTH = 20
+        all_files: List[Dict[str, Any]] = []
+        params: Dict[str, str] = {}
+        if ref:
+            params["ref"] = ref
+
+        def get_content_recursively(path: str, depth: int = 0) -> None:
+            if depth > MAX_DEPTH or len(all_files) >= MAX_FILES:
+                return
+            api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+            contents = self._make_request('GET', api_url, headers=headers, params=params)
+
+            if not contents or isinstance(contents, dict) and 'error' in contents:
+                return
+            if isinstance(contents, dict):
+                contents = [contents]
+
+            for item in contents:
+                if len(all_files) >= MAX_FILES:
+                    return
+                if item.get('type') == 'file':
+                    all_files.append({
+                        'name': item.get('name'),
+                        'path': item.get('path'),
+                        'sha': item.get('sha'),
+                        'type': 'file',
+                        'platform': 'github',
+                        'item_url': item.get('url')
+                    })
+                elif item.get('type') == 'dir':
+                    get_content_recursively(item.get('path'), depth + 1)
+
+        get_content_recursively(subdirectory)
+        return all_files
+
     def list_repository_files(self, repo_url: str) -> List[Dict[str, Any]] | Dict[str, str]:
         platform = self._get_platform_from_url(repo_url)
         parsed_url = urlparse(repo_url)
         path_parts = parsed_url.path.strip('/').split('/')
         headers = {}
-        
+
         if platform == 'github':
             if len(path_parts) < 2: return {"error": "URL do GitHub inválida"}
             owner, repo = path_parts[0], path_parts[1]
             if self.github_api_key: headers["Authorization"] = f"token {self.github_api_key}"
 
+            ref = ""
             subdirectory_path = ""
             if len(path_parts) > 3 and path_parts[2] == 'tree':
+                ref = path_parts[3]
                 subdirectory_path = "/".join(path_parts[4:])
 
-            MAX_FILES = 5000
-            MAX_DEPTH = 20
-            all_files: List[Dict[str, Any]] = []
+            if not subdirectory_path:
+                tree_result = self._list_github_files_via_trees(owner, repo, ref, headers)
+                if tree_result is not None:
+                    return tree_result
 
-            def get_content_recursively(path: str, depth: int = 0) -> None:
-                if depth > MAX_DEPTH or len(all_files) >= MAX_FILES:
-                    return
-                api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
-                contents = self._make_request('GET', api_url, headers=headers)
-
-                if not contents or isinstance(contents, dict) and 'error' in contents:
-                    return
-                if isinstance(contents, dict):
-                    contents = [contents]
-
-                for item in contents:
-                    if len(all_files) >= MAX_FILES:
-                        return
-                    if item.get('type') == 'file':
-                        all_files.append({
-                            'name': item.get('name'),
-                            'path': item.get('path'),
-                            'sha': item.get('sha'),
-                            'type': 'file',
-                            'platform': 'github',
-                            'item_url': item.get('url')
-                        })
-                    elif item.get('type') == 'dir':
-                        get_content_recursively(item.get('path'), depth + 1)
-
-            get_content_recursively(subdirectory_path)
-            return all_files
+            return self._list_github_files_via_contents(owner, repo, ref, subdirectory_path, headers)
             
         elif platform == 'gitlab':
             base_repo_path = "/".join(path_parts[:2])
@@ -274,10 +346,11 @@ class ApiClient:
                     'name': f.get('name'),
                     'path': f.get('path'),
                     'sha': f.get('id'),
-                    'type': 'file', 
-                    'platform': 'gitlab', 
-                    'project_id': project_id, 
-                    'default_branch': default_branch
+                    'type': 'file',
+                    'platform': 'gitlab',
+                    'project_id': project_id,
+                    'default_branch': default_branch,
+                    'gitlab_host': parsed_url.hostname,
                 } for f in files if f.get('type') == 'blob'])
                 if len(files) < 100: break
                 page += 1
@@ -302,22 +375,45 @@ class ApiClient:
             return None
         return project_data
 
+    MAX_CONTENT_SIZE: int = 1_048_576
+
     def get_repository_file_content(self, file_info: Dict[str, Any]) -> Optional[str]:
         platform = file_info.get('platform')
         try:
             if platform == 'github':
                 headers = {"Accept": "application/vnd.github.v3.raw"}
                 if self.github_api_key: headers["Authorization"] = f"token {self.github_api_key}"
-                response = self.session.get(file_info['item_url'], headers=headers, timeout=20)
+                response = self.session.get(file_info['item_url'], headers=headers, timeout=20, stream=True)
             elif platform == 'gitlab':
+                gitlab_host = file_info.get('gitlab_host', 'gitlab.com')
                 branch = file_info.get('default_branch', 'main')
-                api_url = f"https://gitlab.com/api/v4/projects/{file_info['project_id']}/repository/files/{quote_plus(file_info['path'])}/raw?ref={branch}"
+                api_url = f"https://{gitlab_host}/api/v4/projects/{file_info['project_id']}/repository/files/{quote_plus(file_info['path'])}/raw?ref={branch}"
                 headers = {"PRIVATE-TOKEN": self.gitlab_api_key} if self.gitlab_api_key else {}
-                response = self.session.get(api_url, headers=headers, timeout=20)
+                response = self.session.get(api_url, headers=headers, timeout=20, stream=True)
             else:
                 return None
             response.raise_for_status()
-            return response.text
+
+            content_length = response.headers.get('Content-Length')
+            if content_length and int(content_length) > self.MAX_CONTENT_SIZE:
+                response.close()
+                return None
+
+            chunks: list[bytes] = []
+            total = 0
+            for chunk in response.iter_content(chunk_size=8192):
+                total += len(chunk)
+                if total > self.MAX_CONTENT_SIZE:
+                    response.close()
+                    return None
+                chunks.append(chunk)
+            response.close()
+
+            raw = b"".join(chunks)
+            try:
+                return raw.decode("utf-8")
+            except UnicodeDecodeError:
+                return raw.decode("utf-8", errors="replace")
         except (requests.exceptions.RequestException, ValueError, KeyError):
             return None
 

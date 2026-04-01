@@ -158,5 +158,12 @@
     "error_api_key_missing": "Chave de API nao configurada. Va em Configuracoes > Chaves de API para adicionar.",
     "error_ollama_not_running": "Ollama nao encontrado. Verifique se esta rodando e se o endpoint esta correto em Configuracoes.",
     "error_network_timeout": "Timeout na conexao. Verifique sua internet e tente novamente.",
-    "error_no_results": "Nenhum resultado encontrado. Verifique se os alvos sao validos e se as chaves de API estao configuradas."
+    "error_no_results": "Nenhum resultado encontrado. Verifique se os alvos sao validos e se as chaves de API estao configuradas.",
+
+    "wizard_github_label": "Token GitHub (recomendado):",
+    "wizard_github_placeholder": "ghp_... (Personal Access Token)",
+    "wizard_github_hint": "Sem token: limite de 60 requests/hora. Com token: 5.000/hora. Necessario para analisar repositorios grandes. Crie em github.com/settings/tokens (escopo: public_repo).",
+
+    "rate_limit_title": "Limite de API do GitHub",
+    "rate_limit_warning": "Atencao: restam apenas {remaining}/{limit} requests na API do GitHub. O limite sera resetado as {reset_time}.\n\nDeseja continuar mesmo assim?"
 }

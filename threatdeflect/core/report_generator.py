@@ -25,12 +25,13 @@ from typing import Dict, Any, List, Optional, Tuple
 from urllib.parse import quote
 import xlsxwriter
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
+from reportlab.lib.colors import HexColor
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, HRFlowable
 from xlsxwriter.format import Format
 from xlsxwriter.workbook import Workbook
 from xlsxwriter.worksheet import Worksheet
@@ -72,6 +73,7 @@ class ReportGenerator:
             'score_med': workbook.add_format({'bg_color': '#FFEB9C', 'font_color': '#9C6500', 'border': 1, 'valign': 'top'}),
             'punycode_warn': workbook.add_format({'bg_color': '#FFEB9C', 'font_color': '#9C6500', 'border': 1, 'valign': 'top', 'text_wrap': True, 'bold': True}),
             'warning_title': workbook.add_format({'bold': True, 'font_size': 12, 'font_color': '#9C0006', 'bg_color': '#FFC7CE'}),
+            'url': workbook.add_format({'border': 1, 'valign': 'top', 'font_color': 'black', 'underline': True}),
         }
         return formats
 
@@ -122,19 +124,59 @@ class ReportGenerator:
             row += 1
 
     def _write_executive_summary_sheet(self, workbook: Workbook, formats: Dict[str, Format]) -> None:
-        """Escreve o Resumo Executivo gerado pela IA em uma nova planilha."""
         ws = workbook.add_worksheet("Resumo Executivo")
-        ws.set_column('A:A', 120)
+        ws.set_column('A:A', 25)
+        ws.set_column('B:B', 100)
         ws.set_default_row(15)
-        
-        ws.write('A1', "Resumo Executivo (Análise de Riscos Prioritários por IA)", formats['header'])
-        
-        summary_format = workbook.add_format({'valign': 'top', 'text_wrap': True})
-        
-        num_lines = self.executive_summary.count('\n') + 15
-        ws.set_row(1, num_lines * 10 if num_lines > 15 else 200)
+        ws.hide_gridlines(2)
 
-        ws.write('A2', self.executive_summary, summary_format)
+        title_fmt = workbook.add_format({
+            'bold': True, 'font_size': 14, 'font_color': '#0F172A',
+            'bottom': 2, 'bottom_color': '#1E40AF', 'valign': 'vcenter',
+        })
+        meta_label_fmt = workbook.add_format({
+            'bold': True, 'font_size': 9, 'font_color': '#64748B',
+            'bg_color': '#F8FAFC', 'border': 1, 'border_color': '#CBD5E1',
+        })
+        meta_value_fmt = workbook.add_format({
+            'font_size': 9, 'font_color': '#0F172A',
+            'bg_color': '#F8FAFC', 'border': 1, 'border_color': '#CBD5E1',
+        })
+        summary_fmt = workbook.add_format({'valign': 'top', 'text_wrap': True, 'font_size': 10, 'font_color': '#1E293B'})
+        section_fmt = workbook.add_format({
+            'bold': True, 'font_size': 11, 'font_color': '#1E40AF',
+            'bottom': 1, 'bottom_color': '#CBD5E1',
+        })
+        tlp_fmt = workbook.add_format({
+            'bold': True, 'font_size': 9, 'font_color': '#D97706',
+            'align': 'right', 'valign': 'vcenter',
+        })
+
+        ws.merge_range('A1:B1', "ThreatDeflect — Resumo Executivo", title_fmt)
+        ws.set_row(0, 30)
+
+        total_targets = len(self.ip_results) + len(self.url_results) + len(self.file_results) + len(self.repo_results)
+        analysis_type = "Repositórios" if self.repo_results else "IOCs / Arquivos"
+        meta = [
+            ("Classificação:", "TLP:AMBER — Uso interno autorizado"),
+            ("Data/Hora:", self.generation_time),
+            ("Tipo de Análise:", analysis_type),
+            ("Alvos Analisados:", str(total_targets)),
+        ]
+        row = 2
+        for label, value in meta:
+            ws.write(row, 0, label, meta_label_fmt)
+            ws.write(row, 1, value, meta_value_fmt)
+            row += 1
+
+        row += 1
+        ws.merge_range(f'A{row + 1}:B{row + 1}', "Análise de Riscos (IA)", section_fmt)
+        ws.set_row(row, 22)
+        row += 1
+
+        num_lines = self.executive_summary.count('\n') + 15
+        ws.set_row(row, max(num_lines * 12, 200))
+        ws.merge_range(f'A{row + 1}:B{row + 1}', self.executive_summary, summary_fmt)
 
     def _write_repo_summary_sheet(self, workbook: Workbook, formats: Dict[str, Format]) -> None:
         """Escreve uma planilha de resumo para os repositórios analisados."""
@@ -146,7 +188,8 @@ class ReportGenerator:
         for row_num, res in enumerate(self.repo_results, 2):
             score = res.get('risk_score', 0)
             score_format = formats['score_crit'] if score > 90 else (formats['score_high'] if score > 70 else (formats['score_med'] if score > 40 else formats['cell']))
-            ws.write(f'A{row_num}', res.get('url'), formats['cell'])
+            repo_url = res.get('url', '')
+            ws.write_url(f'A{row_num}', repo_url, formats['url'], repo_url)
             ws.write(f'B{row_num}', f"{score}/100", score_format)
 
     def _write_repo_findings_sheet(self, workbook: Workbook, formats: Dict[str, Format]) -> None:
@@ -158,9 +201,9 @@ class ReportGenerator:
 
         row_num = 2
         for res in self.repo_results:
-            repo_url = res.get('url')
+            repo_url = res.get('url', '')
             if not res.get('findings'):
-                ws.write(f'A{row_num}', repo_url, formats['cell'])
+                ws.write_url(f'A{row_num}', repo_url, formats['url'], repo_url)
                 ws.write_row(f'B{row_num}', ["Nenhum achado", "-", "-", "-"], formats['cell'])
                 row_num += 1
                 continue
@@ -171,8 +214,8 @@ class ReportGenerator:
                 if severity == 'CRITICAL': sev_format = formats['score_crit']
                 elif severity == 'HIGH': sev_format = formats['score_high']
                 elif severity == 'MEDIUM': sev_format = formats['score_med']
-                
-                ws.write(f'A{row_num}', repo_url, formats['cell'])
+
+                ws.write_url(f'A{row_num}', repo_url, formats['url'], repo_url)
                 ws.write(f'B{row_num}', severity, sev_format)
                 ws.write(f'C{row_num}', finding.get('description'), formats['wrap'])
                 ws.write(f'D{row_num}', finding.get('type'), formats['wrap'])
@@ -180,11 +223,10 @@ class ReportGenerator:
                 row_num += 1
 
     def _write_repo_dependencies_sheet(self, workbook: Workbook, formats: Dict[str, Format]) -> None:
-        """Escreve as dependências encontradas nos repositórios em uma planilha."""
         ws = workbook.add_worksheet("Repo - Dependências")
-        headers = ["Repositório URL", "Arquivo de Dependência", "Pacote"]
+        headers = ["Repositório URL", "Arquivo de Dependência", "Pacote", "Versão"]
         ws.write_row('A1', headers, formats['header'])
-        ws.set_column('A:A', 60); ws.set_column('B:B', 30); ws.set_column('C:C', 40)
+        ws.set_column('A:A', 60); ws.set_column('B:B', 30); ws.set_column('C:C', 40); ws.set_column('D:D', 20)
 
         row_num = 2; has_deps = False
         for res in self.repo_results:
@@ -193,9 +235,14 @@ class ReportGenerator:
                 repo_url = res.get('url')
                 for file, packages in res.get('dependencies', {}).items():
                     for package in packages:
-                        ws.write(f'A{row_num}', repo_url, formats['cell'])
+                        ws.write_url(f'A{row_num}', repo_url or '', formats['url'], repo_url or '')
                         ws.write(f'B{row_num}', file, formats['cell'])
-                        ws.write(f'C{row_num}', package, formats['wrap'])
+                        if isinstance(package, dict):
+                            ws.write(f'C{row_num}', package.get('name', ''), formats['wrap'])
+                            ws.write(f'D{row_num}', package.get('version', ''), formats['wrap'])
+                        else:
+                            ws.write(f'C{row_num}', str(package), formats['wrap'])
+                            ws.write(f'D{row_num}', '', formats['wrap'])
                         row_num += 1
         if not has_deps:
             ws.write('A2', "Nenhuma dependência encontrada nos repositórios analisados.", formats['cell'])
@@ -214,15 +261,15 @@ class ReportGenerator:
                 repo_url = res.get('url')
                 for ioc in res.get('extracted_iocs', []):
                     ioc_string = ioc.get('ioc')
-                    vt_malicious = safe_get(ioc, 'reputation.virustotal.data.attributes.stats.malicious')
+                    vt_malicious = safe_get(ioc, 'reputation.virustotal.data.attributes.last_analysis_stats.malicious')
                     vt_malicious_count = vt_malicious if vt_malicious is not None else "N/A"
                     
                     score_format = formats['cell']
                     if vt_malicious is not None and vt_malicious > 0:
                         score_format = formats['score_high']
 
-                    ws.write(f'A{row_num}', repo_url, formats['cell'])
-                    
+                    ws.write_url(f'A{row_num}', repo_url or '', formats['url'], repo_url or '')
+
                     if warning_type := self.spoofing_warnings.get(ioc_string):
                         text_to_write = f"⚠️ ALERTA ({warning_type}): {defang_ioc(ioc_string)}"
                         ws.write(f'B{row_num}', text_to_write, formats['punycode_warn'])
@@ -293,7 +340,7 @@ class ReportGenerator:
             vt_malicious = safe_get(results, 'virustotal.data.attributes.last_analysis_stats.malicious')
             
             if vt_malicious is None:
-                vt_malicious = safe_get(results, 'virustotal.data.attributes.stats.malicious')
+                vt_malicious = safe_get(results, 'virustotal.data.attributes.last_analysis_stats.malicious')
 
             
             if warning_type := self.spoofing_warnings.get(url):
@@ -376,17 +423,35 @@ class ReportGenerator:
             raise
 
     def _draw_footer(self, canvas: Any, doc: Any) -> None:
-        """Desenha o rodapé em cada página do PDF."""
         canvas.saveState()
-        canvas.setFont('Helvetica', 8)
-        canvas.setFillColor(colors.grey)
-        canvas.line(doc.leftMargin, 0.7 * inch, doc.width + doc.leftMargin, 0.7 * inch)
-        canvas.drawString(doc.leftMargin, 0.5 * inch, "Relatório ThreatDeflect - CONFIDENCIAL")
-        canvas.drawRightString(doc.width + doc.leftMargin, 0.5 * inch, f"Página {canvas.getPageNumber()} | Gerado em: {self.generation_time}")
+        y_line = 0.7 * inch
+        canvas.setStrokeColor(HexColor('#CBD5E1'))
+        canvas.setLineWidth(0.5)
+        canvas.line(doc.leftMargin, y_line, doc.width + doc.leftMargin, y_line)
+
+        canvas.setFont('Helvetica-Bold', 7)
+        canvas.setFillColor(HexColor('#0F172A'))
+        canvas.drawString(doc.leftMargin, 0.52 * inch, "ThreatDeflect")
+        canvas.setFont('Helvetica', 7)
+        canvas.setFillColor(HexColor('#64748B'))
+        canvas.drawString(doc.leftMargin + 65, 0.52 * inch, "| CONFIDENCIAL | Uso interno autorizado")
+        canvas.drawRightString(doc.width + doc.leftMargin, 0.52 * inch, f"Pág. {canvas.getPageNumber()}")
+        canvas.setFont('Helvetica', 6)
+        canvas.drawString(doc.leftMargin, 0.38 * inch, f"Gerado em {self.generation_time} | Este documento contém informações sensíveis de segurança.")
         canvas.restoreState()
 
+    SEVERITY_COLORS: Dict[str, HexColor] = {
+        'CRITICAL': HexColor('#B91C1C'),
+        'HIGH': HexColor('#D97706'),
+        'MEDIUM': HexColor('#2563EB'),
+        'LOW': HexColor('#6B7280'),
+    }
+    COLOR_HEADER_BG = HexColor('#0F172A')
+    COLOR_ACCENT = HexColor('#1E40AF')
+    COLOR_LIGHT_BG = HexColor('#F8FAFC')
+    COLOR_BORDER = HexColor('#CBD5E1')
+
     def _setup_pdf_styles(self) -> Tuple[str, str, Dict[str, ParagraphStyle]]:
-        """Registra fontes e cria estilos de parágrafo para o PDF."""
         font_name = 'DejaVuSans'
         font_name_bold = 'DejaVuSans-Bold'
         try:
@@ -394,24 +459,53 @@ class ReportGenerator:
             pdfmetrics.registerFont(TTFont(font_name_bold, resource_path('DejaVuSans-Bold.ttf')))
             pdfmetrics.registerFontFamily(font_name, normal=font_name, bold=font_name_bold)
         except Exception:
-            logging.error("FALHA CRÍTICA: Fontes DejaVuSans não encontradas. O PDF pode ser gerado com caracteres incorretos.")
+            logging.error("FALHA CRÍTICA: Fontes DejaVuSans não encontradas.")
             font_name, font_name_bold = 'Helvetica', 'Helvetica-Bold'
-        
+
         styles = getSampleStyleSheet()
         styles['Normal'].fontName = font_name
+        styles['Normal'].fontSize = 9
+        styles['Normal'].leading = 13
         styles['BodyText'].fontName = font_name
         styles['h1'].fontName = font_name_bold
+        styles['h1'].fontSize = 16
+        styles['h1'].textColor = self.COLOR_HEADER_BG
+        styles['h1'].spaceAfter = 6
         styles['h2'].fontName = font_name_bold
+        styles['h2'].fontSize = 13
+        styles['h2'].textColor = self.COLOR_ACCENT
+        styles['h2'].spaceBefore = 12
+        styles['h2'].spaceAfter = 4
         styles['h3'].fontName = font_name_bold
-        
-        styles.add(ParagraphStyle(name='Justify', parent=styles['Normal'], alignment=TA_JUSTIFY))
+        styles['h3'].fontSize = 11
+        styles['h3'].textColor = self.COLOR_HEADER_BG
+        styles['h3'].spaceBefore = 8
+        styles['h3'].spaceAfter = 3
+
+        styles.add(ParagraphStyle(name='Justify', parent=styles['Normal'], alignment=TA_JUSTIFY, fontSize=9, leading=13))
         styles.add(ParagraphStyle(name='TableCell', parent=styles['Normal'], fontSize=8, leading=10))
         styles.add(ParagraphStyle(name='TableCellBold', fontName=font_name_bold, fontSize=8, leading=10, textColor=colors.white))
+        styles.add(ParagraphStyle(name='MetaLabel', fontName=font_name_bold, fontSize=8, leading=10, textColor=HexColor('#64748B')))
+        styles.add(ParagraphStyle(name='MetaValue', fontName=font_name, fontSize=8, leading=10, textColor=self.COLOR_HEADER_BG))
+        styles.add(ParagraphStyle(name='TLP', fontName=font_name_bold, fontSize=8, leading=10, textColor=HexColor('#D97706'), alignment=TA_RIGHT))
+        styles.add(ParagraphStyle(name='SeverityCritical', fontName=font_name_bold, fontSize=8, leading=10, textColor=self.SEVERITY_COLORS['CRITICAL']))
+        styles.add(ParagraphStyle(name='SeverityHigh', fontName=font_name_bold, fontSize=8, leading=10, textColor=self.SEVERITY_COLORS['HIGH']))
+        styles.add(ParagraphStyle(name='SeverityMedium', fontName=font_name_bold, fontSize=8, leading=10, textColor=self.SEVERITY_COLORS['MEDIUM']))
+        styles.add(ParagraphStyle(name='SeverityLow', fontName=font_name_bold, fontSize=8, leading=10, textColor=self.SEVERITY_COLORS['LOW']))
 
         return font_name, font_name_bold, styles
 
+    def _severity_cell_style(self, text: str, styles: Dict) -> Paragraph:
+        upper = text.strip().upper()
+        style_name = {
+            'CRITICAL': 'SeverityCritical', 'HIGH': 'SeverityHigh',
+            'MEDIUM': 'SeverityMedium', 'LOW': 'SeverityLow',
+        }.get(upper)
+        if style_name:
+            return Paragraph(f"<b>{text.strip()}</b>", styles[style_name])
+        return Paragraph(text.strip(), styles['TableCell'])
+
     def _build_ai_summary_story(self, summary_text: str, styles: Dict) -> List:
-        """Converte o texto do resumo da IA (incluindo markdown) em objetos do ReportLab."""
         story = []
         if not summary_text or summary_text.strip().lower().startswith(("erro:", "falha:", "não foi possível")):
             error_style = ParagraphStyle(name='ErrorStyle', parent=styles['Normal'], textColor=colors.red)
@@ -428,25 +522,48 @@ class ReportGenerator:
                     table_lines.append(lines[i].strip())
                     i += 1
                 for idx, t_line in enumerate(table_lines):
-                    if re.match(r'^[|: -]+$', t_line): continue
-                    style = styles['TableCellBold'] if idx == 0 else styles['TableCell']
-                    cells = [Paragraph(re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', cell.strip()), style) for cell in t_line.strip('|').split('|')]
+                    if re.match(r'^[|: -]+$', t_line):
+                        continue
+                    if idx == 0:
+                        cells = [Paragraph(re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', cell.strip()), styles['TableCellBold']) for cell in t_line.strip('|').split('|')]
+                    else:
+                        cells = []
+                        for cell in t_line.strip('|').split('|'):
+                            cell_text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', cell.strip())
+                            if cell.strip().upper() in ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW'):
+                                cells.append(self._severity_cell_style(cell, styles))
+                            else:
+                                cells.append(Paragraph(cell_text, styles['TableCell']))
                     table_data.append(cells)
                 if table_data:
                     pdf_table = Table(table_data, hAlign='LEFT', repeatRows=1)
-                    pdf_table.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,0), colors.navy), ('GRID', (0,0), (-1,-1), 1, colors.black)]))
+                    table_style = TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, 0), self.COLOR_HEADER_BG),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                        ('GRID', (0, 0), (-1, -1), 0.5, self.COLOR_BORDER),
+                        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, self.COLOR_LIGHT_BG]),
+                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                        ('TOPPADDING', (0, 0), (-1, -1), 4),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                    ])
+                    pdf_table.setStyle(table_style)
                     story.append(pdf_table)
-                    story.append(Spacer(1, 0.2 * inch))
+                    story.append(Spacer(1, 0.15 * inch))
                 continue
 
             line = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', line)
-            if line.startswith('### '): story.append(Paragraph(line.lstrip('# ').strip(), styles['h3']))
-            elif line.startswith('## '): story.append(Paragraph(line.lstrip('# ').strip(), styles['h2']))
+            if line.startswith('### '):
+                story.append(Paragraph(line.lstrip('# ').strip(), styles['h3']))
+            elif line.startswith('## '):
+                story.append(Paragraph(line.lstrip('# ').strip(), styles['h2']))
             elif line.startswith(('-', '•')) or re.match(r'^[0-9]+\.', line):
-                p_text = f"•&nbsp;&nbsp;{re.sub(r'^[0-9-•.]+\s*', '', line)}"
+                p_text = f"&nbsp;&nbsp;•&nbsp;&nbsp;{re.sub(r'^[0-9-•.]+\\s*', '', line)}"
                 story.append(Paragraph(p_text, styles['Justify']))
-            elif line: story.append(Paragraph(line, styles['Justify']))
-            else: story.append(Spacer(1, 0.1 * inch))
+            elif line:
+                story.append(Paragraph(line, styles['Justify']))
+            else:
+                story.append(Spacer(1, 0.08 * inch))
             i += 1
         return story
 
@@ -485,7 +602,7 @@ class ReportGenerator:
                 
                 row = [
                     Paragraph(url_text, styles['TableCell']),
-                    Paragraph(str(safe_get(res, 'virustotal.data.attributes.stats.malicious', 'N/A')), styles['TableCell']),
+                    Paragraph(str(safe_get(res, 'virustotal.data.attributes.last_analysis_stats.malicious', 'N/A')), styles['TableCell']),
                     Paragraph(safe_get(res, 'urlhaus.url_status', 'N/A'), styles['TableCell'])
                 ]
                 data.append(row)
@@ -538,23 +655,83 @@ class ReportGenerator:
         story.append(Spacer(1, 0.3 * inch))
         return story
 
+    def _build_pdf_header(self, styles: Dict) -> List:
+        header_title_style = ParagraphStyle(
+            'HeaderTitle_' + str(id(self)), fontName=styles['h1'].fontName,
+            fontSize=14, textColor=colors.white, leading=18)
+        header_tlp_style = ParagraphStyle(
+            'HeaderTLP_' + str(id(self)), fontName=styles['h1'].fontName,
+            fontSize=9, textColor=HexColor('#FCD34D'), alignment=TA_RIGHT, leading=12)
+        header_data = [[
+            Paragraph("<b>THREATDEFLECT</b>", header_title_style),
+            Paragraph("TLP:AMBER", header_tlp_style),
+        ]]
+        header_table = Table(header_data, colWidths=['70%', '30%'])
+        header_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), self.COLOR_HEADER_BG),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('LEFTPADDING', (0, 0), (0, 0), 12),
+            ('RIGHTPADDING', (-1, -1), (-1, -1), 12),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ]))
+        return [header_table, Spacer(1, 0.15 * inch)]
+
+    def _build_metadata_box(self, styles: Dict) -> List:
+        total_targets = len(self.ip_results) + len(self.url_results) + len(self.file_results) + len(self.repo_results)
+        analysis_type = "Repositórios" if self.repo_results else "IOCs / Arquivos"
+
+        finding_count = 0
+        critical_count = 0
+        for repo in self.repo_results:
+            for f in repo.get('findings', []):
+                finding_count += 1
+                if f.get('severity') == 'CRITICAL':
+                    critical_count += 1
+
+        meta_items = [
+            ("Data/Hora:", self.generation_time),
+            ("Tipo de Análise:", analysis_type),
+            ("Alvos Analisados:", str(total_targets)),
+        ]
+        if self.repo_results:
+            meta_items.append(("Achados:", f"{finding_count} ({critical_count} críticos)"))
+
+        meta_data = []
+        for label, value in meta_items:
+            meta_data.append([
+                Paragraph(label, styles['MetaLabel']),
+                Paragraph(value, styles['MetaValue']),
+            ])
+
+        meta_table = Table(meta_data, colWidths=['30%', '70%'])
+        meta_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), self.COLOR_LIGHT_BG),
+            ('BOX', (0, 0), (-1, -1), 0.5, self.COLOR_BORDER),
+            ('LEFTPADDING', (0, 0), (-1, -1), 8),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ]))
+        return [meta_table, Spacer(1, 0.2 * inch)]
+
     def generate_pdf_summary(self, filepath: str, summary_text: str) -> None:
-        """Gera um resumo em PDF incluindo a análise da IA e as tabelas de IOCs."""
         try:
             doc = SimpleDocTemplate(filepath, topMargin=0.5 * inch, bottomMargin=0.8 * inch)
             _, font_name_bold, styles = self._setup_pdf_styles()
-            
-            story = []
-            title = Paragraph("<b>Análise Técnica Resumida – Multi-API</b>", styles['h1'])
-            title.alignment = TA_CENTER
-            story.extend([title, Spacer(1, 0.2 * inch)])
 
-            story.extend([Paragraph("<b>Resumo da Análise (IA)</b>", styles['h2']), Spacer(1, 0.1 * inch)])
+            story = []
+            story.extend(self._build_pdf_header(styles))
+            story.extend(self._build_metadata_box(styles))
+
+            story.append(HRFlowable(width="100%", thickness=1, color=self.COLOR_ACCENT, spaceBefore=4, spaceAfter=8))
             story.extend(self._build_ai_summary_story(summary_text, styles))
-            
+
             story.extend(self._build_security_warnings_story(styles))
-            
-            story.extend([PageBreak(), Paragraph("<b>Relatório Detalhado de Indicadores Analisados</b>", styles['h2']), Spacer(1, 0.1 * inch)])
+
+            story.extend([PageBreak()])
+            story.extend(self._build_pdf_header(styles))
+            story.append(Paragraph("Relatório Detalhado de Indicadores", styles['h2']))
+            story.append(Spacer(1, 0.1 * inch))
 
             if self.repo_results:
                 story.extend(self._build_repo_table_story(styles, font_name_bold))
@@ -567,56 +744,67 @@ class ReportGenerator:
             raise
             
     def _build_repo_table_story(self, styles: Dict, font_name_bold: str) -> List:
-        """Constrói a tabela de Repositórios para o relatório PDF, com um achado por linha."""
         story = []
-        style = TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.navy), ('TEXTCOLOR',(0,0),(-1,0), colors.white),
-            ('ALIGN', (0,0), (-1,-1), 'LEFT'), ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('FONTNAME', (0,0), (-1,0), font_name_bold), ('FONTSIZE', (0,0), (-1,0), 9),
-            ('BOTTOMPADDING', (0,0), (-1,0), 10), ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
-            ('GRID', (0,0), (-1,-1), 1, colors.lightgrey)
-        ])
-
         if not self.repo_results:
             return story
 
-        story.extend([Paragraph("<b>Repositórios Analisados - Achados de Segurança</b>", styles['h3']), Spacer(1, 0.1*inch)])
-        header = [Paragraph(h, styles['TableCellBold']) for h in ['Repositório', 'Risco', 'Severidade', 'Descrição do Achado', 'Arquivo']]
-        
+        story.extend([Paragraph("Achados de Segurança por Repositório", styles['h3']), Spacer(1, 0.1 * inch)])
+        header = [Paragraph(h, styles['TableCellBold']) for h in ['Repositório', 'Risco', 'Severidade', 'Descrição', 'Arquivo']]
+
         table_data = [header]
-        
+        row_severity_colors = []
+
         for res in self.repo_results:
             repo_url = res.get('url', 'N/A')
-            risk_score = f"<b>{res.get('risk_score', 0)}/100</b>"
+            risk = res.get('risk_score', 0)
+            risk_color = self.SEVERITY_COLORS['CRITICAL'] if risk >= 70 else (self.SEVERITY_COLORS['HIGH'] if risk >= 40 else self.SEVERITY_COLORS['MEDIUM'] if risk >= 20 else self.SEVERITY_COLORS['LOW'])
+            risk_text = f"<font color='{risk_color.hexval()}'><b>{risk}/100</b></font>"
             findings_list = res.get('findings', [])
 
             if not findings_list:
-                row = [
+                table_data.append([
                     Paragraph(defang_ioc(repo_url), styles['TableCell']),
-                    Paragraph(risk_score, styles['TableCell']),
+                    Paragraph(risk_text, styles['TableCell']),
+                    Paragraph("-", styles['TableCell']),
                     Paragraph("Nenhum achado", styles['TableCell']),
                     Paragraph("-", styles['TableCell']),
-                    Paragraph("-", styles['TableCell'])
-                ]
-                table_data.append(row)
+                ])
+                row_severity_colors.append(None)
                 continue
 
             for finding in findings_list:
                 severity = finding.get('severity', 'N/A')
-                severity_color_map = {"CRITICAL": "red", "HIGH": "orange", "MEDIUM": "#B8860B"}
-                severity_color = severity_color_map.get(severity, "black")
-
-                row = [
+                sev_color = self.SEVERITY_COLORS.get(severity, HexColor('#000000'))
+                sev_style = f"<font color='{sev_color.hexval()}'><b>{severity}</b></font>"
+                table_data.append([
                     Paragraph(defang_ioc(repo_url), styles['TableCell']),
-                    Paragraph(risk_score, styles['TableCell']),
-                    Paragraph(f"<font color='{severity_color}'>{severity}</font>", styles['TableCell']),
+                    Paragraph(risk_text, styles['TableCell']),
+                    Paragraph(sev_style, styles['TableCell']),
                     Paragraph(finding.get('description', 'N/A'), styles['TableCell']),
-                    Paragraph(f"<i>{finding.get('file', 'N/A')}</i>", styles['TableCell'])
-                ]
-                table_data.append(row)
+                    Paragraph(f"<i>{finding.get('file', 'N/A')}</i>", styles['TableCell']),
+                ])
+                row_severity_colors.append(severity)
 
-        table = Table(table_data, colWidths=[2.0*inch, 0.6*inch, 0.8*inch, 2.3*inch, 1.3*inch], hAlign='LEFT', repeatRows=1)
-        table.setStyle(style)
-        story.extend([table, Spacer(1, 0.2*inch)])
-            
+        base_style = TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), self.COLOR_HEADER_BG),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, 0), font_name_bold),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, self.COLOR_LIGHT_BG]),
+            ('GRID', (0, 0), (-1, -1), 0.5, self.COLOR_BORDER),
+        ])
+
+        for row_idx, sev in enumerate(row_severity_colors):
+            if sev == 'CRITICAL':
+                base_style.add('BACKGROUND', (2, row_idx + 1), (2, row_idx + 1), HexColor('#FEF2F2'))
+
+        table = Table(table_data, colWidths=[1.8 * inch, 0.6 * inch, 0.8 * inch, 2.5 * inch, 1.3 * inch], hAlign='LEFT', repeatRows=1)
+        table.setStyle(base_style)
+        story.extend([table, Spacer(1, 0.2 * inch)])
+
         return story

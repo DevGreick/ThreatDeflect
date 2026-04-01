@@ -158,5 +158,12 @@
     "error_api_key_missing": "API key not configured. Go to Settings > API Keys to add it.",
     "error_ollama_not_running": "Ollama not found. Check if it's running and the endpoint is correct in Settings.",
     "error_network_timeout": "Connection timeout. Check your internet and try again.",
-    "error_no_results": "No results found. Check that targets are valid and API keys are configured."
+    "error_no_results": "No results found. Check that targets are valid and API keys are configured.",
+
+    "wizard_github_label": "GitHub Token (recommended):",
+    "wizard_github_placeholder": "ghp_... (Personal Access Token)",
+    "wizard_github_hint": "Without token: 60 requests/hour limit. With token: 5,000/hour. Required for scanning large repositories. Create at github.com/settings/tokens (scope: public_repo).",
+
+    "rate_limit_title": "GitHub API Rate Limit",
+    "rate_limit_warning": "Warning: only {remaining}/{limit} GitHub API requests remaining. Limit resets at {reset_time}.\n\nDo you want to continue anyway?"
 }

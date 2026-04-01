@@ -193,8 +193,9 @@ class TestLockFileParsing:
         file_info = {"path": "package-lock.json", "name": "package-lock.json"}
         findings, iocs, deps = analyzer._process_file_content(content, file_info)
         assert "package-lock.json" in deps
-        assert "lodash" in deps["package-lock.json"]
-        assert "express" in deps["package-lock.json"]
+        dep_names = [d['name'] for d in deps["package-lock.json"]]
+        assert "lodash" in dep_names
+        assert "express" in dep_names
 
     def test_cargo_lock_parsing(self, analyzer: Any) -> None:
         content = """[[package]]
@@ -208,8 +209,9 @@ version = "1.0.0"
         file_info = {"path": "Cargo.lock", "name": "Cargo.lock"}
         findings, iocs, deps = analyzer._process_file_content(content, file_info)
         assert "Cargo.lock" in deps
-        assert "serde" in deps["Cargo.lock"]
-        assert "tokio" in deps["Cargo.lock"]
+        dep_names = [d['name'] for d in deps["Cargo.lock"]]
+        assert "serde" in dep_names
+        assert "tokio" in dep_names
 
     def test_pipfile_lock_parsing(self, analyzer: Any) -> None:
         content = json.dumps({
@@ -219,8 +221,9 @@ version = "1.0.0"
         file_info = {"path": "Pipfile.lock", "name": "Pipfile.lock"}
         findings, iocs, deps = analyzer._process_file_content(content, file_info)
         assert "Pipfile.lock" in deps
-        assert "requests" in deps["Pipfile.lock"]
-        assert "pytest" in deps["Pipfile.lock"]
+        dep_names = [d['name'] for d in deps["Pipfile.lock"]]
+        assert "requests" in dep_names
+        assert "pytest" in dep_names
 
     def test_malformed_json_lock_file(self, analyzer: Any) -> None:
         content = "{{{{not valid json at all!!!!"
@@ -236,8 +239,9 @@ version = "1.0.0"
         file_info = {"path": "composer.lock", "name": "composer.lock"}
         findings, iocs, deps = analyzer._process_file_content(content, file_info)
         assert "composer.lock" in deps
-        assert "laravel/framework" in deps["composer.lock"]
-        assert "phpunit/phpunit" in deps["composer.lock"]
+        dep_names = [d['name'] for d in deps["composer.lock"]]
+        assert "laravel/framework" in dep_names
+        assert "phpunit/phpunit" in dep_names
 
 
 class TestNPMDangerousHooks:

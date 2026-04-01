@@ -493,8 +493,8 @@ class SettingsDialog(QDialog):
         about_text = """
         <p><b>ThreatDeflect v{version}</b></p>
         <p>Esta é uma ferramenta open source distribuída sob a licença <b>GPLv3</b>.</p>
-        <p><b>Repositório:</b> <a href="https://github.com/DevGreick/ThreatDeflect">github.com/DevGreick/ThreatSpy</a></p>
-        <p><b>Autor:</b> @seczeror</p>
+        <p><b>Repositório:</b> <a href="https://github.com/DevGreick/ThreatDeflect">github.com/DevGreick/ThreatDeflect</a></p>
+        <p><b>Autor:</b> @DevGreick</p>
         <hr>
         <h4>Uso Responsável e Privacidade</h4>
         <p>• Para realizar as análises, esta ferramenta <b>envia os dados fornecidos</b> (IPs, URLs, hashes) para APIs de terceiros (ex: VirusTotal).</p>

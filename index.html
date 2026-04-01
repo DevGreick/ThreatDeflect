@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThreatDeflect - High-Performance Threat Analysis Engine</title>
+<meta name="description" content="High-performance threat analysis engine for secret detection, IOC extraction, and supply chain attack identification. Built with Rust and Python.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050508;
+  --bg-card:#0a0c10;
+  --green:#00ff41;
+  --green-mid:#00cc33;
+  --green-dim:#00ff4120;
+  --green-glow:#00ff4140;
+  --text:#b0b8c0;
+  --text-dim:#4a5568;
+  --border:#0f1f14;
+  --border-hover:#00ff4130;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  font-family:'JetBrains Mono',monospace;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+}
+
+/* Scanlines */
+body::before{
+  content:'';position:fixed;top:0;left:0;
+  width:100%;height:100%;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(
+    0deg,transparent,transparent 2px,
+    rgba(0,255,65,0.012) 2px,rgba(0,255,65,0.012) 4px
+  );
+}
+
+/* Grid overlay */
+body::after{
+  content:'';position:fixed;top:0;left:0;
+  width:100%;height:100%;pointer-events:none;z-index:1;
+  background:
+    linear-gradient(rgba(0,255,65,0.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,65,0.02) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+a{color:var(--green);text-decoration:none;transition:all 0.3s}
+a:hover{text-shadow:0 0 12px var(--green)}
+::selection{background:var(--green);color:var(--bg)}
+
+/* Navbar */
+.navbar{
+  position:fixed;top:0;left:0;right:0;z-index:10000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.2rem 3rem;
+  background:rgba(5,5,8,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.navbar-logo{font-weight:800;font-size:1.2rem;color:var(--green);letter-spacing:3px}
+.navbar-links{display:flex;gap:2rem;list-style:none}
+.navbar-links a{
+  font-size:0.7rem;letter-spacing:3px;
+  color:var(--text-dim);text-transform:uppercase;
+  transition:color 0.3s,text-shadow 0.3s;
+}
+.navbar-links a:hover{color:var(--green);text-shadow:0 0 10px var(--green)}
+
+/* Layout */
+section{position:relative;z-index:2;padding:8rem 2rem}
+.container{max-width:1100px;margin:0 auto}
+
+/* Hero */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  padding-top:6rem;
+  position:relative;
+}
+.hero::before{
+  content:'';position:absolute;
+  top:50%;left:50%;
+  width:800px;height:800px;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(0,255,65,0.04) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* Badge */
+.hero-badge{
+  display:inline-block;
+  padding:0.5rem 1.5rem;
+  border:1px solid var(--border-hover);
+  border-radius:100px;
+  font-size:0.65rem;
+  letter-spacing:3px;
+  color:var(--green);
+  text-transform:uppercase;
+  margin-bottom:3rem;
+  background:rgba(0,255,65,0.03);
+  animation:badge-glow 4s ease-in-out infinite alternate;
+}
+@keyframes badge-glow{
+  0%{box-shadow:0 0 5px rgba(0,255,65,0.1)}
+  100%{box-shadow:0 0 20px rgba(0,255,65,0.15),0 0 40px rgba(0,255,65,0.05)}
+}
+
+.ascii-logo{
+  font-size:clamp(0.32rem,1.3vw,0.9rem);
+  line-height:1.15;
+  color:var(--green);
+  white-space:pre;
+  text-shadow:
+    0 0 10px #00ff41,
+    0 0 30px #00ff41,
+    0 0 60px #00ff4180,
+    0 0 100px #00ff4140;
+  margin-bottom:2.5rem;
+  animation:pulse-glow 4s ease-in-out infinite alternate;
+  position:relative;
+  z-index:2;
+}
+@keyframes pulse-glow{
+  0%{text-shadow:0 0 10px #00ff41,0 0 30px #00ff41,0 0 60px #00ff4180,0 0 100px #00ff4140}
+  100%{text-shadow:0 0 20px #00ff41,0 0 50px #00ff41,0 0 80px #00ff4180,0 0 120px #00ff4160,0 0 160px #00ff4120}
+}
+
+.hero-subtitle{
+  font-size:clamp(0.85rem,1.4vw,1.15rem);
+  color:var(--text);
+  max-width:700px;
+  margin:0 auto 3rem;
+  font-weight:300;
+  line-height:1.8;
+  letter-spacing:0.5px;
+}
+.hero-subtitle strong{color:var(--green);font-weight:500}
+
+.hero-cta{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-bottom:2rem}
+.btn{
+  display:inline-flex;align-items:center;gap:0.6rem;
+  padding:0.85rem 2.2rem;
+  font-family:inherit;font-size:0.8rem;
+  letter-spacing:2px;text-transform:uppercase;
+  border:1px solid var(--green);
+  background:transparent;color:var(--green);
+  cursor:pointer;transition:all 0.4s;
+  position:relative;overflow:hidden;
+}
+.btn::before{
+  content:'';position:absolute;top:0;left:-100%;
+  width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,65,0.1),transparent);
+  transition:left 0.5s;
+}
+.btn:hover::before{left:100%}
+.btn:hover{
+  background:var(--green);color:var(--bg);
+  box-shadow:0 0 30px #00ff4140,0 0 60px #00ff4120;
+  text-shadow:none;
+}
+.btn-primary{background:var(--green);color:var(--bg);font-weight:700}
+.btn-primary:hover{background:transparent;color:var(--green)}
+
+.btn-star-count{
+  background:rgba(0,0,0,0.3);
+  padding:0.2rem 0.6rem;
+  border-radius:3px;
+  font-size:0.7rem;
+  font-weight:700;
+}
+
+.hero-tech{
+  font-size:0.7rem;color:var(--text-dim);
+  letter-spacing:3px;text-transform:uppercase;
+  display:flex;align-items:center;gap:1rem;
+  flex-wrap:wrap;justify-content:center;
+}
+.hero-tech .sep{color:var(--green);opacity:0.3}
+
+/* Stats */
+.stats-section{padding:4rem 2rem}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:0;
+  text-align:center;
+  border:1px solid var(--border);
+  background:var(--bg-card);
+}
+.stat-item{
+  padding:3rem 1.5rem;
+  border-right:1px solid var(--border);
+  transition:background 0.3s;
+}
+.stat-item:last-child{border-right:none}
+.stat-item:hover{background:rgba(0,255,65,0.02)}
+.stat-number{
+  font-size:clamp(2.5rem,5vw,4rem);
+  font-weight:800;
+  color:var(--green);
+  text-shadow:0 0 20px #00ff4140;
+  line-height:1;
+}
+.stat-suffix{
+  font-size:clamp(1.2rem,2.5vw,1.8rem);
+  color:var(--green-mid);
+  font-weight:300;
+}
+.stat-label{
+  font-size:0.65rem;color:var(--text-dim);
+  margin-top:1rem;letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+/* Section titles */
+.section-title{
+  font-size:clamp(1.2rem,2.5vw,1.8rem);
+  color:var(--green);
+  margin-bottom:4rem;
+  font-weight:400;
+  letter-spacing:3px;
+}
+
+/* Features */
+.features-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:1px;
+  background:var(--border);
+  border:1px solid var(--border);
+}
+.feature-card{
+  padding:2.5rem;
+  background:var(--bg-card);
+  transition:all 0.4s;
+  position:relative;
+}
+.feature-card::before{
+  content:'';position:absolute;top:0;left:0;
+  width:0;height:2px;
+  background:var(--green);
+  transition:width 0.4s;
+}
+.feature-card:hover::before{width:100%}
+.feature-card:hover{background:rgba(0,255,65,0.02)}
+.feature-card h3{
+  color:var(--green);font-size:0.9rem;
+  margin-bottom:1rem;font-weight:600;
+  letter-spacing:1px;
+  display:flex;align-items:center;gap:0.8rem;
+}
+.feature-icon{
+  width:28px;height:28px;
+  border:1px solid var(--border-hover);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.8rem;
+  flex-shrink:0;
+}
+.feature-card p{
+  font-size:0.78rem;color:var(--text);
+  line-height:1.8;font-weight:300;
+}
+
+/* Quickstart */
+.quickstart-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:2rem;
+}
+.code-block{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  overflow:hidden;
+  transition:border-color 0.3s;
+}
+.code-block:hover{border-color:var(--border-hover)}
+.code-block-header{
+  padding:0.8rem 1.2rem;
+  background:rgba(255,255,255,0.02);
+  border-bottom:1px solid var(--border);
+  font-size:0.7rem;
+  color:var(--green);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  display:flex;align-items:center;gap:1rem;
+}
+.code-block-header::before{
+  content:'';
+  display:flex;gap:6px;
+  width:50px;height:12px;
+  background:
+    radial-gradient(circle at 6px 6px,#ff5f56 4px,transparent 4px),
+    radial-gradient(circle at 22px 6px,#ffbd2e 4px,transparent 4px),
+    radial-gradient(circle at 38px 6px,#27c93f 4px,transparent 4px);
+}
+.code-block pre{
+  padding:1.5rem;
+  font-size:0.78rem;
+  line-height:1.9;
+  overflow-x:auto;
+  color:var(--text);
+}
+.code-block .kw{color:var(--green)}
+.code-block .cm{color:var(--text-dim)}
+.code-block .str{color:#66bb6a}
+
+/* Architecture */
+.arch-diagram{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  padding:3rem 1rem;
+  overflow-x:auto;
+  text-align:center;
+  transition:border-color 0.3s;
+}
+.arch-diagram:hover{border-color:var(--border-hover)}
+.arch-diagram svg{transition:filter 0.3s}
+.arch-diagram:hover svg{filter:drop-shadow(0 0 8px #00ff4120)}
+
+/* Footer */
+.footer{
+  text-align:center;
+  padding:4rem 2rem;
+  border-top:1px solid var(--border);
+  position:relative;z-index:2;
+}
+.footer p{font-size:0.7rem;color:var(--text-dim);margin-bottom:0.5rem;letter-spacing:1px}
+.footer-links{display:flex;gap:2rem;justify-content:center;margin-top:1.5rem}
+.footer-links a{
+  font-size:0.65rem;color:var(--text-dim);letter-spacing:3px;
+  text-transform:uppercase;transition:color 0.3s;
+}
+.footer-links a:hover{color:var(--green)}
+
+/* Lang toggle */
+.lang-btn{
+  background:transparent;border:1px solid var(--border-hover);
+  color:var(--green);font-family:inherit;font-size:0.65rem;
+  letter-spacing:2px;padding:0.3rem 0.8rem;cursor:pointer;
+  transition:all 0.3s;text-transform:uppercase;
+}
+.lang-btn:hover{background:var(--green);color:var(--bg)}
+
+/* Scroll animations */
+.fade-in{opacity:0;transform:translateY(40px);transition:opacity 0.8s ease,transform 0.8s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.fade-in:nth-child(2){transition-delay:0.1s}
+.fade-in:nth-child(3){transition-delay:0.2s}
+.fade-in:nth-child(4){transition-delay:0.3s}
+.fade-in:nth-child(5){transition-delay:0.4s}
+.fade-in:nth-child(6){transition-delay:0.5s}
+
+/* Responsive */
+@media(max-width:768px){
+  .navbar{padding:0.8rem 1.2rem}
+  .navbar-links{gap:1rem}
+  .navbar-links a{font-size:0.6rem;letter-spacing:1px}
+  section{padding:5rem 1.2rem}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat-item{padding:2rem 1rem}
+  .stat-item:nth-child(2){border-right:none}
+  .stat-item:nth-child(3),.stat-item:nth-child(4){border-top:1px solid var(--border)}
+  .stat-number{font-size:2.5rem}
+  .features-grid{grid-template-columns:1fr}
+  .quickstart-grid{grid-template-columns:1fr}
+  .ascii-logo{font-size:clamp(0.2rem,2.5vw,0.5rem)}
+}
+@media(max-width:480px){
+  .navbar-links{gap:0.5rem}
+  .navbar-links a{font-size:0.55rem;letter-spacing:0}
+  .hero-cta{flex-direction:column;align-items:center}
+  .btn{width:100%;max-width:280px;justify-content:center}
+  .hero-tech{flex-direction:column;gap:0.3rem}
+  .hero-tech .sep{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-logo">threatdeflect</div>
+  <ul class="navbar-links">
+    <li><a href="https://devgreick.github.io/ThreatDeflect/docs/">DOCS</a></li>
+    <li><a href="https://github.com/DevGreick/ThreatDeflect">GITHUB</a></li>
+    <li><a href="https://crates.io/crates/threatdeflect-core">CRATES.IO</a></li>
+    <li><a href="https://devgreick.github.io/ThreatDeflect/docs/changelog/">CHANGELOG</a></li>
+    <li><button id="lang-toggle" class="lang-btn" onclick="toggleLang()">PT-BR</button></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge" data-i18n="badge">Open Source Threat Analysis Engine</div>
+    <div class="ascii-logo" aria-label="THREATDEFLECT">
+ _____ _   _ ____  _____    _  _____  ____  _____ _____ _     _____ ____ _____
+|_   _| | | |  _ \| ____|  / \|_   _||  _ \| ____|  ___| |   | ____/ ___|_   _|
+  | | | |_| | |_) |  _|   / _ \ | |  | | | |  _| | |_  | |   |  _|| |     | |
+  | | |  _  |  _ &lt;| |___ / ___ \| |  | |_| | |___|  _| | |___| |__| |___  | |
+  |_| |_| |_|_| \_\_____/_/   \_\_|  |____/|_____|_|   |_____|_____\____| |_|
+    </div>
+    <p class="hero-subtitle" data-i18n-html="subtitle">
+      <strong>Secret detection</strong>, <strong>IOC extraction</strong>, and <strong>supply chain attack</strong> identification.
+      From reconnaissance to report, fully automated.
+    </p>
+    <div class="hero-cta">
+      <a href="https://github.com/DevGreick/ThreatDeflect" class="btn btn-primary" data-i18n="btn_star">Star on GitHub</a>
+      <a href="https://devgreick.github.io/ThreatDeflect/docs/" class="btn" data-i18n="btn_docs">Read Docs</a>
+    </div>
+    <div class="hero-tech">
+      <span>Rust + Python</span>
+      <span class="sep">|</span>
+      <span>GPL-3.0</span>
+      <span class="sep">|</span>
+      <span>crates.io</span>
+      <span class="sep">|</span>
+      <span>GUI + CLI</span>
+    </div>
+  </div>
+</section>
+
+<section class="stats-section">
+  <div class="container">
+    <div class="stats fade-in">
+      <div class="stat-item">
+        <div><span class="stat-number" data-target="46">0</span><span class="stat-suffix">+</span></div>
+        <div class="stat-label" data-i18n="stat_rules">Detection Rules</div>
+      </div>
+      <div class="stat-item">
+        <div><span class="stat-number" data-target="4">0</span></div>
+        <div class="stat-label" data-i18n="stat_deobf">Deobfuscation Engines</div>
+      </div>
+      <div class="stat-item">
+        <div><span class="stat-number" data-target="6">0</span></div>
+        <div class="stat-label" data-i18n="stat_apis">Threat Intel APIs</div>
+      </div>
+      <div class="stat-item">
+        <div><span class="stat-number" data-target="3">0</span></div>
+        <div class="stat-label" data-i18n="stat_plat">Platforms</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2 class="section-title fade-in" data-i18n="title_features">// Features</h2>
+    <div class="features-grid">
+      <div class="feature-card fade-in">
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat1_title">Detection Engine</span></h3>
+        <p data-i18n="feat1_desc">46 regex-based rules covering AWS keys, GitHub tokens, database credentials, reverse shells, crypto mining, and supply chain patterns.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat2_title">Confidence Scoring</span></h3>
+        <p data-i18n="feat2_desc">Shannon entropy, file context classification, assignment detection, and placeholder filtering. Scores 0.0-1.0 with intelligent routing.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat3_title">Obfuscation Detection</span></h3>
+        <p data-i18n="feat3_desc">Automatically decodes Base64, hex, URL-encoded, and character array obfuscated secrets and IOCs.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat4_title">Cross-Evidence Correlation</span></h3>
+        <p data-i18n="feat4_desc">Crosses findings in the same file. Code that fetches external payload and executes it becomes a single HIGH severity alert.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat5_title">Threat Intel APIs</span></h3>
+        <p data-i18n="feat5_desc">Integrates with VirusTotal, Shodan, AbuseIPDB, URLHaus, MalwareBazaar. All optional, works fully offline.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <h3><span class="feature-icon">&gt;</span> <span data-i18n="feat6_title">Local AI Analysis</span></h3>
+        <p data-i18n="feat6_desc">Summarize findings with Ollama. No data leaves your machine. Supports any local model.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2 class="section-title fade-in" data-i18n="title_quickstart">// Quick Start</h2>
+    <div class="quickstart-grid">
+      <div class="code-block fade-in">
+        <div class="code-block-header" data-i18n="code_rust">Rust Crate</div>
+        <pre><span class="cm">cargo add threatdeflect-core</span>
+
+<span class="kw">use</span> threatdeflect_core::SecretAnalyzer;
+
+<span class="kw">let</span> analyzer = SecretAnalyzer::new(rules, <span class="kw">vec!</span>[])?;
+<span class="kw">let</span> result = analyzer.analyze_content(
+    content, <span class="str">"src/config.py"</span>, <span class="str">"config.py"</span>
+);</pre>
+      </div>
+      <div class="code-block fade-in">
+        <div class="code-block-header" data-i18n="code_cli">CLI Tool</div>
+        <pre><span class="cm" data-i18n="cli_install"># Install</span>
+pip install threatdeflect
+
+<span class="cm" data-i18n="cli_scan"># Scan a repository</span>
+<span class="kw">threatdeflect</span> repo https://github.com/org/repo
+
+<span class="cm" data-i18n="cli_ioc"># Analyze IOCs</span>
+<span class="kw">threatdeflect</span> ioc 8.8.8.8 https://suspicious.com
+
+<span class="cm" data-i18n="cli_ai"># With AI summary</span>
+<span class="kw">threatdeflect</span> repo https://github.com/org/repo <span class="str">--ai</span> llama3</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2 class="section-title fade-in" data-i18n="title_arch">// Architecture</h2>
+    <div class="arch-diagram fade-in">
+      <svg viewBox="0 0 520 490" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;width:100%">
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <style>
+          .node-box{fill:#0a0c10;stroke:#00ff4140;stroke-width:1.5;rx:4}
+          .node-box:hover{stroke:#00ff41;fill:#00ff4108}
+          .node-label{fill:#00ff41;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;text-anchor:middle}
+          .node-sub{fill:#b0b8c0;font-family:'JetBrains Mono',monospace;font-size:10px;text-anchor:middle;font-weight:300}
+          .conn{stroke:#00ff4140;stroke-width:1.5;stroke-dasharray:4 3}
+          .conn-solid{stroke:#00ff4160;stroke-width:1.5}
+        </style>
+
+        <!-- ThreatDeflect (top) -->
+        <rect class="node-box" x="135" y="10" width="250" height="44" filter="url(#glow)"/>
+        <text class="node-label" x="260" y="37">ThreatDeflect</text>
+
+        <!-- Lines to GUI and CLI -->
+        <line class="conn-solid" x1="200" y1="54" x2="130" y2="95"/>
+        <line class="conn-solid" x1="320" y1="54" x2="390" y2="95"/>
+
+        <!-- GUI -->
+        <rect class="node-box" x="30" y="95" width="200" height="44"/>
+        <text class="node-label" x="130" y="122">GUI (Tkinter)</text>
+
+        <!-- CLI -->
+        <rect class="node-box" x="290" y="95" width="200" height="44"/>
+        <text class="node-label" x="390" y="122">CLI (Typer)</text>
+
+        <!-- Lines down to Python Engine -->
+        <line class="conn-solid" x1="130" y1="139" x2="200" y2="185"/>
+        <line class="conn-solid" x1="390" y1="139" x2="320" y2="185"/>
+
+        <!-- Python Engine -->
+        <rect class="node-box" x="110" y="185" width="300" height="60"/>
+        <text class="node-label" x="260" y="212">Python Engine</text>
+        <text class="node-sub" x="260" y="232">Correlation, AI, APIs</text>
+
+        <!-- Line down -->
+        <line class="conn" x1="260" y1="245" x2="260" y2="295"/>
+        <circle cx="260" cy="270" r="3" fill="#00ff41" opacity="0.5"/>
+
+        <!-- Rust Core -->
+        <rect class="node-box" x="110" y="295" width="300" height="60"/>
+        <text class="node-label" x="260" y="322">Rust Core (PyO3)</text>
+        <text class="node-sub" x="260" y="342">Regex, Entropy, Decode</text>
+
+        <!-- Line down -->
+        <line class="conn" x1="260" y1="355" x2="260" y2="405"/>
+        <circle cx="260" cy="380" r="3" fill="#00ff41" opacity="0.5"/>
+
+        <!-- threatdeflect-core -->
+        <rect class="node-box" x="110" y="405" width="300" height="60" stroke="#00ff4180" stroke-width="2"/>
+        <text class="node-label" x="260" y="432">threatdeflect-core</text>
+        <text class="node-sub" x="260" y="452">crates.io</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p data-i18n-html="footer_built">Built by <a href="https://github.com/DevGreick">DevGreick</a></p>
+  <p>Rust + Python | GPL-3.0</p>
+  <div class="footer-links">
+    <a href="https://github.com/DevGreick/ThreatDeflect">GITHUB</a>
+    <a href="https://devgreick.github.io/ThreatDeflect/docs/">DOCS</a>
+    <a href="https://crates.io/crates/threatdeflect-core">CRATES.IO</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var i18n = {
+    en: {
+      badge: "Open Source Threat Analysis Engine",
+      subtitle: '<strong>Secret detection</strong>, <strong>IOC extraction</strong>, and <strong>supply chain attack</strong> identification. From reconnaissance to report, fully automated.',
+      btn_star: "Star on GitHub",
+      btn_docs: "Read Docs",
+      stat_rules: "Detection Rules",
+      stat_deobf: "Deobfuscation Engines",
+      stat_apis: "Threat Intel APIs",
+      stat_plat: "Platforms",
+      title_features: "// Features",
+      feat1_title: "Detection Engine",
+      feat1_desc: "46 regex-based rules covering AWS keys, GitHub tokens, database credentials, reverse shells, crypto mining, and supply chain patterns.",
+      feat2_title: "Confidence Scoring",
+      feat2_desc: "Shannon entropy, file context classification, assignment detection, and placeholder filtering. Scores 0.0-1.0 with intelligent routing.",
+      feat3_title: "Obfuscation Detection",
+      feat3_desc: "Automatically decodes Base64, hex, URL-encoded, and character array obfuscated secrets and IOCs.",
+      feat4_title: "Cross-Evidence Correlation",
+      feat4_desc: "Crosses findings in the same file. Code that fetches external payload and executes it becomes a single HIGH severity alert.",
+      feat5_title: "Threat Intel APIs",
+      feat5_desc: "Integrates with VirusTotal, Shodan, AbuseIPDB, URLHaus, MalwareBazaar. All optional, works fully offline.",
+      feat6_title: "Local AI Analysis",
+      feat6_desc: "Summarize findings with Ollama. No data leaves your machine. Supports any local model.",
+      title_quickstart: "// Quick Start",
+      code_rust: "Rust Crate",
+      code_cli: "CLI Tool",
+      cli_install: "# Install",
+      cli_scan: "# Scan a repository",
+      cli_ioc: "# Analyze IOCs",
+      cli_ai: "# With AI summary",
+      title_arch: "// Architecture",
+      footer_built: 'Built by <a href="https://github.com/DevGreick">DevGreick</a>'
+    },
+    pt: {
+      badge: "Engine Open Source de Análise de Ameaças",
+      subtitle: 'Detecção de <strong>secrets</strong>, extração de <strong>IOCs</strong> e identificação de <strong>supply chain attacks</strong>. Do reconhecimento ao relatório, totalmente automatizado.',
+      btn_star: "Star no GitHub",
+      btn_docs: "Ver Docs",
+      stat_rules: "Regras de Detecção",
+      stat_deobf: "Engines de Deobfuscação",
+      stat_apis: "APIs de Threat Intel",
+      stat_plat: "Plataformas",
+      title_features: "// Funcionalidades",
+      feat1_title: "Engine de Detecção",
+      feat1_desc: "46 regras baseadas em regex cobrindo chaves AWS, tokens GitHub, credenciais de banco, reverse shells, crypto mining e padrões de supply chain.",
+      feat2_title: "Confidence Scoring",
+      feat2_desc: "Entropia Shannon, classificação de contexto de arquivo, detecção de assignment e filtragem de placeholders. Scores 0.0-1.0 com roteamento inteligente.",
+      feat3_title: "Detecção de Ofuscação",
+      feat3_desc: "Decodifica automaticamente secrets e IOCs ofuscados em Base64, hex, URL-encoded e character arrays.",
+      feat4_title: "Correlação de Evidências",
+      feat4_desc: "Cruza findings no mesmo arquivo. Código que baixa payload externo e executa o conteúdo vira um alerta único de severidade HIGH.",
+      feat5_title: "APIs de Threat Intel",
+      feat5_desc: "Integra com VirusTotal, Shodan, AbuseIPDB, URLHaus, MalwareBazaar. Todas opcionais, funciona 100% offline.",
+      feat6_title: "IA Local",
+      feat6_desc: "Resuma findings com Ollama. Nenhum dado sai da sua máquina. Suporta qualquer modelo local.",
+      title_quickstart: "// Início Rápido",
+      code_rust: "Crate Rust",
+      code_cli: "Ferramenta CLI",
+      cli_install: "# Instalar",
+      cli_scan: "# Escanear um repositório",
+      cli_ioc: "# Analisar IOCs",
+      cli_ai: "# Com resumo por IA",
+      title_arch: "// Arquitetura",
+      footer_built: 'Criado por <a href="https://github.com/DevGreick">DevGreick</a>'
+    }
+  };
+
+  var currentLang = localStorage.getItem('td-lang') || 'en';
+
+  function applyLang(lang) {
+    var strings = i18n[lang];
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var key = el.dataset.i18n;
+      if (strings[key]) el.textContent = strings[key];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(el) {
+      var key = el.dataset.i18nHtml;
+      if (strings[key]) el.innerHTML = strings[key];
+    });
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    document.getElementById('lang-toggle').textContent = lang === 'en' ? 'PT-BR' : 'EN';
+    localStorage.setItem('td-lang', lang);
+    currentLang = lang;
+  }
+
+  window.toggleLang = function() {
+    applyLang(currentLang === 'en' ? 'pt' : 'en');
+  };
+
+  if (currentLang !== 'en') applyLang(currentLang);
+
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        var counters = entry.target.querySelectorAll('[data-target]');
+        counters.forEach(function(counter){
+          if(counter.dataset.counted) return;
+          counter.dataset.counted = 'true';
+          var target = parseInt(counter.dataset.target);
+          var duration = 2000;
+          var startTime = null;
+          function animate(timestamp){
+            if(!startTime) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            counter.textContent = Math.floor(eased * target);
+            if(progress < 1) requestAnimationFrame(animate);
+            else counter.textContent = target;
+          }
+          requestAnimationFrame(animate);
+        });
+      }
+    });
+  },{threshold:0.2});
+
+  document.querySelectorAll('.fade-in').forEach(function(el){
+    observer.observe(el);
+  });
+})();
+</script>
+</body>
+</html>

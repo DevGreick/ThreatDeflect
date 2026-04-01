@@ -504,6 +504,7 @@ severity_map:
   GCP Service Account Key: CRITICAL
 
   # HIGH: Credenciais provaveis ou execucao remota
+  Vulnerable Dependency: HIGH
   Heroku API Key: HIGH
   Twilio Auth Token: HIGH
   SendGrid API Key: HIGH

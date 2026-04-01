@@ -1011,7 +1011,7 @@ class VtotalscanGUI(QMainWindow):
     def _show_first_run_wizard(self) -> None:
         wizard = QDialog(self)
         wizard.setWindowTitle(T("wizard_title"))
-        wizard.setMinimumWidth(480)
+        wizard.setMinimumWidth(520)
         wizard.setModal(True)
         layout = QVBoxLayout(wizard)
 
@@ -1025,6 +1025,15 @@ class VtotalscanGUI(QMainWindow):
         vt_input.setPlaceholderText(T("wizard_vt_placeholder"))
         vt_input.setEchoMode(QLineEdit.Password)
         form.addRow(T("wizard_vt_label"), vt_input)
+
+        github_input = QLineEdit()
+        github_input.setPlaceholderText(T("wizard_github_placeholder"))
+        github_input.setEchoMode(QLineEdit.Password)
+        github_hint = QLabel(T("wizard_github_hint"))
+        github_hint.setWordWrap(True)
+        github_hint.setStyleSheet("color: #9da3ae; font-size: 11px;")
+        form.addRow(T("wizard_github_label"), github_input)
+        form.addRow("", github_hint)
 
         ollama_input = QLineEdit()
         ollama_input.setPlaceholderText(T("wizard_ollama_placeholder"))
@@ -1050,11 +1059,16 @@ class VtotalscanGUI(QMainWindow):
                 status_label.setText(T("wizard_error_no_vt"))
                 return
             keyring.set_password("vtotalscan", "virustotal_api_key", vt_key)
+
+            gh_key = github_input.text().strip()
+            if gh_key:
+                keyring.set_password("vtotalscan", "github_api_key", gh_key)
+
+            config_path = get_config_path()
+            config = configparser.ConfigParser()
+            config.read(config_path)
             endpoint = ollama_input.text().strip()
             if endpoint:
-                config_path = get_config_path()
-                config = configparser.ConfigParser()
-                config.read(config_path)
                 if not config.has_section('AI'):
                     config.add_section('AI')
                 config.set('AI', 'endpoint', endpoint)
@@ -1124,6 +1138,34 @@ class VtotalscanGUI(QMainWindow):
         self.btn_ai_summary.setStyleSheet(self.STYLE_AI_BUTTON_INACTIVE)
         self.btn_ai_summary_pdf.setStyleSheet(self.STYLE_AI_BUTTON_INACTIVE)
 
+    def _check_rate_limit_before_scan(self, repo_count: int) -> bool:
+        try:
+            api_client = ApiClient()
+            rate_info = api_client.check_github_rate_limit()
+            remaining = rate_info.get("remaining", 0)
+            limit = rate_info.get("limit", 0)
+
+            min_needed = repo_count * 5
+            if remaining < min_needed:
+                from datetime import datetime
+                reset_ts = rate_info.get("reset", 0)
+                reset_str = datetime.fromtimestamp(reset_ts).strftime('%H:%M:%S') if reset_ts else "N/A"
+
+                msg = T("rate_limit_warning").format(
+                    remaining=remaining, limit=limit, reset_time=reset_str
+                )
+                reply = QMessageBox.warning(
+                    self, T("rate_limit_title"), msg,
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+                )
+                if reply == QMessageBox.No:
+                    return False
+
+            self.log(f"GitHub API: {remaining}/{limit} requests restantes.")
+        except Exception as e:
+            logging.warning(f"Falha ao verificar rate limit: {e}")
+        return True
+
     def start_repo_analysis(self) -> None:
         self._set_ui_for_analysis(True)
         self._reset_results()
@@ -1134,6 +1176,11 @@ class VtotalscanGUI(QMainWindow):
             QMessageBox.warning(self, "Nenhum Alvo", "Forneça URLs válidas.")
             self._set_ui_for_analysis(False)
             return
+
+        if not self._check_rate_limit_before_scan(len(repo_urls)):
+            self._set_ui_for_analysis(False)
+            return
+
         save_path, _ = QFileDialog.getSaveFileName(self, "Salvar Relatório", "Analise_Repositorios.xlsx", "Arquivos Excel (*.xlsx)")
         if not save_path:
             self._set_ui_for_analysis(False)

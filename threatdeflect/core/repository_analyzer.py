@@ -132,12 +132,14 @@ class RepositoryAnalyzer:
         local_deps: Dict[str, List[str]] = {}
 
         if file_name in self.dependency_files:
-            deps: List[str] = []
+            deps: List[Dict[str, Any]] = []
             try:
                 if file_name == 'package.json':
                     data = json.loads(content)
-                    deps.extend(data.get('dependencies', {}).keys())
-                    deps.extend(data.get('devDependencies', {}).keys())
+                    for pkg, ver in data.get('dependencies', {}).items():
+                        deps.append({'name': pkg, 'version': ver.lstrip('^~>=<! ') if isinstance(ver, str) else ''})
+                    for pkg, ver in data.get('devDependencies', {}).items():
+                        deps.append({'name': pkg, 'version': ver.lstrip('^~>=<! ') if isinstance(ver, str) else ''})
                     dangerous_hooks = {
                         'install', 'preinstall', 'postinstall',
                         'prepare', 'prepublish', 'prepublishOnly',
@@ -167,19 +169,22 @@ class RepositoryAnalyzer:
                             })
                 elif file_name == 'package-lock.json':
                     data = json.loads(content)
-                    lock_deps = data.get('dependencies', {})
+                    lock_deps = data.get('packages', {})
                     if not lock_deps:
-                        lock_deps = data.get('packages', {})
+                        lock_deps = data.get('dependencies', {})
                     for dep_name, dep_info in lock_deps.items():
-                        clean_name = dep_name.replace('node_modules/', '')
+                        clean_name = dep_name.replace('node_modules/', '').strip()
                         if clean_name and isinstance(dep_info, dict):
-                            deps.append(clean_name)
+                            deps.append({'name': clean_name, 'version': dep_info.get('version', '')})
                 elif file_name == 'yarn.lock':
+                    current_pkg = ''
                     for line in content.splitlines():
                         if line and not line.startswith(' ') and not line.startswith('#'):
-                            pkg = line.split('@')[0].strip('"').strip()
-                            if pkg:
-                                deps.append(pkg)
+                            current_pkg = line.split('@')[0].strip('"').strip()
+                        elif line.strip().startswith('version ') and current_pkg:
+                            ver = line.split('"')[1] if '"' in line else ''
+                            deps.append({'name': current_pkg, 'version': ver})
+                            current_pkg = ''
                 elif file_name == 'requirements.txt':
                     for line in content.splitlines():
                         line = line.strip()
@@ -187,29 +192,37 @@ class RepositoryAnalyzer:
                             continue
                         line = line.split(';')[0].strip()
                         line = re.sub(r'\[.*?\]', '', line)
-                        pkg = re.split(r'[><=!~]', line)[0].strip()
+                        parts = re.split(r'([><=!~]+)', line, maxsplit=1)
+                        pkg = parts[0].strip()
+                        ver = parts[2].strip().lstrip('=') if len(parts) > 2 else ''
                         if pkg:
-                            deps.append(pkg)
+                            deps.append({'name': pkg, 'version': ver})
                 elif file_name == 'Pipfile.lock':
                     data = json.loads(content)
                     for section in ('default', 'develop'):
-                        deps.extend(data.get(section, {}).keys())
+                        for pkg, info in data.get(section, {}).items():
+                            ver = info.get('version', '').lstrip('=') if isinstance(info, dict) else ''
+                            deps.append({'name': pkg, 'version': ver})
                 elif file_name == 'Cargo.lock':
+                    current_pkg = ''
                     for line in content.splitlines():
                         stripped = line.strip()
                         if stripped.startswith('name = '):
-                            pkg = stripped.split('"')[1] if '"' in stripped else ''
-                            if pkg:
-                                deps.append(pkg)
+                            current_pkg = stripped.split('"')[1] if '"' in stripped else ''
+                        elif stripped.startswith('version = ') and current_pkg:
+                            ver = stripped.split('"')[1] if '"' in stripped else ''
+                            deps.append({'name': current_pkg, 'version': ver})
+                            current_pkg = ''
                 elif file_name == 'go.sum':
                     seen_go: set = set()
                     for line in content.splitlines():
                         parts = line.strip().split()
-                        if parts:
+                        if len(parts) >= 2:
                             mod = parts[0]
+                            ver = parts[1].split('/')[0].lstrip('v')
                             if mod not in seen_go:
                                 seen_go.add(mod)
-                                deps.append(mod)
+                                deps.append({'name': mod, 'version': ver})
                 elif file_name == 'Gemfile.lock':
                     in_specs = False
                     for line in content.splitlines():
@@ -218,19 +231,59 @@ class RepositoryAnalyzer:
                             in_specs = True
                             continue
                         if in_specs and stripped and not stripped.startswith('('):
-                            pkg = stripped.split('(')[0].strip()
-                            if pkg:
-                                deps.append(pkg)
+                            match = re.match(r'^(\S+)\s*\(([^)]+)\)', stripped)
+                            if match:
+                                deps.append({'name': match.group(1), 'version': match.group(2)})
+                            else:
+                                pkg = stripped.split('(')[0].strip()
+                                if pkg:
+                                    deps.append({'name': pkg, 'version': ''})
                         elif in_specs and not line.startswith(' '):
                             in_specs = False
                 elif file_name == 'composer.lock':
                     data = json.loads(content)
                     for pkg_info in data.get('packages', []):
                         if name := pkg_info.get('name'):
-                            deps.append(name)
+                            deps.append({'name': name, 'version': pkg_info.get('version', '').lstrip('v')})
                     for pkg_info in data.get('packages-dev', []):
                         if name := pkg_info.get('name'):
-                            deps.append(name)
+                            deps.append({'name': name, 'version': pkg_info.get('version', '').lstrip('v')})
+                elif file_name == 'pyproject.toml':
+                    try:
+                        import tomllib
+                    except ModuleNotFoundError:
+                        import tomli as tomllib
+                    try:
+                        toml_data = tomllib.loads(content)
+                        for dep in toml_data.get('project', {}).get('dependencies', []):
+                            parts = re.split(r'([><=!~]+)', dep, maxsplit=1)
+                            pkg = parts[0].strip().split('[')[0]
+                            ver = parts[2].strip().lstrip('=') if len(parts) > 2 else ''
+                            if pkg:
+                                deps.append({'name': pkg, 'version': ver})
+                        for dep_list in toml_data.get('project', {}).get('optional-dependencies', {}).values():
+                            for d in dep_list:
+                                parts = re.split(r'[><=!~]', d, maxsplit=1)
+                                pkg = parts[0].strip().split('[')[0]
+                                if pkg:
+                                    deps.append({'name': pkg, 'version': ''})
+                        poetry_deps = toml_data.get('tool', {}).get('poetry', {}).get('dependencies', {})
+                        for pkg_name, ver_spec in poetry_deps.items():
+                            if pkg_name.lower() != 'python':
+                                ver = ''
+                                if isinstance(ver_spec, str):
+                                    ver = ver_spec.lstrip('^~>=<! ')
+                                elif isinstance(ver_spec, dict):
+                                    ver = ver_spec.get('version', '').lstrip('^~>=<! ')
+                                deps.append({'name': pkg_name, 'version': ver})
+                        poetry_dev = toml_data.get('tool', {}).get('poetry', {}).get('dev-dependencies', {})
+                        for pkg_name, ver_spec in poetry_dev.items():
+                            ver = ''
+                            if isinstance(ver_spec, str):
+                                ver = ver_spec.lstrip('^~>=<! ')
+                            deps.append({'name': pkg_name, 'version': ver})
+                    except Exception as toml_err:
+                        logging.warning(f"Falha ao parsear pyproject.toml: {toml_err}")
 
                 if deps:
                     local_deps[file_name] = deps
@@ -251,7 +304,16 @@ class RepositoryAnalyzer:
             'Gemfile.lock': 'RubyGems', 'Gemfile': 'RubyGems',
             'composer.lock': 'Packagist', 'composer.json': 'Packagist',
         }
-        all_deps = [{'pkg': p, 'eco': eco, 'file': f} for f, pkgs in self.results["dependencies"].items() if (eco := ecosystem_map.get(os.path.basename(f))) for p in pkgs]
+        all_deps = []
+        for f, pkgs in self.results["dependencies"].items():
+            eco = ecosystem_map.get(os.path.basename(f))
+            if not eco:
+                continue
+            for p in pkgs:
+                if isinstance(p, dict):
+                    all_deps.append({'pkg': p['name'], 'version': p.get('version', ''), 'eco': eco, 'file': f})
+                else:
+                    all_deps.append({'pkg': p, 'version': '', 'eco': eco, 'file': f})
 
         if not all_deps:
             return
@@ -259,13 +321,17 @@ class RepositoryAnalyzer:
         self._update_status(f"Analisando vulnerabilidades em {len(all_deps)} dependencias...")
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            future_to_dep = {executor.submit(self.api_client.check_package_vulnerability, d['pkg'], d['eco']): d for d in all_deps}
+            future_to_dep = {executor.submit(self.api_client.check_package_vulnerability, d['pkg'], d['eco'], d['version']): d for d in all_deps}
             for future in as_completed(future_to_dep):
                 dep_info = future_to_dep[future]
                 try:
-                    if vulns := future.result():
-                        ids = ", ".join([v.get('id', 'N/A') for v in vulns])
-                        self._add_finding(f"Dependencia vulneravel: '{dep_info['pkg']}' (IDs: {ids})", dep_info['file'], "Malicious Dependency")
+                    if vulns := future.result(timeout=30):
+                        mal_ids = [v.get('id', 'N/A') for v in vulns if v.get('id', '').startswith('MAL-')]
+                        vuln_ids = [v.get('id', 'N/A') for v in vulns if not v.get('id', '').startswith('MAL-')]
+                        if mal_ids:
+                            self._add_finding(f"Dependencia maliciosa: '{dep_info['pkg']}' (IDs: {', '.join(mal_ids)})", dep_info['file'], "Malicious Dependency")
+                        if vuln_ids:
+                            self._add_finding(f"Dependencia vulneravel: '{dep_info['pkg']}' (IDs: {', '.join(vuln_ids)})", dep_info['file'], "Vulnerable Dependency")
                 except Exception as exc:
                     logging.error(f"Erro ao analisar dependencia {dep_info['pkg']}: {exc}")
 
@@ -298,18 +364,23 @@ class RepositoryAnalyzer:
 
         url_reputation_map: Dict[str, Any] = {}
 
+        def _check_single_ioc(url: str) -> Tuple[str, Dict[str, Any]]:
+            vt_result = self.api_client.check_url(url)
+            urlhaus_result = self.api_client.check_url_urlhaus(url)
+            return url, {"virustotal": vt_result, "urlhaus": urlhaus_result}
+
         with ThreadPoolExecutor(max_workers=10) as executor:
-            future_to_url = {executor.submit(self.api_client.check_url, url): url for url in urls_to_check}
+            future_to_url = {executor.submit(_check_single_ioc, url): url for url in urls_to_check}
 
             completed = 0
             for future in as_completed(future_to_url):
                 url = future_to_url[future]
                 try:
-                    result = future.result()
-                    url_reputation_map[url] = {"virustotal": result}
+                    _, reputation_data = future.result(timeout=30)
+                    url_reputation_map[url] = reputation_data
                 except Exception as exc:
                     logging.error(f"Erro ao verificar IOC {url}: {exc}")
-                    url_reputation_map[url] = {"virustotal": {"error": "Falha na verificacao"}}
+                    url_reputation_map[url] = {"virustotal": {"error": "Falha na verificacao"}, "urlhaus": {"error": "Falha na verificacao"}}
 
                 completed += 1
                 if completed % 5 == 0:
@@ -431,7 +502,7 @@ class RepositoryAnalyzer:
             completed = 0
             for future in as_completed(futures):
                 try:
-                    original_finding, verdict, ai_score = future.result()
+                    original_finding, verdict, ai_score = future.result(timeout=90)
                     completed += 1
                     if completed % 5 == 0:
                          self._update_status(f"IA: Processando {completed}/{len(items_to_analyze)}...")
@@ -596,7 +667,7 @@ class RepositoryAnalyzer:
 
                 if any(ignored in fpath for ignored in self.ignore_dirs):
                     continue
-                if fname in self.ignore_files:
+                if fname in self.ignore_files and fname not in self.dependency_files:
                     continue
 
                 if fname in self.sensitive_filenames:
@@ -607,7 +678,7 @@ class RepositoryAnalyzer:
                         "match_content": f"Filename: {fname}"
                     })
 
-                if any(fname.endswith(ext) for ext in self.interesting_extensions) or fname in self.dependency_files:
+                if any(fname.endswith(ext) for ext in self.interesting_extensions) or fname in self.dependency_files or fname in self.sensitive_filenames:
                     files_to_inspect.append(file_info)
 
             with ThreadPoolExecutor(max_workers=10) as executor:
@@ -615,7 +686,7 @@ class RepositoryAnalyzer:
                 for future in as_completed(future_to_file):
                     item = future_to_file[future]
                     try:
-                        content = future.result()
+                        content = future.result(timeout=30)
                         if not content:
                             continue
                         file_findings, file_iocs, file_deps = self._process_file_content(content, item)
@@ -640,7 +711,18 @@ class RepositoryAnalyzer:
 
         self._update_status("Finalizando analise...")
         for file, deps_list in self.results["dependencies"].items():
-            self.results["dependencies"][file] = sorted(list(set(deps_list)))
+            seen: set = set()
+            unique_deps: list = []
+            for dep in deps_list:
+                if isinstance(dep, dict):
+                    key = (dep.get('name', ''), dep.get('version', ''))
+                else:
+                    key = dep
+                if key not in seen:
+                    seen.add(key)
+                    unique_deps.append(dep)
+            unique_deps.sort(key=lambda d: d.get('name', '') if isinstance(d, dict) else d)
+            self.results["dependencies"][file] = unique_deps
 
         self.results["findings"] = self._deduplicate_findings(self.results["findings"])
 

@@ -14,10 +14,9 @@
 <br>
 ⭐ Star it if it helped you!
 
-<br><br>
+<br>
 
-<a href="README.md"><img src="https://img.shields.io/badge/lang-Portugu%C3%AAs-grey?style=for-the-badge" alt="Português"></a>
-<a href="README.en.md"><img src="https://img.shields.io/badge/lang-English-1f6feb?style=for-the-badge" alt="English"></a>
+[Português](README.md) | **English**
 
 </div>
 
